@@ -33,7 +33,7 @@ namespace Nutadore
             _PaintClefs(staffsLeft);
         }
 
-        // rysuje klamrę spinającą pięciolinię wiolinową i basową
+        // rysuje klamrę spinającą pięciolinię wiolinową i basową.
         private double _PaintBracket()
         {
             // wyznaczam wymiary klamry
