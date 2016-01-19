@@ -66,7 +66,8 @@ namespace Nutadore
             //if (Keyboard.IsKeyDown(Key.LeftCtrl) ||
             //    Keyboard.IsKeyDown(Key.RightCtrl))
             {
-                score.Magnification = 1.0;
+                if (e.ChangedButton == MouseButton.Middle)
+                    score.Magnification = 1.0;
             }
         }
     }

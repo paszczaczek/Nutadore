@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -10,14 +11,13 @@ namespace Nutadore
     {
         private readonly static double _marginTop = 20;
         private readonly static double _distanceBetweenLines = 10;
-        private readonly static FontFamily fontFamily = new FontFamily("feta26");
 
         private Canvas _canvas;
         private double _y;
         private double _magnification;
         private double _curPos;
 
-        // konstruktor
+        // Konstruktor.
         public Staff(Canvas canvas, double y, double magnification)
         {
             _canvas = canvas;
@@ -26,6 +26,7 @@ namespace Nutadore
             _curPos = 0;
         }
 
+        // Rysuje pięcilinie z zawartościć i elementami skojarzonymi
         public void Paint()
         {
             double staffsLeft = _PaintBracket();
@@ -33,7 +34,7 @@ namespace Nutadore
             _PaintClefs(staffsLeft);
         }
 
-        // rysuje klamrę spinającą pięciolinię wiolinową i basową.
+        // Rysuje klamrę spinającą pięciolinię wiolinową i basową.
         private double _PaintBracket()
         {
             // wyznaczam wymiary klamry
@@ -68,7 +69,7 @@ namespace Nutadore
             return bracketWidth - bracketOffestX;
         }
 
-        // rysuje pięciolinie wiolinową i basową
+        // Rysuje pięciolinie wiolinową i basową.
         private void _PaintStaffs(double staffsLeft)
         {
             for (int staffNo = 0; staffNo < 2; staffNo++)
@@ -87,10 +88,27 @@ namespace Nutadore
             }
         }
 
-        // rysuje klucz wiolinowy i basowy
+        // Rysuje klucz wiolinowy i basowy.
         private void _PaintClefs(double sraffsLeft)
         {
+            _PaintFetaGlyph("\x00c9");
+        }
 
+        private void _PaintFetaGlyph(string glyphCode)
+        {
+            Label glyph = new Label
+            {
+                FontFamily = new FontFamily("feta26"),
+                FontSize = 30,
+                Content = glyphCode,
+                Padding = new Thickness(0, 0, 0, 0),
+                Margin = new Thickness(
+                    0,
+                    0,
+                    0,
+                    0)
+            };
+            this._canvas.Children.Add(glyph);
         }
 
         public bool PaintSing(Sign s)
