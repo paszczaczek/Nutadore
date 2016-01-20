@@ -6,6 +6,7 @@ namespace Nutadore
     public class Staff
     {
         private readonly static double _distanceBetweenLines = 10;
+        private readonly static double _distanceBetweenSigns = 1;
 
         private Clef _clef;
 
@@ -37,10 +38,10 @@ namespace Nutadore
             get { return (int)type; }
         }
 
-        public void Paint(Canvas canvas, double left, double top, double magnification)
+        public double Paint(Canvas canvas, Scale scale, double left, double top, double magnification)
         {
             // Rysuję pięciolinię.
-            for (var staffLine = StaffLine.Base(1); staffLine <= StaffLine.Base(5); staffLine++)
+            for (var staffLine = Position.Line(1); staffLine <= Position.Line(5); staffLine++)
             {
                 double y = _LineY(staffLine, Number, top, magnification);
                 System.Windows.Shapes.Line shapeLine = new System.Windows.Shapes.Line
@@ -56,16 +57,26 @@ namespace Nutadore
             }
 
             // Rysuję klucz wiolinowy lub basowy.
-            double clefTop = _LineY(StaffLine.Base(2), Number, top, magnification);
-            _clef.Paint(canvas, left, clefTop, magnification);
+            double clefTop = _LineY(Position.Line(2), Number, top, magnification);
+            double clefRight = _clef.Paint(canvas, left, clefTop, magnification);
+
+            double signLeft = clefRight + 10 * magnification;
+            foreach (Sign sign in scale.Signs())
+            {
+                double signTop = _LineY(sign.staffLine, Number, top, magnification);
+                signLeft = sign.Paint(canvas, signLeft, signTop, magnification);
+                signLeft += _distanceBetweenSigns * magnification;
+            }
+
+            return 0; //TODO
         }
 
-        public double _LineY(StaffLine staffLine, int staffNumber, double top, double magnification)
+        public double _LineY(Position staffLine, int staffNumber, double top, double magnification)
         {
             return
                 top * magnification // tu będzie piąta linia
                 + staffNumber * 6 * _distanceBetweenLines * magnification // pięciolinia wiolinowa lub basowa
-                + (4 - staffLine.Number) * _distanceBetweenLines * magnification; // numer linii
+                + (4 - staffLine.ToDouble()) * _distanceBetweenLines * magnification; // numer linii
         }
     }
 }

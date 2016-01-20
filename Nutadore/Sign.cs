@@ -1,18 +1,26 @@
-﻿using System.Windows;
+﻿using System.Globalization;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace Nutadore
 {
-    public class Sign
+    abstract public class Sign
     {
-        public void Paint(Canvas canvas, string signCode, double left, double top, double maginification)
+        public Position staffLine;
+
+        abstract public double Paint(Canvas canvas, double left, double top, double maginification);
+
+        public double Paint(Canvas canvas, string text, double left, double top, double maginification)
         {
-            Label glyph = new Label
+            const string familyName = "feta26";
+            double fontSize = 42 * maginification;
+
+            Label sign = new Label
             {
-                FontFamily = new FontFamily("feta26"),
-                FontSize = 42 * maginification,
-                Content = signCode,
+                FontFamily = new FontFamily(familyName),
+                FontSize = fontSize,
+                Content = text,
                 Padding = new Thickness(0, 0, 0, 0),
                 //Background = new SolidColorBrush(Colors.LightYellow),
                 Margin = new Thickness(
@@ -21,7 +29,17 @@ namespace Nutadore
                     0,
                     0)
             };
-            canvas.Children.Add(glyph);
+            canvas.Children.Add(sign);
+
+            FormattedText formattedText = new FormattedText(
+                text,
+                CultureInfo.GetCultureInfo("en-us"),
+                FlowDirection.LeftToRight,
+                new Typeface(familyName),
+                fontSize,
+                Brushes.Black);
+
+            return left + formattedText.Width;
         }
     }
 }

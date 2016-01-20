@@ -7,15 +7,23 @@ using System.Windows.Controls;
 
 namespace Nutadore
 {
-    class Note : Sign
+    public class Sharp : Sign
     {
-        public void Paint()
+        public Sharp(Position staffLine)
         {
+            base.staffLine = staffLine;
         }
 
         override public double Paint(Canvas canvas, double left, double top, double maginification)
         {
-            return left;
+            const string sharpCode = "\x002e";
+
+            top -= 57 * maginification;
+
+            double right = base.Paint(canvas, sharpCode, left, top, maginification);
+
+            return right;
         }
+
     }
 }

@@ -29,7 +29,8 @@ namespace Nutadore
             canvas.LayoutTransform = new ScaleTransform();
 
             score = new Score(canvas);
-            score.scale = new Scale();
+            score.scale = new Scale(Scale.Based.C, Scale.Type.Minor);
+
             for (int i = 0; i < 10; i++)
                 score.Add(new Note());
             //score.Paint();

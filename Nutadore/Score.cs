@@ -50,7 +50,7 @@ namespace Nutadore
             {
                 while (staffCurrent == null || !staffCurrent.PaintSing(s))
                 {
-                    staffCurrent = new StaffPair(_canvas, staffNumber, Magnification); 
+                    staffCurrent = new StaffPair(_canvas, scale, staffNumber/*top!*/, Magnification); 
                     staffCurrent.Paint();
                     staffNumber++;
                 }

@@ -53,12 +53,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Bar.cs" />
     <Compile Include="Clef.cs" />
     <Compile Include="Note.cs" />
     <Compile Include="Scale.cs" />
     <Compile Include="Score.cs" />
-    <Compile Include="StaffLine.cs" />
+    <Compile Include="Sharp.cs" />
+    <Compile Include="Position.cs" />
     <Compile Include="StaffPair.cs" />
     <Compile Include="Sign.cs" />
     <Compile Include="Staff.cs" />

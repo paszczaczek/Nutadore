@@ -15,7 +15,7 @@ namespace Nutadore
             _type = type;
         }
 
-        public void Paint(Canvas canvas, double left, double top, double maginification)
+        override public double Paint(Canvas canvas, double left, double top, double maginification)
         {
             string clefCode = null;
             switch (_type)
@@ -31,7 +31,9 @@ namespace Nutadore
                 default:
                     break;
             }
-            base.Paint(canvas, clefCode, left, top, maginification);
+            double right  = base.Paint(canvas, clefCode, left, top, maginification);
+
+            return right;
         }
     }
 }
