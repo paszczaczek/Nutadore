@@ -1,119 +1,71 @@
-﻿using System;
-using System.Globalization;
-using System.Windows;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Shapes;
 
 namespace Nutadore
 {
-    internal class Staff
+    public class Staff
     {
-        private readonly static double _marginTop = 20;
         private readonly static double _distanceBetweenLines = 10;
 
-        private Canvas _canvas;
-        private double _y;
-        private double _magnification;
-        private double _curPos;
+        private Clef _clef;
 
-        // Konstruktor.
-        public Staff(Canvas canvas, double y, double magnification)
+        static public Staff Treble()
         {
-            _canvas = canvas;
-            _y = y;
-            _magnification = magnification;
-            _curPos = 0;
+            return new Staff(Type.Treble);
         }
 
-        // Rysuje pięcilinie z zawartościć i elementami skojarzonymi
-        public void Paint()
+        static public Staff Bass()
         {
-            double staffsLeft = _PaintBracket();
-            _PaintStaffs(staffsLeft);
-            _PaintClefs(staffsLeft);
+            return new Staff(Type.Bass);
         }
 
-        // Rysuje klamrę spinającą pięciolinię wiolinową i basową.
-        private double _PaintBracket()
+        public enum Type
         {
-            // wyznaczam wymiary klamry
-            string familyName = "MS Mincho";
-            double fontSize = 116 * _magnification;
-            FormattedText formattedText = new FormattedText(
-                "{", 
-                CultureInfo.GetCultureInfo("en-us"), 
-                FlowDirection.LeftToRight, 
-                new Typeface(familyName), 
-                fontSize, 
-                Brushes.Black);
-            double bracketWidth = formattedText.Width;
-            double bracketHeight = formattedText.Height;
-            double bracketOffestX = bracketWidth * 0.3;
-            double bracketOffsetY = bracketHeight * 0.07;
-
-            // rysuję klamrę
-            Label bracket = new Label();
-            bracket.FontFamily = new FontFamily(familyName);
-            bracket.FontSize = fontSize;
-            bracket.Content = "{";
-            bracket.Padding = new Thickness(0, 0, 0, 0);
-            bracket.Margin = new Thickness(
-                    -bracketOffestX, 
-                    _marginTop * _magnification - bracketOffsetY, 
-                    0, 
-                    0);
-            this._canvas.Children.Add(bracket);
-
-            // zwracam miejsce w którym kończy sie klamra i będa rozpoczynały sie pięciolinie
-            return bracketWidth - bracketOffestX;
+            Treble = 0,
+            Bass
         }
 
-        // Rysuje pięciolinie wiolinową i basową.
-        private void _PaintStaffs(double staffsLeft)
+        public Type type;
+        private Staff(Type type)
         {
-            for (int staffNo = 0; staffNo < 2; staffNo++)
+            this.type = type;
+            _clef = new Clef(type);
+        }
+
+        public int Number
+        {
+            get { return (int)type; }
+        }
+
+        public void Paint(Canvas canvas, double left, double top, double magnification)
+        {
+            // Rysuję pięciolinię.
+            for (var staffLine = StaffLine.Base(1); staffLine <= StaffLine.Base(5); staffLine++)
             {
-                for (int lineNo = 0; lineNo < 5; lineNo++)
+                double y = _LineY(staffLine, Number, top, magnification);
+                System.Windows.Shapes.Line shapeLine = new System.Windows.Shapes.Line
                 {
-                    Line line = new Line();
-                    line.X1 = staffsLeft;
-                    line.X2 = _canvas.ActualWidth - 10;
-                    line.Y1 = (_y + Staff._marginTop + (lineNo + staffNo * 6) * _distanceBetweenLines) * _magnification;
-                    line.Y2 = line.Y1;
-                    line.Stroke = Brushes.Black;
-                    line.StrokeThickness = 0.5;
-                    this._canvas.Children.Add(line);
-                }
+                    X1 = left,
+                    X2 = canvas.ActualWidth - 10,
+                    Y1 = y,
+                    Y2 = y,
+                    Stroke = Brushes.Black,
+                    StrokeThickness = 0.5
+                };
+                canvas.Children.Add(shapeLine);
             }
+
+            // Rysuję klucz wiolinowy lub basowy.
+            double clefTop = _LineY(StaffLine.Base(2), Number, top, magnification);
+            _clef.Paint(canvas, left, clefTop, magnification);
         }
 
-        // Rysuje klucz wiolinowy i basowy.
-        private void _PaintClefs(double sraffsLeft)
+        public double _LineY(StaffLine staffLine, int staffNumber, double top, double magnification)
         {
-            _PaintFetaGlyph("\x00c9");
-        }
-
-        private void _PaintFetaGlyph(string glyphCode)
-        {
-            Label glyph = new Label
-            {
-                FontFamily = new FontFamily("feta26"),
-                FontSize = 30,
-                Content = glyphCode,
-                Padding = new Thickness(0, 0, 0, 0),
-                Margin = new Thickness(
-                    0,
-                    0,
-                    0,
-                    0)
-            };
-            this._canvas.Children.Add(glyph);
-        }
-
-        public bool PaintSing(Sign s)
-        {
-            return true;
+            return
+                top * magnification // tu będzie piąta linia
+                + staffNumber * 6 * _distanceBetweenLines * magnification // pięciolinia wiolinowa lub basowa
+                + (4 - staffLine.Number) * _distanceBetweenLines * magnification; // numer linii
         }
     }
 }

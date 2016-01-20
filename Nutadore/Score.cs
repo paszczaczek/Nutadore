@@ -42,20 +42,15 @@ namespace Nutadore
 
         public void Paint()
         {
-            //const double staffMarginLeft = 50;
-            //const double staffMarginRight = 10;
-            //const double staffMarginTop = 30;
-            //const double distanceBetweenStaff = 150;
-
             _canvas.Children.Clear();
 
-            Staff staffCurrent = null;
+            StaffPair staffCurrent = null;
             int staffNumber = 0;
             foreach (Sign s in _signs)
             {
                 while (staffCurrent == null || !staffCurrent.PaintSing(s))
                 {
-                    staffCurrent = new Staff(_canvas, staffNumber, Magnification);
+                    staffCurrent = new StaffPair(_canvas, staffNumber, Magnification); 
                     staffCurrent.Paint();
                     staffNumber++;
                 }
