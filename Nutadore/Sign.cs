@@ -7,16 +7,19 @@ namespace Nutadore
 {
     abstract public class Sign
     {
-        public Position staffLine;
+        public StaffPosition staffPosition;
 
-        abstract public double Paint(Canvas canvas, double left, double top, double maginification);
+        protected Score score;
+        protected UIElement signLabel;
 
-        public double Paint(Canvas canvas, string text, double left, double top, double maginification)
+        abstract public double Show(double left, double top);
+
+        public double Show(string text, double left, double top)
         {
             const string familyName = "feta26";
-            double fontSize = 42 * maginification;
+            double fontSize = 42 * score.Magnification;
 
-            Label sign = new Label
+            signLabel = new Label
             {
                 FontFamily = new FontFamily(familyName),
                 FontSize = fontSize,
@@ -29,7 +32,7 @@ namespace Nutadore
                     0,
                     0)
             };
-            canvas.Children.Add(sign);
+            score.canvas.Children.Add(signLabel);
 
             FormattedText formattedText = new FormattedText(
                 text,
@@ -40,6 +43,11 @@ namespace Nutadore
                 Brushes.Black);
 
             return left + formattedText.Width;
+        }
+
+        protected void Hide()
+        {
+            score.canvas.Children.Remove(signLabel);
         }
     }
 }

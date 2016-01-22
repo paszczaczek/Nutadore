@@ -7,52 +7,54 @@ using System.Threading.Tasks;
 
 namespace Nutadore
 {
-    public class Position : IComparable
+    public class StaffPosition : IComparable
     {
-        static public Position Line(int line)
+        #region Publiczne konstruktory statyczne.
+        static public StaffPosition Line(int line)
         {
             if (line < 1 || line > 5)
                 throw new ArgumentOutOfRangeException("line", line, "Numer linii pieciolinii musi był liczbą 1..5");
-            return new Position(Name.Base1 + line - 1, false);
+            return new StaffPosition(Name.Base1 + line - 1, false);
         }
 
-        static public Position LagerAbove(int line)
+        static public StaffPosition LagerAbove(int line)
         {
             if (line < 1 || line > 5)
                 throw new ArgumentOutOfRangeException("line", line, "Numer linii dodanej górnej pieciolinii musi być liczba 1..5");
-            return new Position(Name.Base1 + 5 + line, false);
+            return new StaffPosition(Name.Base1 + 5 + line, false);
         }
 
-        static public Position LagerBelow(int line)
+        static public StaffPosition LagerBelow(int line)
         {
-            if (line < 1 || line > 5)
+            if (line < 1 || line > 6)
                 throw new ArgumentOutOfRangeException("line", line, "Numer linii dodanej dolnej pieciolinii musi być liczba 1..6");
-            return new Position(Name.Base1 - line, false);
+            return new StaffPosition(Name.Base1 - line, false);
         }
 
         public class Above
         {
-            static public Position Line(int line)
+            static public StaffPosition Line(int line)
             {
                 if (line < 1 || line > 5)
                     throw new ArgumentOutOfRangeException("line", line, "Numer linii pieciolinii musi był liczbą 1..5");
-                return new Position(Name.Base1 + line - 1, true);
+                return new StaffPosition(Name.Base1 + line - 1, true);
             }
 
-            static public Position LagerAbove(int line)
+            static public StaffPosition LagerAbove(int line)
             {
                 if (line < 1 || line > 5)
                     throw new ArgumentOutOfRangeException("line", line, "Numer linii dodanej górnej pieciolinii musi być liczba 1..5");
-                return new Position(Name.Base1 + 5 + line, true);
+                return new StaffPosition(Name.Base1 + 5 + line, true);
             }
 
-            static public Position LagerBelow(int line)
+            static public StaffPosition LagerBelow(int line)
             {
-                if (line < 1 || line > 5)
+                if (line < 1 || line > 6)
                     throw new ArgumentOutOfRangeException("line", line, "Numer linii dodanej dolnej pieciolinii musi być liczba 1..6");
-                return new Position(Name.Base1 - line, true);
+                return new StaffPosition(Name.Base1 - line, true);
             }
         }
+        #endregion
 
         public enum Name
         {
@@ -76,7 +78,9 @@ namespace Nutadore
 
         private Name name;
         private bool above;
-        private Position(Name name, bool above)
+
+        // Konstruktor prywatny
+        private StaffPosition(Name name, bool above)
         {
             this.name = name;
             this.above = above;
@@ -89,7 +93,7 @@ namespace Nutadore
 
         public int CompareTo(object obj)
         {
-            Position line = obj as Position;
+            StaffPosition line = obj as StaffPosition;
             if (name == line.name)
                 return 0;
             if (name < line.name)
@@ -97,17 +101,17 @@ namespace Nutadore
             return 1;
         }
 
-        static public bool operator <=(Position line1, Position line2)
+        static public bool operator <=(StaffPosition line1, StaffPosition line2)
         {
             return line1.CompareTo(line2) <= 0;
         }
 
-        static public bool operator >=(Position line1, Position line2)
+        static public bool operator >=(StaffPosition line1, StaffPosition line2)
         {
             return line1.CompareTo(line2) >= 0;
         }
 
-        static public Position operator ++(Position line)
+        static public StaffPosition operator ++(StaffPosition line)
         {
             line.name++;
             return line;

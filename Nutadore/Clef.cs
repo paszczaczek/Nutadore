@@ -7,31 +7,47 @@ using System.Windows.Controls;
 
 namespace Nutadore
 {
-    class Clef : Sign
+    public class Clef : Sign
     {
-        private Staff.Type _type;
-        public Clef(Staff.Type type)
+        public enum Type
         {
-            _type = type;
+            Treble,
+            Bass,
+            TrebleSmall,
+            BassSmall
         }
 
-        override public double Paint(Canvas canvas, double left, double top, double maginification)
+        private  Type type;
+
+        public Clef(Score score, Type type)
+        {
+            base.score = score;
+            this.type = type;
+        }
+
+        override public double Show(double left, double top)
         {
             string clefCode = null;
-            switch (_type)
+            switch (type)
             {
-                case Staff.Type.Treble:
+                case Type.Treble:
                     clefCode = "\x00c9";
-                    top -= 57 * maginification;
+                    top -= 57 * base.score.Magnification;
                     break;
-                case Staff.Type.Bass:
+                case Type.Bass:
                     clefCode = "\x00c7";
-                    top -= 77.5 * maginification;
+                    top -= 77.5 * base.score.Magnification;
+                    break;
+                case Type.TrebleSmall:
+                    // TODO
+                    break;
+                case Type.BassSmall:
+                    // TODO
                     break;
                 default:
                     break;
             }
-            double right  = base.Paint(canvas, clefCode, left, top, maginification);
+            double right = base.Show(clefCode, left, top);
 
             return right;
         }

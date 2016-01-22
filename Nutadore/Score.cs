@@ -9,54 +9,53 @@ using System.Windows.Shapes;
 
 namespace Nutadore
 {
-    class Score
+    public class Score
     {
-        static public readonly double FetaFontSize = 40;
+        public Canvas canvas;
         public Scale scale;
 
-        private Canvas _canvas;
-        private List<Sign> _signs = new List<Sign>();
+        private List<Sign> signs = new List<Sign>();
 
-        public Score(Canvas canvas)
+        public Score(Canvas canvas, Scale.Based scaleBased, Scale.Type scaleType)
         {
-            _canvas = canvas;
+            this.canvas = canvas;
+            scale = new Scale(this, scaleBased, scaleType);
         }
 
         public void Add(Sign sign)
         {
-            _signs.Add(sign);
+            signs.Add(sign);
         }
 
-        private double _magnification = 1.0;
+        private double magnification = 1.0;
         public double Magnification {
-            get
-            {
-                return _magnification;
+            get{
+                return magnification;
             }
             set
             {
-                _magnification = value;
-                Paint();
+                magnification = value;
+                Show();
             }
         }
 
-        public void Paint()
+        public void Show()
         {
-            _canvas.Children.Clear();
+            canvas.Children.Clear();
 
-            StaffPair staffCurrent = null;
-            int staffNumber = 0;
-            foreach (Sign s in _signs)
+            GrandStaff grandStaffCurrent = null;
+            int grandStaffIndex = 0;
+            foreach (Sign sign in signs)
             {
-                while (staffCurrent == null || !staffCurrent.PaintSing(s))
+                while (grandStaffCurrent == null || !grandStaffCurrent.Add(sign))
                 {
-                    staffCurrent = new StaffPair(_canvas, scale, staffNumber/*top!*/, Magnification); 
-                    staffCurrent.Paint();
-                    staffNumber++;
+                    grandStaffCurrent = new GrandStaff(this, 0);
+                    grandStaffCurrent.Show();
+                    grandStaffIndex++;
                 }
             }
 
-            _canvas.UpdateLayout();
+            canvas.UpdateLayout();
         }
     }
 }

@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MainWindow" Height="500" Width="345" SizeChanged="Window_SizeChanged" PreviewMouseWheel="Window_PreviewMouseWheel" PreviewMouseDown="Window_PreviewMouseDown">
     <Grid>
-        <Canvas x:Name="canvas" Margin="10" Background="#FFD8D8D8"/>
+        <Canvas x:Name="canvas" Margin="10,10,10,54" Background="#FFD8D8D8"/>
+        <Button x:Name="testButton" Content="Button" HorizontalAlignment="Left" Margin="111,435,0,0" VerticalAlignment="Top" Width="75" Click="testButton_Click"/>
     </Grid>
 </Window>

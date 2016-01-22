@@ -59,7 +59,7 @@
     <Compile Include="Score.cs" />
     <Compile Include="Sharp.cs" />
     <Compile Include="Position.cs" />
-    <Compile Include="StaffPair.cs" />
+    <Compile Include="GrandStaff.cs" />
     <Compile Include="Sign.cs" />
     <Compile Include="Staff.cs" />
     <Page Include="MainWindow.xaml">

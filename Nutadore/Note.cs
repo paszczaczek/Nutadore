@@ -9,13 +9,19 @@ namespace Nutadore
 {
     class Note : Sign
     {
-        public void Paint()
+        public Note(Score score)
         {
+            base.score = score;
         }
 
-        override public double Paint(Canvas canvas, double left, double top, double maginification)
+        override public double Show(double left, double top)
         {
-            return left;
+            string noteCode = "\x0055";
+            top -= 57.5 * base.score.Magnification;
+            double right = base.Show(noteCode, left, top);
+
+            return right;
         }
+
     }
 }

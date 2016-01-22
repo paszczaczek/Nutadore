@@ -26,19 +26,17 @@ namespace Nutadore
         {
             InitializeComponent();
 
-            canvas.LayoutTransform = new ScaleTransform();
-
-            score = new Score(canvas);
-            score.scale = new Scale(Scale.Based.C, Scale.Type.Minor);
+            score = new Score(canvas, Scale.Based.C, Scale.Type.Major);
 
             for (int i = 0; i < 10; i++)
-                score.Add(new Note());
+                score.Add(new Note(score));
+
             //score.Paint();
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            score.Paint();
+            score.Show();
         }
 
         private void Window_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -70,6 +68,11 @@ namespace Nutadore
                 if (e.ChangedButton == MouseButton.Middle)
                     score.Magnification = 1.0;
             }
+        }
+
+        private void testButton_Click(object sender, RoutedEventArgs e)
+        {
+            //canvas.Children.Remove(Sign.ttt);
         }
     }
 }

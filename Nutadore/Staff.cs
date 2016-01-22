@@ -1,24 +1,18 @@
 ﻿using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace Nutadore
 {
     public class Staff
     {
-        private readonly static double _distanceBetweenLines = 10;
-        private readonly static double _distanceBetweenSigns = 1;
+        private readonly static double distanceBetweenLines = 10;
+        private readonly static double distanceBetweenSigns = 1;
 
-        private Clef _clef;
-
-        static public Staff Treble()
-        {
-            return new Staff(Type.Treble);
-        }
-
-        static public Staff Bass()
-        {
-            return new Staff(Type.Bass);
-        }
+        private Score score;
+        private Type type;
+        private double left;
+        private double top;
 
         public enum Type
         {
@@ -26,57 +20,71 @@ namespace Nutadore
             Bass
         }
 
-        public Type type;
-        private Staff(Type type)
+        public Staff(Score score, Type staffType)
         {
-            this.type = type;
-            _clef = new Clef(type);
+            this.score = score;
+            type = staffType;            
         }
 
-        public int Number
+        public double Show(double staffLeft, double staffTop)
         {
-            get { return (int)type; }
-        }
+            left = staffLeft;
+            top = staffTop;
 
-        public double Paint(Canvas canvas, Scale scale, double left, double top, double magnification)
-        {
-            // Rysuję pięciolinię.
-            for (var staffLine = Position.Line(1); staffLine <= Position.Line(5); staffLine++)
+            // Dodaję pięciolinię.
+            for (var staffLine = StaffPosition.Line(1); staffLine <= StaffPosition.Line(5); staffLine++)
             {
-                double y = _LineY(staffLine, Number, top, magnification);
-                System.Windows.Shapes.Line shapeLine = new System.Windows.Shapes.Line
+                double y = StaffPositionToY(staffLine, type);
+                Line shapeLine = new Line
                 {
-                    X1 = left,
-                    X2 = canvas.ActualWidth - 10,
+                    X1 = staffLeft,
+                    X2 = score.canvas.ActualWidth - 10,
                     Y1 = y,
                     Y2 = y,
                     Stroke = Brushes.Black,
                     StrokeThickness = 0.5
                 };
-                canvas.Children.Add(shapeLine);
+                score.canvas.Children.Add(shapeLine);
             }
 
-            // Rysuję klucz wiolinowy lub basowy.
-            double clefTop = _LineY(Position.Line(2), Number, top, magnification);
-            double clefRight = _clef.Paint(canvas, left, clefTop, magnification);
+            // Dodaję klucz.
+            Clef clef = new Clef(score, (Clef.Type)type);
+            double clefTop = StaffPositionToY(StaffPosition.Line(2), type);
+            double clefRight = clef.Show(staffLeft, clefTop);
 
-            double signLeft = clefRight + 10 * magnification;
-            foreach (Sign sign in scale.Signs())
+            // Dodaję znaki przykluczowe.
+            double signLeft = clefRight + 10 * score.Magnification;
+            foreach (Sign sign in score.scale.Signs())
             {
-                double signTop = _LineY(sign.staffLine, Number, top, magnification);
-                signLeft = sign.Paint(canvas, signLeft, signTop, magnification);
-                signLeft += _distanceBetweenSigns * magnification;
+                double signTop = StaffPositionToY(sign.staffPosition, type);
+                signLeft 
+                    = sign.Show(signLeft, signTop)
+                    + distanceBetweenSigns * score.Magnification;
             }
 
-            return 0; //TODO
+            // zwracam miejsce w którym mozna umieszczać następny znak
+            return signLeft;
         }
 
-        public double _LineY(Position staffLine, int staffNumber, double top, double magnification)
+        public double StaffPositionToY(StaffPosition staffLine, Type staffType)
         {
             return
-                top * magnification // tu będzie piąta linia
-                + staffNumber * 6 * _distanceBetweenLines * magnification // pięciolinia wiolinowa lub basowa
-                + (4 - staffLine.ToDouble()) * _distanceBetweenLines * magnification; // numer linii
+                // tu będzie piąta linia
+                top * score.Magnification
+                // pięciolinia wiolinowa lub basowa
+                + (int)staffType * (5 + 1) * distanceBetweenLines * score.Magnification
+                // numer linii
+                + (4 - staffLine.ToDouble()) * distanceBetweenLines * score.Magnification;
+        }
+
+        public double Add(Sign sign, double left)
+        {
+            // TODO: wyznaczyć na podstwie wysokości nuty
+            StaffPosition staffPosition = StaffPosition.Above.Line(1);
+            double signTop = StaffPositionToY(staffPosition, type);
+            return
+                sign.Show(left, signTop)
+                + distanceBetweenSigns ;
         }
     }
 }

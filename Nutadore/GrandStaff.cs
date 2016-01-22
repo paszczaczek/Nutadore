@@ -6,42 +6,50 @@ using System.Windows.Media;
 
 namespace Nutadore
 {
-    public partial class StaffPair
+    public partial class GrandStaff
     {
-        private readonly static double _marginTop = 20;
+        private readonly static double marginTop = 20;
 
-        private Canvas _canvas;
-        private double _top;
-        private double _magnification;
-
-        Staff _trebleStaff = Staff.Treble();
-        Staff _bassStaff = Staff.Bass();
-        Scale _scale;
+        private Score score;
+        private double top;
+        private Staff trebleStaff;
+        private Staff bassStaff;
+        private double cursor;
 
         // Konstruktor.
-        public StaffPair(Canvas canvas, Scale scale, double top, double magnification)
+        public GrandStaff(Score score, double top)
         {
-            _canvas = canvas;
-            _top = top;
-            _magnification = magnification;
-            _scale = scale;
+            this.score = score;
+            this.top = top;
         }
 
         // Rysuje pięciolinie i klamrę je spinającą.
-        public void Paint()
+        public void Show()
         {
-            double staffLeft = _PaintBrace();
+            // Rysuję klamrę.
+            double staffLeft = PaintBrace();
 
-            double scaleLeft = _trebleStaff.Paint(_canvas, _scale, staffLeft, _marginTop, _magnification);
-            _bassStaff.Paint(_canvas, _scale, staffLeft, _marginTop, _magnification);
+            // Rysuję klucz wiolinowy.
+            trebleStaff = new Staff(score, Staff.Type.Treble);
+            double trebleStaffCursor = trebleStaff.Show(staffLeft, marginTop);
+
+            // Rysuje klucz basowy.
+            bassStaff = new Staff(score, Staff.Type.Bass);
+            double bassStaffCursor = bassStaff.Show(staffLeft, marginTop);
+
+            // Wyznaczam połoznenie kursora na GrandStaff
+            cursor 
+                = trebleStaffCursor > bassStaffCursor
+                ? trebleStaffCursor
+                : bassStaffCursor;
         }
 
         // Rysuje klamrę spinającą pięciolinię wiolinową i basową.
-        private double _PaintBrace()
+        private double PaintBrace()
         {
             // wyznaczam wymiary klamry
             string familyName = "MS Mincho";
-            double fontSize = 116 * _magnification;
+            double fontSize = 116 * score.Magnification;
             FormattedText formattedText = new FormattedText(
                 "{", 
                 CultureInfo.GetCultureInfo("en-us"), 
@@ -62,17 +70,19 @@ namespace Nutadore
             brace.Padding = new Thickness(0, 0, 0, 0);
             brace.Margin = new Thickness(
                     -braceOffestX, 
-                    _marginTop * _magnification - braceOffsetY, 
+                    marginTop * score.Magnification - braceOffsetY, 
                     0, 
                     0);
-            _canvas.Children.Add(brace);
+            score.canvas.Children.Add(brace);
 
             // zwracam miejsce w którym kończy sie klamra i będa rozpoczynały sie pięciolinie
             return braceWidth - braceOffestX;
         }
 
-        public bool PaintSing(Sign s)
+        public bool Add(Sign sign)
         {
+            // TODO: która pięcilinia
+            cursor = trebleStaff.Add(sign, cursor);
             return true;
         }
     }
