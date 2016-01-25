@@ -11,15 +11,15 @@ namespace Nutadore
 {
     public class Score
     {
+        static private readonly double distanceBetweenStaffGrands = 150;
+
         public Canvas canvas;
-        public Scale scale;
+        public Scale scale = new Scale(Scale.Based.C, Scale.Type.Major);
+        public  List<Sign> signs = new List<Sign>();
 
-        private List<Sign> signs = new List<Sign>();
-
-        public Score(Canvas canvas, Scale.Based scaleBased, Scale.Type scaleType)
+        public Score(Canvas canvas)
         {
             this.canvas = canvas;
-            scale = new Scale(this, scaleBased, scaleType);
         }
 
         public void Add(Sign sign)
@@ -29,7 +29,8 @@ namespace Nutadore
 
         private double magnification = 1.0;
         public double Magnification {
-            get{
+            get
+            {
                 return magnification;
             }
             set
@@ -41,21 +42,28 @@ namespace Nutadore
 
         public void Show()
         {
-            canvas.Children.Clear();
+            // czyscimy partyturę
+            Clear();
 
-            GrandStaff grandStaffCurrent = null;
-            int grandStaffIndex = 0;
-            foreach (Sign sign in signs)
+            // rusujemy podwójną pieciolinię 
+            StaffGrand staffGrand = new StaffGrand();
+            double top = 0;
+            while (!staffGrand.Show(this, top))
             {
-                while (grandStaffCurrent == null || !grandStaffCurrent.Add(sign))
-                {
-                    grandStaffCurrent = new GrandStaff(this, 0);
-                    grandStaffCurrent.Show();
-                    grandStaffIndex++;
-                }
+                // nie zmieściło się, dokończymy na kolejnej
+                top += distanceBetweenStaffGrands;
+                if (top > canvas.ActualHeight)
+                    break;
             }
+        }
 
-            canvas.UpdateLayout();
+        public void Clear()
+        {
+            // usuwamy wszystkie nuty
+            signs.ForEach(sign => sign.Clear());
+
+            // usuwamy pozostałe elemetny (klucze, znaki przykluczowe, itd.)
+            canvas.Children.Clear();
         }
     }
 }

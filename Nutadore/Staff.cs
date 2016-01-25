@@ -7,9 +7,10 @@ namespace Nutadore
     public class Staff
     {
         private readonly static double distanceBetweenLines = 10;
-        private readonly static double distanceBetweenSigns = 1;
+        private readonly static double distanceBetweenScaleSigns = 1;
+        private readonly static double distanceBetweenSigns = 10;
+        private readonly static double marginLeft = 10;
 
-        private Score score;
         private Type type;
         private double left;
         private double top;
@@ -20,13 +21,12 @@ namespace Nutadore
             Bass
         }
 
-        public Staff(Score score, Type staffType)
+        public Staff(Type type)
         {
-            this.score = score;
-            type = staffType;            
+            this.type = type;            
         }
 
-        public double Show(double staffLeft, double staffTop)
+        public double Show(Score score, double staffLeft, double staffTop)
         {
             left = staffLeft;
             top = staffTop;
@@ -34,11 +34,11 @@ namespace Nutadore
             // Dodaję pięciolinię.
             for (var staffLine = StaffPosition.Line(1); staffLine <= StaffPosition.Line(5); staffLine++)
             {
-                double y = StaffPositionToY(staffLine, type);
+                double y = StaffPositionToY(score, staffLine, type);
                 Line shapeLine = new Line
                 {
                     X1 = staffLeft,
-                    X2 = score.canvas.ActualWidth - 10,
+                    X2 = score.canvas.ActualWidth - marginLeft,
                     Y1 = y,
                     Y2 = y,
                     Stroke = Brushes.Black,
@@ -48,25 +48,48 @@ namespace Nutadore
             }
 
             // Dodaję klucz.
-            Clef clef = new Clef(score, (Clef.Type)type);
-            double clefTop = StaffPositionToY(StaffPosition.Line(2), type);
-            double clefRight = clef.Show(staffLeft, clefTop);
+            Clef clef = new Clef((Clef.Type)type);
+            double clefTop = StaffPositionToY(score, StaffPosition.Line(2), type);
+            double clefRight = clef.Show(score, staffLeft, clefTop);
 
             // Dodaję znaki przykluczowe.
             double signLeft = clefRight + 10 * score.Magnification;
             foreach (Sign sign in score.scale.Signs())
             {
-                double signTop = StaffPositionToY(sign.staffPosition, type);
-                signLeft 
-                    = sign.Show(signLeft, signTop)
-                    + distanceBetweenSigns * score.Magnification;
+                double signTop = StaffPositionToY(score, sign.staffPosition, type);
+                signLeft
+                    = sign.Show(score, signLeft, signTop)
+                    + distanceBetweenScaleSigns * score.Magnification;
             }
 
             // zwracam miejsce w którym mozna umieszczać następny znak
-            return signLeft;
+            return signLeft + distanceBetweenSigns;
         }
 
-        public double StaffPositionToY(StaffPosition staffLine, Type staffType)
+        public double ShowSign(Score score, Sign sign, double left)
+        {
+            // TODO: tak naprawdę sign będzie kolekcją zawierająca akordy wiolinowe i basowe
+            // TODO: wyznaczyć na podstwie wysokości nuty
+            StaffPosition staffPosition = StaffPosition.Above.Line(1);
+            double signTop = StaffPositionToY(score, staffPosition, type);
+            left = sign.Show(score, left, signTop);
+
+            // czy nuta zmieściła sie na pięcolinii
+            if (left >= score.canvas.ActualWidth - marginLeft)
+            {
+                // nie zmieściła się, narysujemy ją na następnej pieciolinii
+                sign.Clear();
+                return -1;
+            }
+            else
+            {
+                // zmieściła się
+                left += distanceBetweenSigns;
+                return left;
+            }
+        }
+
+        public double StaffPositionToY(Score score, StaffPosition staffLine, Type staffType)
         {
             return
                 // tu będzie piąta linia
@@ -75,16 +98,6 @@ namespace Nutadore
                 + (int)staffType * (5 + 1) * distanceBetweenLines * score.Magnification
                 // numer linii
                 + (4 - staffLine.ToDouble()) * distanceBetweenLines * score.Magnification;
-        }
-
-        public double Add(Sign sign, double left)
-        {
-            // TODO: wyznaczyć na podstwie wysokości nuty
-            StaffPosition staffPosition = StaffPosition.Above.Line(1);
-            double signTop = StaffPositionToY(staffPosition, type);
-            return
-                sign.Show(left, signTop)
-                + distanceBetweenSigns ;
         }
     }
 }

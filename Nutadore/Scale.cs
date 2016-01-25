@@ -4,13 +4,11 @@ namespace Nutadore
 {
     public class Scale
     {
-        private Score score;
         private Based based;
         private Type type;
 
-        public Scale(Score score, Based based, Type type)
+        public Scale(Based based, Type type)
         {
-            this.score = score;
             this.based = based;
             this.type = type;
         }
@@ -21,13 +19,13 @@ namespace Nutadore
         public Sign[] Signs()
         {
             return new Sign[] {
-                new Sharp(score, StaffPosition.Line(5)),
-                new Sharp(score, StaffPosition.Above.Line(3)),
-                new Sharp(score, StaffPosition.Above.Line(5)),
-                new Sharp(score, StaffPosition.Line(4)),
-                new Sharp(score, StaffPosition.Above.Line(2)),
-                new Sharp(score, StaffPosition.Above.Line(4)),
-                new Sharp(score, StaffPosition.Line(3))
+                new Sharp(StaffPosition.Line(5)),
+                new Sharp(StaffPosition.Above.Line(3)),
+                new Sharp(StaffPosition.Above.Line(5)),
+                new Sharp(StaffPosition.Line(4)),
+                new Sharp(StaffPosition.Above.Line(2)),
+                new Sharp(StaffPosition.Above.Line(4)),
+                new Sharp(StaffPosition.Line(3))
             };
         }
     }

@@ -26,12 +26,11 @@ namespace Nutadore
         {
             InitializeComponent();
 
-            score = new Score(canvas, Scale.Based.C, Scale.Type.Major);
-
+            score = new Score(canvas);
+            score.scale = new Scale(Scale.Based.C, Scale.Type.Minor);
             for (int i = 0; i < 10; i++)
-                score.Add(new Note(score));
-
-            //score.Paint();
+                score.Add(new Note());
+            //score.Show();
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -72,7 +71,7 @@ namespace Nutadore
 
         private void testButton_Click(object sender, RoutedEventArgs e)
         {
-            //canvas.Children.Remove(Sign.ttt);
+            score.Clear();
         }
     }
 }

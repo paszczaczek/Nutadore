@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -6,46 +7,65 @@ using System.Windows.Media;
 
 namespace Nutadore
 {
-    public partial class GrandStaff
+    public class StaffGrand
     {
         private readonly static double marginTop = 20;
 
-        private Score score;
         private double top;
         private Staff trebleStaff;
         private Staff bassStaff;
         private double cursor;
 
         // Konstruktor.
-        public GrandStaff(Score score, double top)
+        public StaffGrand()
         {
-            this.score = score;
-            this.top = top;
         }
 
         // Rysuje pięciolinie i klamrę je spinającą.
-        public void Show()
+        public bool Show(Score score, double top)
         {
+            this.top = top;
+
             // Rysuję klamrę.
-            double staffLeft = PaintBrace();
+            double staffLeft = ShowBrace(score);
 
             // Rysuję klucz wiolinowy.
-            trebleStaff = new Staff(score, Staff.Type.Treble);
-            double trebleStaffCursor = trebleStaff.Show(staffLeft, marginTop);
+            trebleStaff = new Staff(Staff.Type.Treble);
+            double trebleStaffCursor = trebleStaff.Show(score, staffLeft, top + marginTop);
 
-            // Rysuje klucz basowy.
-            bassStaff = new Staff(score, Staff.Type.Bass);
-            double bassStaffCursor = bassStaff.Show(staffLeft, marginTop);
+            // Rysuję klucz basowy.
+            bassStaff = new Staff(Staff.Type.Bass);
+            double bassStaffCursor = bassStaff.Show(score, staffLeft, top + marginTop);
 
             // Wyznaczam połoznenie kursora na GrandStaff
             cursor 
                 = trebleStaffCursor > bassStaffCursor
                 ? trebleStaffCursor
                 : bassStaffCursor;
+
+            // Rusuję nienarysowane jeszcze na piecilinii nuty i inne znaki.
+            List<Sign> signsNotShown = score.signs.FindAll(sign => !sign.Shown);
+            foreach (Sign sign in signsNotShown)
+            {
+                Staff staff
+                    = true  // TODO: na którym kluczu rysować nutę
+                    ? trebleStaff
+                    : bassStaff;
+                cursor = staff.ShowSign(score, sign, cursor);
+
+                // Czy wystarczyło tej pięciolinii dla wszystkich nut?
+                if (cursor == -1)
+                {                    
+                    // nie - trzeba dodać kolejną pieciolinie
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         // Rysuje klamrę spinającą pięciolinię wiolinową i basową.
-        private double PaintBrace()
+        private double ShowBrace(Score score)
         {
             // wyznaczam wymiary klamry
             string familyName = "MS Mincho";
@@ -70,7 +90,7 @@ namespace Nutadore
             brace.Padding = new Thickness(0, 0, 0, 0);
             brace.Margin = new Thickness(
                     -braceOffestX, 
-                    marginTop * score.Magnification - braceOffsetY, 
+                    (top + marginTop) * score.Magnification - braceOffsetY, 
                     0, 
                     0);
             score.canvas.Children.Add(brace);
@@ -79,11 +99,11 @@ namespace Nutadore
             return braceWidth - braceOffestX;
         }
 
-        public bool Add(Sign sign)
-        {
-            // TODO: która pięcilinia
-            cursor = trebleStaff.Add(sign, cursor);
-            return true;
-        }
+        //public bool Add(Score score, Sign sign)
+        //{
+        //    // TODO: która pięcilinia
+        //    cursor = trebleStaff.ShowSign(score, sign, cursor);
+        //    return true;
+        //}
     }
 }

@@ -9,17 +9,16 @@ namespace Nutadore
 {
     public class Sharp : Sign
     {
-        public Sharp(Score score, StaffPosition statfPosition)
+        public Sharp(StaffPosition statfPosition)
         {
-            base.score = score;
             base.staffPosition = statfPosition;
         }
 
-        override public double Show(double left, double top)
+        override public double Show(Score score, double left, double top)
         {
-            const string sharpCode = "\x002e";
-            top -= 57 * base.score.Magnification;
-            double right = base.Show(sharpCode, left, top);
+            base.code = "\x002e";
+            top -= 57 * score.Magnification;
+            double right = base.Show(score, left, top);
 
             return right;
         }

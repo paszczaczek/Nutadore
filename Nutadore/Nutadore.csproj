@@ -59,7 +59,7 @@
     <Compile Include="Score.cs" />
     <Compile Include="Sharp.cs" />
     <Compile Include="StaffPosition.cs" />
-    <Compile Include="GrandStaff.cs" />
+    <Compile Include="StaffGrand.cs" />
     <Compile Include="Sign.cs" />
     <Compile Include="Staff.cs" />
     <Page Include="MainWindow.xaml">
@@ -93,6 +93,17 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <Resource Include="Misc\Fonts\Denemo.ttf" />
+    <Resource Include="Misc\Fonts\feta-braces-a.ttf" />
+    <Resource Include="Misc\Fonts\feta-braces-b.ttf" />
+    <Resource Include="Misc\Fonts\feta-braces-c.ttf" />
+    <Resource Include="Misc\Fonts\feta-braces-d.ttf" />
+    <Resource Include="Misc\Fonts\feta-braces-e.ttf" />
+    <Resource Include="Misc\Fonts\feta-braces-f.ttf" />
+    <Resource Include="Misc\Fonts\feta-braces-g.ttf" />
+    <Resource Include="Misc\Fonts\feta-braces-h.ttf" />
+    <Resource Include="Misc\Fonts\feta-braces-i.ttf" />
+    <Resource Include="Misc\Fonts\feta.ttf" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -101,6 +112,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Misc\Readme.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -9,21 +9,22 @@ namespace Nutadore
     {
         public StaffPosition staffPosition;
 
-        protected Score score;
-        protected UIElement signLabel;
+        protected string code;
+        protected UIElement label;
+        private Score score;
 
-        abstract public double Show(double left, double top);
-
-        public double Show(string text, double left, double top)
+        virtual public double Show(Score score, double left, double top)
         {
+            this.score = score;
+
             const string familyName = "feta26";
             double fontSize = 42 * score.Magnification;
 
-            signLabel = new Label
+            label = new Label
             {
                 FontFamily = new FontFamily(familyName),
                 FontSize = fontSize,
-                Content = text,
+                Content = code,
                 Padding = new Thickness(0, 0, 0, 0),
                 //Background = new SolidColorBrush(Colors.LightYellow),
                 Margin = new Thickness(
@@ -32,10 +33,10 @@ namespace Nutadore
                     0,
                     0)
             };
-            score.canvas.Children.Add(signLabel);
+            score.canvas.Children.Add(label);
 
             FormattedText formattedText = new FormattedText(
-                text,
+                code,
                 CultureInfo.GetCultureInfo("en-us"),
                 FlowDirection.LeftToRight,
                 new Typeface(familyName),
@@ -45,9 +46,18 @@ namespace Nutadore
             return left + formattedText.Width;
         }
 
-        protected void Hide()
+        public void Clear()
         {
-            score.canvas.Children.Remove(signLabel);
+            if (score != null && label != null)
+            {
+                score.canvas.Children.Remove(label);
+                label = null;
+            }
+        }
+
+        public bool Shown
+        {
+            get { return label != null; }
         }
     }
 }

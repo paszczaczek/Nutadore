@@ -19,24 +19,23 @@ namespace Nutadore
 
         private  Type type;
 
-        public Clef(Score score, Type type)
+        public Clef(Type type)
         {
-            base.score = score;
             this.type = type;
         }
 
-        override public double Show(double left, double top)
+        override public double Show(Score score, double left, double top)
         {
-            string clefCode = null;
+            base.code = null;
             switch (type)
             {
                 case Type.Treble:
-                    clefCode = "\x00c9";
-                    top -= 57 * base.score.Magnification;
+                    base.code = "\x00c9";
+                    top -= 57 * score.Magnification;
                     break;
                 case Type.Bass:
-                    clefCode = "\x00c7";
-                    top -= 77.5 * base.score.Magnification;
+                    base.code = "\x00c7";
+                    top -= 77.5 * score.Magnification;
                     break;
                 case Type.TrebleSmall:
                     // TODO
@@ -47,7 +46,7 @@ namespace Nutadore
                 default:
                     break;
             }
-            double right = base.Show(clefCode, left, top);
+            double right = base.Show(score, left, top);
 
             return right;
         }
