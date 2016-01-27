@@ -10,7 +10,7 @@ namespace Nutadore.Tests
         [TestMethod()]
         public void Test1()
         {
-            var sp = StaffPosition.CreateByLineNumber(5.5);
+            var sp = StaffPosition.ByLineNumber(5.5);
         }
     }
 }

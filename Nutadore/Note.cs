@@ -6,15 +6,14 @@ namespace Nutadore
     {
         public Letter letter;
         public Octave octave;
-        //public Staff.Type staffType;
-        //private ShowAt showAt;
+        public ShowAt showAt;
 
-        public Note(Letter letter, Octave octave, Staff.Type staffType = Staff.Type.Treble)
+        public Note(Letter letter, Octave octave, Staff.Type? preferredStaffType = null)
         {
             this.letter = letter;
             this.octave = octave;
             base.staffType = staffType;
-            base.staffPosition = CalculateStaffPosition();
+            base.staffPosition = CalculateStaffPosition(preferredStaffType);
         }
 
         public enum Letter {
@@ -41,7 +40,7 @@ namespace Nutadore
         }
 
         override public double Show(Score score, double left, double top)
-        {
+        {           
             base.code = "\x0055";
             top -= 57.5 * score.Magnification;
             double right = base.Show(score, left, top);
@@ -55,74 +54,78 @@ namespace Nutadore
         /// <param name="staffType">Na której pięciolinii basowej czy wiolinowej chcemy nutę. Nuty z od f do g1 mogą być umieszczane na obu.</param>
         /// <param name="considerOttava">Dla linii pomocniczych pokazujących położenie nut C w różnych oktawach nie chcemy ottawy.</param>
         /// <returns></returns>
-        public StaffPosition CalculateStaffPosition()
+        public StaffPosition CalculateStaffPosition(Staff.Type? preferredStaffType)
         {
             // na której linii leży dźwięk C z oktawy w której jest nuta
-            double lineNo = 0;
+            double lineNumber = 0;
             switch (octave)
             {
                 case Octave.SubContra:
                     // Wszystkie nuty z tej oktawy mogą leżeć tylko na pięciolinii basowej.
                     base.staffType = Staff.Type.Bass;
-                    lineNo = -9.0;
+                    lineNumber = -9.0;
                     break;
                 case Octave.Contra:
                     // wszystkie nuty z tej oktawy mogą leżeć tylko na pięciolinii basowej
                     base.staffType = Staff.Type.Bass;
-                    lineNo = -5.5;
+                    lineNumber = -5.5;
                     break;
                 case Octave.Great:
                     // wszystkie nuty z tej oktawy mogą leżeć tylko na pięciolinii basowej
                     base.staffType = Staff.Type.Bass;
-                    lineNo = -2.0;
+                    lineNumber = -2.0;
                     break;
                 case Octave.Small:
-                    // wszystkie nuty z tej oktawy mogą leżeć na pięciolinii basowej
+                    // domyślnie wszystkie nuty z tej oktawy leżą na pięciolinii basowej
                     // nuty od F włącznie mogą leżeć na pięciolini wiolinowej
-                    if (base.staffType == Staff.Type.Bass || 
-                        base.staffType == Staff.Type.Treble && letter < Letter.F)
+                    if (preferredStaffType == null ||
+                        preferredStaffType == Staff.Type.Bass || 
+                        preferredStaffType == Staff.Type.Treble && letter < Letter.F)
                     {
                         base.staffType = Staff.Type.Bass;
-                        lineNo = 1.5f;
+                        lineNumber = 1.5f;
                     }
                     else
                     {
-                        lineNo = -4.5f;
+                        base.staffType = Staff.Type.Treble;
+                        lineNumber = -4.5f;
                     }
                     break;
                 case Octave.OneLined:
-                    // wszystkie nuty z tej oktawy mogą leżeć na pięciolinii wiolinowej
+                    // domyślnie wszystkie nuty z tej oktawy leżą na pięciolinii wiolinowej
                     // nuty do G włącznie mogą leżeć na pięciolini basowej
-                    if (base.staffType == Staff.Type.Treble || 
-                        base.staffType == Staff.Type.Bass && letter > Letter.G)
+                    if (preferredStaffType == null ||
+                        preferredStaffType == Staff.Type.Treble || 
+                        preferredStaffType == Staff.Type.Bass && letter > Letter.G)
                     {
                         base.staffType = Staff.Type.Treble;
-                        lineNo = -1.0f;
+                        lineNumber = -1.0f;
                     }
                     else
                     {
-                        lineNo = 5.0f;
+                        base.staffType = Staff.Type.Bass;
+                        lineNumber = 5.0f;
                     }
                     break;
                 case Octave.TwoLined:
                     // wszystkie nuty z tej oktawy mogą leżeć tylko na pięciolinii wiolinowej
                     base.staffType = Staff.Type.Treble;
-                    lineNo = 2.5f;
+                    lineNumber = 2.5f;
                     break;
                 case Octave.ThreeLined:
                     // wszystkie nuty z tej oktawy mogą leżeć tylko na pięciolinii wiolinowej
                     base.staffType = Staff.Type.Treble;
-                    lineNo = 6.0f;
+                    lineNumber = 6.0f;
                     break;
                 case Octave.FourLined:
                     // wszystkie nuty z tej oktawy mogą leżeć tylko na pięciolinii wiolinowej
                     base.staffType = Staff.Type.Treble;
-                    lineNo = 9.5f;
+                    lineNumber = 9.5f;
                     break;
                 case Octave.FiveLined:
                     // wszystkie nuty z tej oktawy mogą leżeć tylko na pięciolinii wiolinowej
                     base.staffType = Staff.Type.Treble;
-                    lineNo = 13.0f;
+                    lineNumber = 13.0f;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("octave", octave, "Nieobsłużona oktawa.");
@@ -132,22 +135,22 @@ namespace Nutadore
             if (octave == Octave.FourLined && letter >= Letter.D ||
                 octave > Octave.FourLined)
             {
-                // tak, na pięcionii wiolinowej będzie o oktawę niżej
-                //showAt = ShowAt.OctaveBelow;
-                lineNo -= 3.5f;
+                // tak, na pięcionii wiolinowej rysujemy o oktawę niżej
+                showAt = ShowAt.OctaveBelow;
+                lineNumber -= 3.5f;
             }
             if (octave == Octave.Contra && letter <= Letter.E ||
                 octave < Octave.Contra)
             {
-                // tak, na pięciolinii basowej będzie o oktawę wyżej
-                //showAt = ShowAt.OctaveAbove;
-                lineNo += 3.5f;
+                // tak, na pięciolinii basowej rysujemy o oktawę wyżej
+                showAt = ShowAt.OctaveAbove;
+                lineNumber += 3.5f;
             }
 
             // dodajemy przesunięcie względem dzięku C
-            lineNo += (double)letter / 2;
+            lineNumber += (double)letter / 2;
 
-            return StaffPosition.CreateByLineNumber(lineNo);
+            return StaffPosition.ByLineNumber(lineNumber);
         }
 
         public enum ShowAt

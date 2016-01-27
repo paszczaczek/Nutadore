@@ -6,10 +6,10 @@ namespace Nutadore
 {
     public class Staff
     {
-        private readonly static double distanceBetweenLines = 10;
-        private readonly static double distanceBetweenScaleSigns = 1;
-        private readonly static double distanceBetweenSigns = 10;
-        private readonly static double marginLeft = 10;
+        static private readonly double marginLeft = 10;
+        static private readonly double distanceBetweenLines = 10;
+        static private readonly double distanceBetweenScaleSigns = 1;
+        static private readonly double distanceBetweenSigns = 15;
 
         private Type type;
         private double left;
@@ -32,9 +32,11 @@ namespace Nutadore
             top = staffTop;
 
             // Dodaję pięciolinię.
-            for (var staffLine = StaffPosition.CreateByLine(1); staffLine <= StaffPosition.CreateByLine(5); staffLine++)
+            for (var staffPosition = StaffPosition.ByLine(1); 
+                 staffPosition <= StaffPosition.ByLine(5); 
+                 staffPosition.AddLine(1))
             {
-                double y = StaffPositionToY(score, staffLine, type);
+                double y = StaffPositionToY(score, staffPosition, type);
                 Line shapeLine = new Line
                 {
                     X1 = staffLeft,
@@ -49,7 +51,7 @@ namespace Nutadore
 
             // Dodaję klucz.
             Clef clef = new Clef((Clef.Type)type);
-            double clefTop = StaffPositionToY(score, StaffPosition.CreateByLine(2), type);
+            double clefTop = StaffPositionToY(score, StaffPosition.ByLine(2), type);
             double clefRight = clef.Show(score, staffLeft, clefTop);
 
             // Dodaję znaki przykluczowe.
@@ -72,33 +74,75 @@ namespace Nutadore
             // TODO: wyznaczyć na podstwie wysokości nuty
             //StaffPosition staffPosition = StaffPosition.Above.Line(1);
             //double signTop = StaffPositionToY(score, staffPosition, type);
-            double signTop = StaffPositionToY(score, sign.staffPosition, type);
-            left = sign.Show(score, left, signTop);
+            double top = StaffPositionToY(score, sign.staffPosition, type);
+            double right = sign.Show(score, left, top);
+            double width = right - left;
 
             // Czy nuta zmieściła sie na pięcolinii?
-            if (left >= score.canvas.ActualWidth - marginLeft)
+            if (right >= score.canvas.ActualWidth - marginLeft)
             {
                 // Nie zmieściła się - narysujemy ją na następnej pieciolinii.
                 sign.Clear();
                 return -1;
             }
-            else
+
+            // jesli to nuta to może trzeba dorysować linie dodane?
+            if (sign is Note)
             {
-                // Zmieściła się.
-                left += distanceBetweenSigns;
-                return left;
+                if (sign.staffPosition <= StaffPosition.ByLagerBelow(1))
+                {
+                    // trzeba dorysować linie dodane dolne
+                    for (var staffPosition = StaffPosition.ByLagerBelow(1);
+                         staffPosition >= sign.staffPosition; 
+                         staffPosition.SubstractLine(1))
+                    {
+                        double y = StaffPositionToY(score, staffPosition, type);
+                        Line lagerLine = new Line
+                        {
+                            X1 = left - width * 0.3,
+                            X2 = right + width * 0.3,
+                            Y1 = y,
+                            Y2 = y,
+                            Stroke = Brushes.Black,
+                            StrokeThickness = 0.5
+                        };
+                        score.canvas.Children.Add(lagerLine);
+                    }
+                }
+                if (sign.staffPosition >= StaffPosition.ByLagerAbove(1))
+                {
+                    // trzeba dorysować linie dodane górne
+                    for (var staffPosition = StaffPosition.ByLagerAbove(1);
+                         staffPosition <= sign.staffPosition;
+                         staffPosition.AddLine(1))
+                    {
+                        double y = StaffPositionToY(score, staffPosition, type);
+                        Line lagerLine = new Line
+                        {
+                            X1 = left - width * 0.3,
+                            X2 = right + width * 0.3,
+                            Y1 = y,
+                            Y2 = y,
+                            Stroke = Brushes.Black,
+                            StrokeThickness = 0.5
+                        };
+                        score.canvas.Children.Add(lagerLine);
+                    }
+                }
+
             }
+
+            // Zmieściła się.
+            right += distanceBetweenSigns;
+            return right;
         }
 
-        public double StaffPositionToY(Score score, StaffPosition staffLine, Type staffType)
+        public double StaffPositionToY(Score score, StaffPosition staffPosition, Type staffType)
         {
             return
                 // tu będzie piąta linia
                 top * score.Magnification
-                // pięciolinia wiolinowa lub basowa
-                //+ (int)staffType * (5 + 1) * distanceBetweenLines * score.Magnification
-                // numer linii
-                + (4 - staffLine.LineNumber) * distanceBetweenLines * score.Magnification;
+                + (4 - staffPosition.LineNumber) * distanceBetweenLines * score.Magnification;
         }
     }
 }

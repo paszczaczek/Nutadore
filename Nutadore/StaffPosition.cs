@@ -5,19 +5,19 @@ namespace Nutadore
     public class StaffPosition : IComparable
     {
         #region Publiczne konstruktory statyczne.
-        static public StaffPosition CreateByLine(int baseLineNo, bool above = false)
+        static public StaffPosition ByLine(int baseLineNo, bool above = false)
         {
             CheckLineNo(baseLineNo, 1, 5, "linii");
             return new StaffPosition(LineName.Base1 + baseLineNo - 1, above);
         }
 
-        static public StaffPosition CreateByLagerAbove(int lagerAboveNo, bool above = false)
+        static public StaffPosition ByLagerAbove(int lagerAboveNo, bool above = false)
         {
             CheckLineNo(lagerAboveNo, 1, 5, "linii dodanej górnej");
-            return new StaffPosition(LineName.Base1 + 5 + lagerAboveNo, above);
+            return new StaffPosition(LineName.Base1 + 4 + lagerAboveNo, above);
         }
 
-        static public StaffPosition CreateByLagerBelow(int lagerBelowNo, bool above = false)
+        static public StaffPosition ByLagerBelow(int lagerBelowNo, bool above = false)
         {
             CheckLineNo(lagerBelowNo, 1, 6, "linii dodanej dolnej");
             return new StaffPosition(LineName.Base1 - lagerBelowNo, above);
@@ -31,7 +31,7 @@ namespace Nutadore
                     lineNo, string.Format("Numer {0} pieciolinii musi być liczba {1}..{2}", lineName, lineNoMin, lineNoMax));
         }
 
-        static public StaffPosition CreateByLineNumber(double lineNumber)
+        static public StaffPosition ByLineNumber(double lineNumber)
         {
             double lineNumberMin = (int)LineName.LagerBelow6;
             double lineNumberMax = (int)LineName.LagerAbove5 + 0.5;
@@ -107,10 +107,16 @@ namespace Nutadore
         {
             StaffPosition staffPosition = obj as StaffPosition;
             if (this.lineName == staffPosition.lineName)
-                return 0;
-            if (this.lineName < staffPosition.lineName)
+            {
+                if (this.lineAbove == staffPosition.lineAbove)
+                    return 0;
+                if (this.lineAbove && !staffPosition.lineAbove)
+                    return 1;
                 return -1;
-            return 1;
+            }
+            if (this.lineName > staffPosition.lineName)
+                return 1;
+            return -1;
         }
 
         static public bool operator <=(StaffPosition staffPosition1, StaffPosition staffPosition2)
@@ -123,10 +129,16 @@ namespace Nutadore
             return staffPosition1.CompareTo(staffPosition2) >= 0;
         }
 
-        static public StaffPosition operator ++(StaffPosition staffPosition)
+        public StaffPosition AddLine(int count)
         {
-            staffPosition.lineName++;
-            return staffPosition;
+            lineName += count;
+            return this;
+        }
+
+        public StaffPosition SubstractLine(int count)
+        {
+            lineName -= count;
+            return this;
         }
         #endregion
     }

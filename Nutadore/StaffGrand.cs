@@ -9,7 +9,7 @@ namespace Nutadore
 {
     public class StaffGrand
     {
-        private readonly static double marginTop = 20;
+        private readonly static double marginTop = 40+100;
         private readonly static double distanceBetweenStaffs = 80;
 
         private double top;
