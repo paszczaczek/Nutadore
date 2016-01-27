@@ -11,13 +11,13 @@ namespace Nutadore
             return new StaffPosition(LineName.Base1 + baseLineNo - 1, above);
         }
 
-        static public StaffPosition ByLagerAbove(int lagerAboveNo, bool above = false)
+        static public StaffPosition ByLegerAbove(int lagerAboveNo, bool above = false)
         {
             CheckLineNo(lagerAboveNo, 1, 5, "linii dodanej górnej");
             return new StaffPosition(LineName.Base1 + 4 + lagerAboveNo, above);
         }
 
-        static public StaffPosition ByLagerBelow(int lagerBelowNo, bool above = false)
+        static public StaffPosition ByLegerBelow(int lagerBelowNo, bool above = false)
         {
             CheckLineNo(lagerBelowNo, 1, 6, "linii dodanej dolnej");
             return new StaffPosition(LineName.Base1 - lagerBelowNo, above);
@@ -33,8 +33,8 @@ namespace Nutadore
 
         static public StaffPosition ByLineNumber(double lineNumber)
         {
-            double lineNumberMin = (int)LineName.LagerBelow6;
-            double lineNumberMax = (int)LineName.LagerAbove5 + 0.5;
+            double lineNumberMin = (int)LineName.LegerBelow6;
+            double lineNumberMax = (int)LineName.LegerAbove5 + 0.5;
             double remainder = lineNumber % 1;
             if (lineNumber < lineNumberMin ||
                 lineNumber > lineNumberMax ||
@@ -70,22 +70,22 @@ namespace Nutadore
 
         public enum LineName
         {
-            LagerBelow6 = -6,
-            LagerBelow5 = -5,
-            LagerBelow4 = -4,
-            LagerBelow3 = -3,
-            LagerBelow2 = -2,
-            LagerBelow1 = -1,
+            LegerBelow6 = -6,
+            LegerBelow5 = -5,
+            LegerBelow4 = -4,
+            LegerBelow3 = -3,
+            LegerBelow2 = -2,
+            LegerBelow1 = -1,
             Base1 = 0,
             Base2 = 1,
             Base3 = 2,
             Base4 = 3,
             Base5 = 4,
-            LagerAbove1 = 5,
-            LagerAbove2 = 6,
-            LagerAbove3 = 7,
-            LagerAbove4 = 8,
-            LagerAbove5 = 9
+            LegerAbove1 = 5,
+            LegerAbove2 = 6,
+            LegerAbove3 = 7,
+            LegerAbove4 = 8,
+            LegerAbove5 = 9
         }
 
         private LineName lineName;

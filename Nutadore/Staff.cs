@@ -89,10 +89,10 @@ namespace Nutadore
             // jesli to nuta to może trzeba dorysować linie dodane?
             if (sign is Note)
             {
-                if (sign.staffPosition <= StaffPosition.ByLagerBelow(1))
+                if (sign.staffPosition <= StaffPosition.ByLegerBelow(1))
                 {
                     // trzeba dorysować linie dodane dolne
-                    for (var staffPosition = StaffPosition.ByLagerBelow(1);
+                    for (var staffPosition = StaffPosition.ByLegerBelow(1);
                          staffPosition >= sign.staffPosition; 
                          staffPosition.SubstractLine(1))
                     {
@@ -109,10 +109,10 @@ namespace Nutadore
                         score.canvas.Children.Add(lagerLine);
                     }
                 }
-                if (sign.staffPosition >= StaffPosition.ByLagerAbove(1))
+                if (sign.staffPosition >= StaffPosition.ByLegerAbove(1))
                 {
                     // trzeba dorysować linie dodane górne
-                    for (var staffPosition = StaffPosition.ByLagerAbove(1);
+                    for (var staffPosition = StaffPosition.ByLegerAbove(1);
                          staffPosition <= sign.staffPosition;
                          staffPosition.AddLine(1))
                     {
