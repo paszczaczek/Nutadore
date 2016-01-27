@@ -10,6 +10,7 @@ namespace Nutadore
     public class StaffGrand
     {
         private readonly static double marginTop = 20;
+        private readonly static double distanceBetweenStaffs = 80;
 
         private double top;
         private Staff trebleStaff;
@@ -35,9 +36,9 @@ namespace Nutadore
 
             // Rysuję klucz basowy.
             bassStaff = new Staff(Staff.Type.Bass);
-            double bassStaffCursor = bassStaff.Show(score, staffLeft, top + marginTop);
+            double bassStaffCursor = bassStaff.Show(score, staffLeft, top + marginTop + distanceBetweenStaffs);
 
-            // Wyznaczam połoznenie kursora na GrandStaff
+            // Wyznaczam połoznenie kursora na GrandStaff.
             cursor 
                 = trebleStaffCursor > bassStaffCursor
                 ? trebleStaffCursor
@@ -48,7 +49,7 @@ namespace Nutadore
             foreach (Sign sign in signsNotShown)
             {
                 Staff staff
-                    = true  // TODO: na którym kluczu rysować nutę
+                    = sign.staffType == Staff.Type.Treble 
                     ? trebleStaff
                     : bassStaff;
                 cursor = staff.ShowSign(score, sign, cursor);
@@ -98,12 +99,5 @@ namespace Nutadore
             // zwracam miejsce w którym kończy sie klamra i będa rozpoczynały sie pięciolinie
             return braceWidth - braceOffestX;
         }
-
-        //public bool Add(Score score, Sign sign)
-        //{
-        //    // TODO: która pięcilinia
-        //    cursor = trebleStaff.ShowSign(score, sign, cursor);
-        //    return true;
-        //}
     }
 }

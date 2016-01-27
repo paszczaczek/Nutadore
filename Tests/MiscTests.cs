@@ -8,13 +8,9 @@ namespace Nutadore.Tests
     public class MiscTests
     {
         [TestMethod()]
-        public void StaffLineTest()
+        public void Test1()
         {
-            /*
-            DoubleStaff.Line line = DoubleStaff.Line.Base(1);
-            DoubleStaff.Line.Name name = line.name;
-            int lineNo = line.Number;
-            */
+            var sp = StaffPosition.CreateByLineNumber(5.5);
         }
     }
 }

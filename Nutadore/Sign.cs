@@ -7,7 +7,8 @@ namespace Nutadore
 {
     abstract public class Sign
     {
-        public StaffPosition staffPosition;
+        public StaffPosition staffPosition; // = StaffPosition.CreateByLine(1);
+        public Staff.Type staffType;
 
         protected string code;
         protected UIElement label;

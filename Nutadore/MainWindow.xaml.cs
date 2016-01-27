@@ -28,9 +28,10 @@ namespace Nutadore
 
             score = new Score(canvas);
             score.scale = new Scale(Scale.Based.C, Scale.Type.Minor);
-            for (int i = 0; i < 10; i++)
-                score.Add(new Note());
-            //score.Show();
+            for (int i = 0; i < 8; i++)
+                score.Add(new Note(Note.Letter.C + i, Note.Octave.Small, Staff.Type.Bass));
+            for (int i = 0; i < 8; i++)
+                score.Add(new Note(Note.Letter.C + i, Note.Octave.OneLined, Staff.Type.Treble));
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)

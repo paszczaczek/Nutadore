@@ -1,62 +1,74 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Nutadore
 {
     public class StaffPosition : IComparable
     {
         #region Publiczne konstruktory statyczne.
-        static public StaffPosition Line(int line)
+        static public StaffPosition CreateByLine(int baseLineNo, bool above = false)
         {
-            if (line < 1 || line > 5)
-                throw new ArgumentOutOfRangeException("line", line, "Numer linii pieciolinii musi był liczbą 1..5");
-            return new StaffPosition(Name.Base1 + line - 1, false);
+            CheckLineNo(baseLineNo, 1, 5, "linii");
+            return new StaffPosition(LineName.Base1 + baseLineNo - 1, above);
         }
 
-        static public StaffPosition LagerAbove(int line)
+        static public StaffPosition CreateByLagerAbove(int lagerAboveNo, bool above = false)
         {
-            if (line < 1 || line > 5)
-                throw new ArgumentOutOfRangeException("line", line, "Numer linii dodanej górnej pieciolinii musi być liczba 1..5");
-            return new StaffPosition(Name.Base1 + 5 + line, false);
+            CheckLineNo(lagerAboveNo, 1, 5, "linii dodanej górnej");
+            return new StaffPosition(LineName.Base1 + 5 + lagerAboveNo, above);
         }
 
-        static public StaffPosition LagerBelow(int line)
+        static public StaffPosition CreateByLagerBelow(int lagerBelowNo, bool above = false)
         {
-            if (line < 1 || line > 6)
-                throw new ArgumentOutOfRangeException("line", line, "Numer linii dodanej dolnej pieciolinii musi być liczba 1..6");
-            return new StaffPosition(Name.Base1 - line, false);
+            CheckLineNo(lagerBelowNo, 1, 6, "linii dodanej dolnej");
+            return new StaffPosition(LineName.Base1 - lagerBelowNo, above);
         }
 
-        public class Above
+        static private void CheckLineNo(int lineNo, int lineNoMin, int lineNoMax, string lineName)
         {
-            static public StaffPosition Line(int line)
+            if (lineNo < lineNoMin || lineNo > lineNoMax)
+                throw new ArgumentOutOfRangeException(
+                    "line", 
+                    lineNo, string.Format("Numer {0} pieciolinii musi być liczba {1}..{2}", lineName, lineNoMin, lineNoMax));
+        }
+
+        static public StaffPosition CreateByLineNumber(double lineNumber)
+        {
+            double lineNumberMin = (int)LineName.LagerBelow6;
+            double lineNumberMax = (int)LineName.LagerAbove5 + 0.5;
+            double remainder = lineNumber % 1;
+            if (lineNumber < lineNumberMin ||
+                lineNumber > lineNumberMax ||
+                remainder != 0 && Math.Abs(remainder) != 0.5)
             {
-                if (line < 1 || line > 5)
-                    throw new ArgumentOutOfRangeException("line", line, "Numer linii pieciolinii musi był liczbą 1..5");
-                return new StaffPosition(Name.Base1 + line - 1, true);
+                string message = string.Format(
+                    "Numeracja wewnętrzna linii pięciolinii musi być liczą {0}..{1} podzielną przez 1 lub 0.5",
+                    lineNumberMin, lineNumberMax);
+                throw new ArgumentOutOfRangeException("number", lineNumber, message);
             }
 
-            static public StaffPosition LagerAbove(int line)
+            LineName lineName;
+            bool lineAbove;
+            if (remainder == 0)
             {
-                if (line < 1 || line > 5)
-                    throw new ArgumentOutOfRangeException("line", line, "Numer linii dodanej górnej pieciolinii musi być liczba 1..5");
-                return new StaffPosition(Name.Base1 + 5 + line, true);
+                lineName = (LineName)(int)lineNumber;
+                lineAbove = false;
+            }
+            else if (remainder > 0)
+            {
+                lineName = (LineName)(int)lineNumber;
+                lineAbove = true;
+            }
+            else // remainder < 0
+            {
+                lineName = (LineName)(int)(lineNumber - 1);
+                lineAbove = true;
             }
 
-            static public StaffPosition LagerBelow(int line)
-            {
-                if (line < 1 || line > 6)
-                    throw new ArgumentOutOfRangeException("line", line, "Numer linii dodanej dolnej pieciolinii musi być liczba 1..6");
-                return new StaffPosition(Name.Base1 - line, true);
-            }
+            return new StaffPosition(lineName, lineAbove);
         }
         #endregion
 
-        public enum Name
+        public enum LineName
         {
             LagerBelow6 = -6,
             LagerBelow5 = -5,
@@ -76,45 +88,46 @@ namespace Nutadore
             LagerAbove5 = 9
         }
 
-        private Name name;
-        private bool above;
+        private LineName lineName;
+        private bool lineAbove;
+        public double LineNumber
+        {
+            get { return (double)lineName + (lineAbove ? 0.5 : 0.0); }
+        }
 
         // Konstruktor prywatny
-        private StaffPosition(Name name, bool above)
+        private StaffPosition(LineName lineName, bool lineAbove)
         {
-            this.name = name;
-            this.above = above;
+            this.lineName = lineName;
+            this.lineAbove = lineAbove;
         }
-
-        public double ToDouble()
-        {
-            return (double)name + (above ? 0.5 : 0.0);
-        }
-
+        
+        #region Funkcje do obsługi petli for()
         public int CompareTo(object obj)
         {
-            StaffPosition line = obj as StaffPosition;
-            if (name == line.name)
+            StaffPosition staffPosition = obj as StaffPosition;
+            if (this.lineName == staffPosition.lineName)
                 return 0;
-            if (name < line.name)
+            if (this.lineName < staffPosition.lineName)
                 return -1;
             return 1;
         }
 
-        static public bool operator <=(StaffPosition line1, StaffPosition line2)
+        static public bool operator <=(StaffPosition staffPosition1, StaffPosition staffPosition2)
         {
-            return line1.CompareTo(line2) <= 0;
+            return staffPosition1.CompareTo(staffPosition2) <= 0;
         }
 
-        static public bool operator >=(StaffPosition line1, StaffPosition line2)
+        static public bool operator >=(StaffPosition staffPosition1, StaffPosition staffPosition2)
         {
-            return line1.CompareTo(line2) >= 0;
+            return staffPosition1.CompareTo(staffPosition2) >= 0;
         }
 
-        static public StaffPosition operator ++(StaffPosition line)
+        static public StaffPosition operator ++(StaffPosition staffPosition)
         {
-            line.name++;
-            return line;
+            staffPosition.lineName++;
+            return staffPosition;
         }
+        #endregion
     }
 }

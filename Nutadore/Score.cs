@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Ink;
+using System.Windows.Media;
 using System.Windows.Shapes;
 
 namespace Nutadore
@@ -20,6 +21,7 @@ namespace Nutadore
         public Score(Canvas canvas)
         {
             this.canvas = canvas;
+            canvas.ClipToBounds = true;
         }
 
         public void Add(Sign sign)
@@ -52,6 +54,7 @@ namespace Nutadore
             {
                 // nie zmieściło się, dokończymy na kolejnej
                 top += distanceBetweenStaffGrands;
+                // jeśli brakuje miejsca w pionie, to przerwyamy
                 if (top > canvas.ActualHeight)
                     break;
             }

@@ -19,13 +19,13 @@ namespace Nutadore
         public Sign[] Signs()
         {
             return new Sign[] {
-                new Sharp(StaffPosition.Line(5)),
-                new Sharp(StaffPosition.Above.Line(3)),
-                new Sharp(StaffPosition.Above.Line(5)),
-                new Sharp(StaffPosition.Line(4)),
-                new Sharp(StaffPosition.Above.Line(2)),
-                new Sharp(StaffPosition.Above.Line(4)),
-                new Sharp(StaffPosition.Line(3))
+                new Sharp(StaffPosition.CreateByLine(5)),
+                new Sharp(StaffPosition.CreateByLine(3, true)),
+                new Sharp(StaffPosition.CreateByLine(5, true)),
+                new Sharp(StaffPosition.CreateByLine(4)),
+                new Sharp(StaffPosition.CreateByLine(2, true)),
+                new Sharp(StaffPosition.CreateByLine(4, true)),
+                new Sharp(StaffPosition.CreateByLine(3))
             };
         }
     }

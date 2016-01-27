@@ -32,7 +32,7 @@ namespace Nutadore
             top = staffTop;
 
             // Dodaję pięciolinię.
-            for (var staffLine = StaffPosition.Line(1); staffLine <= StaffPosition.Line(5); staffLine++)
+            for (var staffLine = StaffPosition.CreateByLine(1); staffLine <= StaffPosition.CreateByLine(5); staffLine++)
             {
                 double y = StaffPositionToY(score, staffLine, type);
                 Line shapeLine = new Line
@@ -49,7 +49,7 @@ namespace Nutadore
 
             // Dodaję klucz.
             Clef clef = new Clef((Clef.Type)type);
-            double clefTop = StaffPositionToY(score, StaffPosition.Line(2), type);
+            double clefTop = StaffPositionToY(score, StaffPosition.CreateByLine(2), type);
             double clefRight = clef.Show(score, staffLeft, clefTop);
 
             // Dodaję znaki przykluczowe.
@@ -62,7 +62,7 @@ namespace Nutadore
                     + distanceBetweenScaleSigns * score.Magnification;
             }
 
-            // zwracam miejsce w którym mozna umieszczać następny znak
+            // Zwracam miejsce w którym mozna umieszczać następny znak
             return signLeft + distanceBetweenSigns;
         }
 
@@ -70,20 +70,21 @@ namespace Nutadore
         {
             // TODO: tak naprawdę sign będzie kolekcją zawierająca akordy wiolinowe i basowe
             // TODO: wyznaczyć na podstwie wysokości nuty
-            StaffPosition staffPosition = StaffPosition.Above.Line(1);
-            double signTop = StaffPositionToY(score, staffPosition, type);
+            //StaffPosition staffPosition = StaffPosition.Above.Line(1);
+            //double signTop = StaffPositionToY(score, staffPosition, type);
+            double signTop = StaffPositionToY(score, sign.staffPosition, type);
             left = sign.Show(score, left, signTop);
 
-            // czy nuta zmieściła sie na pięcolinii
+            // Czy nuta zmieściła sie na pięcolinii?
             if (left >= score.canvas.ActualWidth - marginLeft)
             {
-                // nie zmieściła się, narysujemy ją na następnej pieciolinii
+                // Nie zmieściła się - narysujemy ją na następnej pieciolinii.
                 sign.Clear();
                 return -1;
             }
             else
             {
-                // zmieściła się
+                // Zmieściła się.
                 left += distanceBetweenSigns;
                 return left;
             }
@@ -95,9 +96,9 @@ namespace Nutadore
                 // tu będzie piąta linia
                 top * score.Magnification
                 // pięciolinia wiolinowa lub basowa
-                + (int)staffType * (5 + 1) * distanceBetweenLines * score.Magnification
+                //+ (int)staffType * (5 + 1) * distanceBetweenLines * score.Magnification
                 // numer linii
-                + (4 - staffLine.ToDouble()) * distanceBetweenLines * score.Magnification;
+                + (4 - staffLine.LineNumber) * distanceBetweenLines * score.Magnification;
         }
     }
 }
