@@ -12,11 +12,9 @@ namespace Nutadore
 {
     public class Score
     {
-        static private readonly double distanceBetweenStaffGrands = 150;
-
         public Canvas canvas;
         public Scale scale = new Scale(Scale.Based.C, Scale.Type.Major);
-        public  List<Sign> signs = new List<Sign>();
+        public List<Sign> signs = new List<Sign>();
 
         public Score(Canvas canvas)
         {
@@ -44,17 +42,19 @@ namespace Nutadore
 
         public void Show()
         {
-            // czyscimy partyturę
+            // Czyscimy partyturę.
             Clear();
 
-            // rusujemy podwójną pieciolinię 
+            // Rysujemy podwójną pieciolinię.
             StaffGrand staffGrand = new StaffGrand();
             double top = 0;
-            while (!staffGrand.Show(this, top))
+            double bottom;
+            while (!staffGrand.Show(this, top, out bottom))
             {
-                // nie zmieściło się, dokończymy na kolejnej
-                top += distanceBetweenStaffGrands;
-                // jeśli brakuje miejsca w pionie, to przerwyamy
+                // Nie wszystkie znaki zmieściły się na tej podwójnej pięciolinii.
+                // Pozostałe umieścimi na kolejnej podwójnej pięciolinii.
+                top = bottom;
+                // Jeśli wyszliśmy poza dolną krawędź canvas, to kończymy rysowanie.
                 if (top > canvas.ActualHeight)
                     break;
             }

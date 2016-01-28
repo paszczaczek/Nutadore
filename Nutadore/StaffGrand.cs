@@ -9,59 +9,78 @@ namespace Nutadore
 {
     public class StaffGrand
     {
-        private readonly static double marginTop = 40+100;
-        private readonly static double distanceBetweenStaffs = 80;
+        static private readonly double spaceAboveTrebleStaff = Staff.spaceBetweenLines * 7;
+        static private readonly double spaceBetweenTrebleAndBassStaff = Staff.spaceBetweenLines * 7;
+        static private readonly double spaceBelowBassStaff = Staff.spaceBetweenLines * /*7*/5;
 
         private double top;
         private Staff trebleStaff;
         private Staff bassStaff;
         private double cursor;
 
-        // Konstruktor.
-        public StaffGrand()
-        {
-        }
-
         // Rysuje pięciolinie i klamrę je spinającą.
-        public bool Show(Score score, double top)
+        public bool Show(Score score, double top, out double bottom)
         {
             this.top = top;
 
             // Rysuję klamrę.
-            double staffLeft = ShowBrace(score);
+            cursor = ShowBrace(score);
 
-            // Rysuję klucz wiolinowy.
+            // Rysuję pięciolinię wiolinową.
             trebleStaff = new Staff(Staff.Type.Treble);
-            double trebleStaffCursor = trebleStaff.Show(score, staffLeft, top + marginTop);
+            double trebleStaffTop = top + spaceAboveTrebleStaff;
+            double trebleStaffCursor = trebleStaff.Show(score, cursor, trebleStaffTop);
 
-            // Rysuję klucz basowy.
+            // Rysuję pięciolinię basową.
             bassStaff = new Staff(Staff.Type.Bass);
-            double bassStaffCursor = bassStaff.Show(score, staffLeft, top + marginTop + distanceBetweenStaffs);
+            double bassStaffTop 
+                = trebleStaffTop
+                + Staff.spaceBetweenLines * 4 
+                + spaceBetweenTrebleAndBassStaff;
+            double bassStaffCursor = bassStaff.Show(score, cursor, bassStaffTop);
 
-            // Wyznaczam połoznenie kursora na GrandStaff.
+            // Wyznaczam dolną krawędź StaffGrand.
+            bottom
+                = bassStaffTop
+                + Staff.spaceBetweenLines * 4
+                + spaceBelowBassStaff;
+
+            // Wyznaczam połoznenie kursora na StaffGrand.
             cursor 
                 = trebleStaffCursor > bassStaffCursor
                 ? trebleStaffCursor
                 : bassStaffCursor;
 
-            // Rusuję nienarysowane jeszcze na piecilinii nuty i inne znaki.
+            // Rysuję nienarysowane jeszcze na piecilinii nuty i inne znaki.
             List<Sign> signsNotShown = score.signs.FindAll(sign => !sign.Shown);
             foreach (Sign sign in signsNotShown)
             {
-                Staff staff
-                    = sign.staffType == Staff.Type.Treble 
-                    ? trebleStaff
-                    : bassStaff;
-                cursor = staff.ShowSign(score, sign, cursor);
+                // Rysuję znak na właściwej pięciolinii
+                if (sign is Bar)
+                {
+                    // Linie taktów muszą być na obu pięcioliniach.
+                    trebleStaff.ShowSign(score, sign, cursor);
+                    cursor = bassStaff.ShowSign(score, sign, cursor);
+                }
+                else
+                {
+                    // Pozostałe znaki na jednej pięciolinii.
+                    Staff staff
+                        = sign.staffType == Staff.Type.Treble
+                        ? trebleStaff
+                        : bassStaff;
+                    cursor = staff.ShowSign(score, sign, cursor);
+                }
 
-                // Czy wystarczyło tej pięciolinii dla wszystkich nut?
+                // Czy znak zmieścil się na pieciolinii?
                 if (cursor == -1)
                 {                    
-                    // nie - trzeba dodać kolejną pieciolinie
+                    // nie - trzeba go będzie umieścić na kolejnym SraffGrand
                     return false;
                 }
             }
 
+            // Wszystkie znaki zmieściły sie na tym StaffGrand
             return true;
         }
 
@@ -70,7 +89,8 @@ namespace Nutadore
         {
             // wyznaczam wymiary klamry
             string familyName = "MS Mincho";
-            double fontSize = 116 * score.Magnification;
+            //double fontSize = 116 * score.Magnification;
+            double fontSize = 176 * score.Magnification;
             FormattedText formattedText = new FormattedText(
                 "{", 
                 CultureInfo.GetCultureInfo("en-us"), 
@@ -91,7 +111,7 @@ namespace Nutadore
             brace.Padding = new Thickness(0, 0, 0, 0);
             brace.Margin = new Thickness(
                     -braceOffestX, 
-                    (top + marginTop) * score.Magnification - braceOffsetY, 
+                    (top + spaceAboveTrebleStaff) * score.Magnification - braceOffsetY, 
                     0, 
                     0);
             score.canvas.Children.Add(brace);

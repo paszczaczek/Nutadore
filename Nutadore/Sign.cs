@@ -11,8 +11,8 @@ namespace Nutadore
         public Staff.Type staffType;
 
         protected string code;
-        protected UIElement label;
-        private Score score;
+        protected UIElement uiElement;
+        protected Score score;
 
         virtual public double Show(Score score, double left, double top)
         {
@@ -21,7 +21,7 @@ namespace Nutadore
             const string familyName = "feta26";
             double fontSize = 42 * score.Magnification;
 
-            label = new Label
+            uiElement = new Label
             {
                 FontFamily = new FontFamily(familyName),
                 FontSize = fontSize,
@@ -34,7 +34,7 @@ namespace Nutadore
                     0,
                     0)
             };
-            score.canvas.Children.Add(label);
+            score.canvas.Children.Add(uiElement);
 
             FormattedText formattedText = new FormattedText(
                 code,
@@ -49,16 +49,16 @@ namespace Nutadore
 
         public void Clear()
         {
-            if (score != null && label != null)
+            if (score != null && uiElement != null)
             {
-                score.canvas.Children.Remove(label);
-                label = null;
+                score.canvas.Children.Remove(uiElement);
+                uiElement = null;
             }
         }
 
         public bool Shown
         {
-            get { return label != null; }
+            get { return uiElement != null; }
         }
     }
 }
