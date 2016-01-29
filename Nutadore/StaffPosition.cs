@@ -13,7 +13,7 @@ namespace Nutadore
 
         static public StaffPosition ByLegerAbove(int lagerAboveNo, bool above = false)
         {
-            CheckLineNo(lagerAboveNo, 1, 6, "linii dodanej górnej");
+            CheckLineNo(lagerAboveNo, 1, 8, "linii dodanej górnej");
             return new StaffPosition(LineName.Base1 + 4 + lagerAboveNo, above);
         }
 

@@ -1,4 +1,6 @@
-﻿using System.Windows.Media;
+﻿using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Shapes;
 
 namespace Nutadore
@@ -7,12 +9,16 @@ namespace Nutadore
     {
         static private readonly double marginLeft = 10;
         static public readonly double spaceBetweenLines = 10;
-        static private readonly double distanceBetweenScaleSigns = 1;
-        static private readonly double distanceBetweenSigns = 15;
+        static private readonly double spaceBetweenScaleSigns = 1;
+        static private readonly double spaceBetweenSigns = 15;
 
         private Type type;
         private double left;
         private double top;
+
+        Note.Perform perform = Note.Perform.AtPlace;
+        double performLeft;
+        double performRight;
 
         public enum Type
         {
@@ -60,11 +66,11 @@ namespace Nutadore
                 double signTop = StaffPositionToY(score, sign.staffPosition, type);
                 signLeft
                     = sign.Show(score, signLeft, signTop)
-                    + distanceBetweenScaleSigns * score.Magnification;
+                    + spaceBetweenScaleSigns * score.Magnification;
             }
 
             // Zwracam miejsce w którym mozna umieszczać następny znak
-            return signLeft + distanceBetweenSigns;
+            return signLeft + spaceBetweenSigns;
         }
 
         public double ShowSign(Score score, Sign sign, double left)
@@ -74,17 +80,24 @@ namespace Nutadore
             double top = StaffPositionToY(score, sign.staffPosition, type);
             double right = sign.Show(score, left, top);
 
-            // Czy nuta zmieściła sie na pięcolinii?
+            // Czy znak zmieścił sie na pięcolinii?
             if (right >= score.canvas.ActualWidth - marginLeft)
             {
-                // Nie zmieściła się - narysujemy ją na następnej pieciolinii.
+                // Nie zmieścił się - narysujemy ją na następnej pieciolinii.
                 sign.Clear();
+
+                // Trzeba jeszcze narysować nienarysowane ottavy
+                if (perform != Note.Perform.AtPlace)
+                    ShowPerform(score);
+
                 return -1;
             }
 
             // Nuty mogą wymagać linii dodanych i znaków ottava
             if (sign is Note)
             {
+                Note note = sign as Note;
+
                 // Czy trzeba dorysować linie dodane?
                 double legerLeft = left - (right - left) * 0.2;
                 double legerRight = right + (right - left) * 0.2;
@@ -128,10 +141,25 @@ namespace Nutadore
                         score.canvas.Children.Add(lagerLine);
                     }
                 }
-                
-                // TODO wyłapywac początek i koniec ottavy!
-                // Czy trzeba dorysować znaki ottava?
-                Note note = sign as Note;
+
+                // Czy trzeba dorysować znaki zmiany wysokości wykonania
+#if true
+                Note noteNext = score.FindNextNote(sign);
+                bool performChanged = note.perform != perform;
+                bool performNew = performChanged && note.perform != Note.Perform.AtPlace;
+                bool performEnd = performChanged && perform != Note.Perform.AtPlace;
+                if (performEnd)
+                {
+                    ShowPerform(score);
+                    perform = Note.Perform.AtPlace;
+                }
+                if (performNew)
+                {
+                    perform = note.perform;
+                    performLeft = left;
+                }
+                performRight = right;
+#else
                 if (note.perform != Note.Perform.AtPlace)
                 {
                     double y;
@@ -162,12 +190,94 @@ namespace Nutadore
                     };
                     score.canvas.Children.Add(ottavaLine);
                 }
+#endif
+                //perform = note.perform;
             }
 
             // Zmieściła się.
-            right += distanceBetweenSigns;
-            
+            right += spaceBetweenSigns * score.Magnification;
+
             return right;
+        }
+
+        // Rusuje znak zmiany wysokości wykonania.
+        public void ShowPerform(Score score)
+        {
+            const double performHeight = 10;
+
+            // Czy trzeba coś dorysować?
+            double y;
+            double vertLineTop, verLineBottom;
+            double textTop;
+            string text;
+            switch (perform)
+            {
+                case Note.Perform.TwoOctaveHigher:
+                    // Tak, trzeba dorysować znak 15ma
+                    y = StaffPositionToY(score, StaffPosition.ByLegerAbove(3), type);
+                    vertLineTop = y;
+                    verLineBottom = y + performHeight;
+                    textTop = StaffPositionToY(score, StaffPosition.ByLegerAbove(5), type);
+                    text = "15ma";
+                    break;
+                case Note.Perform.OneOctaveHigher:
+                    // Tak, trzeba dorysować znak 8va.
+                    y = StaffPositionToY(score, StaffPosition.ByLegerAbove(6), type);
+                    vertLineTop = y;
+                    verLineBottom = y + performHeight;
+                    textTop = StaffPositionToY(score, StaffPosition.ByLegerAbove(8), type);
+                    text = "8va";
+                    break;
+                case Note.Perform.OneOctaveLower:
+                    // Tak, trzeba dorysować znak 8vb.
+                    y = StaffPositionToY(score, StaffPosition.ByLegerBelow(4), type);
+                    vertLineTop = y - performHeight;
+                    verLineBottom = y;
+                    textTop = StaffPositionToY(score, StaffPosition.ByLegerBelow(4), type);
+                    text = "8vb";
+                    break;
+                case Note.Perform.AtPlace:
+                default:
+                    // Nie trzeba nic rysować.
+                    return;
+            }
+
+            // Rysuję linię poziomą.
+            double delta = spaceBetweenSigns * score.Magnification / 2;
+            Line horizontalLine = new Line
+            {
+                X1 = performLeft - delta,
+                X2 = performRight + delta,
+                Y1 = y,
+                Y2 = y,
+                Stroke = Brushes.Black,
+                StrokeDashArray = new DoubleCollection { 7, 7 },
+                StrokeThickness = 0.5
+            };
+            score.canvas.Children.Add(horizontalLine);
+
+            // Rysuję linię pionową.
+            Line verticalLine = new Line
+            {
+                X1 = performRight + delta,
+                X2 = performRight + delta,
+                Y1 = vertLineTop,
+                Y2 = verLineBottom,
+                Stroke = Brushes.Black,
+                StrokeThickness = 0.5
+            };
+            score.canvas.Children.Add(verticalLine);
+
+            // Rysuję oznaczenie 8va, 8vb lub 15ma
+            Label name = new Label
+            {
+                //name.FontFamily = new FontFamily(familyName),
+                FontSize = 15 * score.Magnification,
+                Content = text,
+                Padding = new Thickness(0, 0, 0, 0),
+                Margin = new Thickness(performLeft - delta, textTop, 0, 0)
+            };
+            score.canvas.Children.Add(name);
         }
 
         public double StaffPositionToY(Score score, StaffPosition staffPosition, Type staffType)

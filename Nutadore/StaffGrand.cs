@@ -9,7 +9,7 @@ namespace Nutadore
 {
     public class StaffGrand
     {
-        static private readonly double spaceAboveTrebleStaff = Staff.spaceBetweenLines * 7;
+        static private readonly double spaceAboveTrebleStaff = Staff.spaceBetweenLines * 8;
         static private readonly double spaceBetweenTrebleAndBassStaff = Staff.spaceBetweenLines * 7;
         static private readonly double spaceBelowBassStaff = Staff.spaceBetweenLines * /*7*/5;
 
@@ -79,6 +79,10 @@ namespace Nutadore
                     return false;
                 }
             }
+
+            // Narysuj te elementy które nie można było dokończyć jak ottvy
+            trebleStaff.ShowPerform(score);
+            bassStaff.ShowPerform(score);
 
             // Wszystkie znaki zmieściły sie na tym StaffGrand
             return true;

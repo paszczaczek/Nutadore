@@ -27,6 +27,14 @@ namespace Nutadore
             signs.Add(sign);
         }
 
+        public Note FindNextNote(Sign sign)
+        {
+            int idx = signs.IndexOf(sign);
+            int idxNextNote = signs.FindIndex(idx, s => s is Note);
+
+            return signs[idxNextNote] as Note;
+        }
+
         private double magnification = 1.0;
         public double Magnification {
             get

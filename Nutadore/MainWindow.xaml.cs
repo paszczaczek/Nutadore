@@ -64,7 +64,6 @@ namespace Nutadore
             for (int i = 0; i < 1; i++)
                 score.Add(new Note(Note.Letter.C + i, Note.Octave.FiveLined));
             score.Add(new Bar());
-
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)

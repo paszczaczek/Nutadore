@@ -39,6 +39,14 @@ namespace Nutadore
             FiveLined
         }
 
+        public enum Perform
+        {
+            AtPlace,
+            OneOctaveHigher,
+            OneOctaveLower,
+            TwoOctaveHigher
+        }
+
         override public double Show(Score score, double left, double top)
         {           
             base.code = "\x0055";
@@ -157,14 +165,6 @@ namespace Nutadore
             lineNumber += (double)letter / 2;
 
             return StaffPosition.ByLineNumber(lineNumber);
-        }
-
-        public enum Perform
-        {
-            AtPlace,
-            OneOctaveHigher,
-            OneOctaveLower,
-            TwoOctaveHigher
         }
     }
 }
