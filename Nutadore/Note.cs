@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows.Media;
 
 namespace Nutadore
 {
@@ -50,6 +51,7 @@ namespace Nutadore
         override public double Show(Score score, double left, double top)
         {           
             base.code = "\x0055";
+            //base.brush = Brush;
             top -= 57.5 * score.Magnification;
             double right = base.Show(score, left, top);
 
@@ -62,7 +64,7 @@ namespace Nutadore
         /// <param name="staffType">Na której pięciolinii basowej czy wiolinowej chcemy nutę. Nuty z od f do g1 mogą być umieszczane na obu.</param>
         /// <param name="considerOttava">Dla linii pomocniczych pokazujących położenie nut C w różnych oktawach nie chcemy ottawy.</param>
         /// <returns></returns>
-        public StaffPosition CalculateStaffPosition(Staff.Type? preferredStaffType)
+        public StaffPosition CalculateStaffPosition(Staff.Type? preferredStaffType, bool withPerform = true)
         {
             // na której linii leży dźwięk C z oktawy w której jest nuta
             double lineNumber = 0;
@@ -140,31 +142,67 @@ namespace Nutadore
             }
 
             // Może nutę należy rysować w ottavie?
-            if (octave == Octave.FiveLined)
+            if (withPerform)
             {
-                // Tak, na pięcionii wiolinowej rysujemy o dwie oktawy niżej.
-                perform = Perform.TwoOctaveHigher;
-                lineNumber -= 3.5 * 2;
-            }
-            else if (octave == Octave.FourLined && letter >= Letter.D ||
-                octave > Octave.FourLined)
-            {
-                // Tak, na pięcionii wiolinowej rysujemy o oktawę niżej.
-                perform = Perform.OneOctaveHigher;
-                lineNumber -= 3.5;
-            }
-            else if (octave == Octave.Contra && letter <= Letter.E ||
-                octave < Octave.Contra)
-            {
-                // Tak, na pięciolinii basowej rysujemy o oktawę wyżej
-                perform = Perform.OneOctaveLower;
-                lineNumber += 3.5;
+                if (octave == Octave.FiveLined)
+                {
+                    // Tak, na pięcionii wiolinowej rysujemy o dwie oktawy niżej.
+                    perform = Perform.TwoOctaveHigher;
+                    lineNumber -= 3.5 * 2;
+                }
+                // else if (octave == Octave.FourLined && letter >= Letter.D ||
+                else if (octave == Octave.FourLined && letter >= Letter.C ||
+                    octave > Octave.FourLined)
+                {
+                    // Tak, na pięcionii wiolinowej rysujemy o oktawę niżej.
+                    perform = Perform.OneOctaveHigher;
+                    lineNumber -= 3.5;
+                }
+                else if (octave == Octave.Contra && letter <= Letter.E ||
+                    octave < Octave.Contra)
+                {
+                    // Tak, na pięciolinii basowej rysujemy o oktawę wyżej
+                    perform = Perform.OneOctaveLower;
+                    lineNumber += 3.5;
+                }
             }
 
             // dodajemy przesunięcie względem dzięku C
             lineNumber += (double)letter / 2;
 
             return StaffPosition.ByLineNumber(lineNumber);
+        }
+
+        private static SolidColorBrush brushRed    = new SolidColorBrush(Color.FromRgb(255, 204, 204)); //(255, 0, 0)
+        private static SolidColorBrush brushOrange = new SolidColorBrush(Color.FromRgb(255, 232, 178)); //(255, 165, 0);
+        private static SolidColorBrush brushYellow = new SolidColorBrush(Color.FromRgb(255, 255, 128)); //(255, 255, 0);
+        private static SolidColorBrush brushGreen  = new SolidColorBrush(Color.FromRgb(204, 255, 204)); //(0, 255, 0);
+        private static SolidColorBrush brushBlue   = new SolidColorBrush(Color.FromRgb(178, 179, 255)); //(0, 0, 255);
+        private static SolidColorBrush brushIndigo = new SolidColorBrush(Color.FromRgb(233, 204, 255)); //(75, 0, 130);
+        private static SolidColorBrush brushViolet = new SolidColorBrush(Color.FromRgb(255, 204, 255)); //(238, 130, 238);
+        public SolidColorBrush Brush
+        {
+            get
+            {
+                switch (letter)
+                {
+                    case Letter.C:
+                        return brushRed;
+                    case Letter.D:
+                        return brushOrange;
+                    case Letter.E:
+                        return brushYellow;
+                    case Letter.F:
+                        return brushGreen;
+                    case Letter.G:
+                        return brushBlue;
+                    case Letter.A:
+                        return brushIndigo;
+                    case Letter.H:
+                    default:
+                        return brushViolet;
+                }
+            }
         }
     }
 }

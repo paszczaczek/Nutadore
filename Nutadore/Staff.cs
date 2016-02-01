@@ -36,12 +36,37 @@ namespace Nutadore
             left = staffLeft;
             top = staffTop;
 
+            // Dodaję pomocnicze kolorowe linie.
+            //for (var octave = Note.Octave.Contra; octave <= Note.Octave.FourLined; octave++)
+            for (var octave = Note.Octave.Great; octave <= Note.Octave.ThreeLined; octave++)
+            {
+                for (var letter = Note.Letter.C; letter <= Note.Letter.H; letter++)
+                    //for (var letter = Note.Letter.C; letter <= Note.Letter.C; letter++)
+                {
+                    var note = new Note(letter, octave);
+                    var staffPosition = note.CalculateStaffPosition(type, false);
+                    if (note.staffType != type)
+                        continue;
+                    double y = StaffPositionToY(score, staffPosition);
+                    Line shapeLine = new Line
+                    {
+                        X1 = staffLeft,
+                        X2 = score.canvas.ActualWidth - marginLeft,
+                        Y1 = y,
+                        Y2 = y,
+                        Stroke = note.Brush,
+                        StrokeThickness = spaceBetweenLines / 3 * score.Magnification,
+                    };
+                    score.canvas.Children.Add(shapeLine);
+                }
+            }
+
             // Dodaję pięciolinię.
             for (var staffPosition = StaffPosition.ByLine(1); 
                  staffPosition <= StaffPosition.ByLine(5); 
                  staffPosition.AddLine(1))
             {
-                double y = StaffPositionToY(score, staffPosition, type);
+                double y = StaffPositionToY(score, staffPosition);
                 Line shapeLine = new Line
                 {
                     X1 = staffLeft,
@@ -49,21 +74,21 @@ namespace Nutadore
                     Y1 = y,
                     Y2 = y,
                     Stroke = Brushes.Black,
-                    StrokeThickness = 0.5
+                    StrokeThickness = 1
                 };
                 score.canvas.Children.Add(shapeLine);
             }
 
             // Dodaję klucz.
             Clef clef = new Clef((Clef.Type)type);
-            double clefTop = StaffPositionToY(score, StaffPosition.ByLine(2), type);
+            double clefTop = StaffPositionToY(score, StaffPosition.ByLine(2));
             double clefRight = clef.Show(score, staffLeft, clefTop);
 
             // Dodaję znaki przykluczowe.
             double signLeft = clefRight + 10 * score.Magnification;
             foreach (Sign sign in score.scale.Signs())
             {
-                double signTop = StaffPositionToY(score, sign.staffPosition, type);
+                double signTop = StaffPositionToY(score, sign.staffPosition);
                 signLeft
                     = sign.Show(score, signLeft, signTop)
                     + spaceBetweenScaleSigns * score.Magnification;
@@ -77,7 +102,7 @@ namespace Nutadore
         {
             // TODO: tak naprawdę sign będzie kolekcją zawierająca akordy wiolinowe i basowe
             // TODO: wyznaczyć na podstwie wysokości nuty
-            double top = StaffPositionToY(score, sign.staffPosition, type);
+            double top = StaffPositionToY(score, sign.staffPosition);
             double right = sign.Show(score, left, top);
 
             // Czy znak zmieścił sie na pięcolinii?
@@ -139,7 +164,7 @@ namespace Nutadore
                      staffPosition >= sign.staffPosition;
                      staffPosition.SubstractLine(1))
                 {
-                    double y = StaffPositionToY(score, staffPosition, type);
+                    double y = StaffPositionToY(score, staffPosition);
                     Line lagerLine = new Line
                     {
                         X1 = legerLeft,
@@ -159,7 +184,7 @@ namespace Nutadore
                      staffPosition <= sign.staffPosition;
                      staffPosition.AddLine(1))
                 {
-                    double y = StaffPositionToY(score, staffPosition, type);
+                    double y = StaffPositionToY(score, staffPosition);
                     Line lagerLine = new Line
                     {
                         X1 = legerLeft,
@@ -187,26 +212,26 @@ namespace Nutadore
             {
                 case Note.Perform.TwoOctaveHigher:
                     // Tak, trzeba dorysować znak 15ma
-                    y = StaffPositionToY(score, StaffPosition.ByLegerAbove(3), type);
+                    y = StaffPositionToY(score, StaffPosition.ByLegerAbove(3));
                     vertLineTop = y;
                     verLineBottom = y + performHeight;
-                    textTop = StaffPositionToY(score, StaffPosition.ByLegerAbove(5), type);
+                    textTop = StaffPositionToY(score, StaffPosition.ByLegerAbove(5));
                     text = "15ma";
                     break;
                 case Note.Perform.OneOctaveHigher:
                     // Tak, trzeba dorysować znak 8va.
-                    y = StaffPositionToY(score, StaffPosition.ByLegerAbove(6), type);
+                    y = StaffPositionToY(score, StaffPosition.ByLegerAbove(6));
                     vertLineTop = y;
                     verLineBottom = y + performHeight;
-                    textTop = StaffPositionToY(score, StaffPosition.ByLegerAbove(8), type);
+                    textTop = StaffPositionToY(score, StaffPosition.ByLegerAbove(8));
                     text = "8va";
                     break;
                 case Note.Perform.OneOctaveLower:
                     // Tak, trzeba dorysować znak 8vb.
-                    y = StaffPositionToY(score, StaffPosition.ByLegerBelow(4), type);
+                    y = StaffPositionToY(score, StaffPosition.ByLegerBelow(4));
                     vertLineTop = y - performHeight;
                     verLineBottom = y;
-                    textTop = StaffPositionToY(score, StaffPosition.ByLegerBelow(4), type);
+                    textTop = StaffPositionToY(score, StaffPosition.ByLegerBelow(4));
                     text = "8vb";
                     break;
                 case Note.Perform.AtPlace:
@@ -253,7 +278,7 @@ namespace Nutadore
             score.canvas.Children.Add(name);
         }
 
-        public double StaffPositionToY(Score score, StaffPosition staffPosition, Type staffType)
+        public double StaffPositionToY(Score score, StaffPosition staffPosition)
         {
             return
                 // tu będzie piąta linia

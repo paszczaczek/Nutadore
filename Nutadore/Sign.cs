@@ -11,6 +11,7 @@ namespace Nutadore
         public Staff.Type staffType;
 
         protected string code;
+        protected Brush brush = Brushes.Black;
         protected UIElement uiElement;
         protected Score score;
 
@@ -26,6 +27,7 @@ namespace Nutadore
                 FontFamily = new FontFamily(familyName),
                 FontSize = fontSize,
                 Content = code,
+                Foreground = brush,
                 Padding = new Thickness(0, 0, 0, 0),
                 //Background = new SolidColorBrush(Colors.LightYellow),
                 Margin = new Thickness(

@@ -58,11 +58,7 @@ namespace Nutadore
             score.Add(new Bar());
 
             for (int i = 0; i < 7; i++)
-            {
                 score.Add(new Note(Note.Letter.C + i, Note.Octave.FourLined));
-                if (i==4)
-                    score.Add(new Note(Note.Letter.C, Note.Octave.FiveLined));
-            }
             score.Add(new Bar());
 
             for (int i = 0; i < 1; i++)
