@@ -29,41 +29,49 @@ namespace Nutadore
             score = new Score(canvas);
             score.scale = new Scale(Scale.Based.C, Scale.Type.Minor);
 
-            for (int i = 5; i < 7; i++)
-                score.Add(new Note(Note.Letter.C + i, Note.Octave.SubContra));
+
+            Chord chord = new Chord();
+            chord.Add(new Note(Note.Letter.C, Note.Octave.OneLined));
+            chord.Add(new Note(Note.Letter.E, Note.Octave.OneLined));
+            chord.Add(new Note(Note.Letter.G, Note.Octave.OneLined));
+            score.Add(chord);
             score.Add(new Bar());
 
-            for (int i = 0; i < 7; i++)
-                score.Add(new Note(Note.Letter.C + i, Note.Octave.Contra));
-            score.Add(new Bar());
+            //for (int i = 5; i < 7; i++)
+            //    score.Add(new Note(Note.Letter.C + i, Note.Octave.SubContra));
+            //score.Add(new Bar());
 
-            for (int i = 0; i < 7; i++)
-                score.Add(new Note(Note.Letter.C + i, Note.Octave.Great));
-            score.Add(new Bar());
+            //for (int i = 0; i < 7; i++)
+            //    score.Add(new Note(Note.Letter.C + i, Note.Octave.Contra));
+            //score.Add(new Bar());
 
-            for (int i = 0; i < 7; i++)
-                score.Add(new Note(Note.Letter.C + i, Note.Octave.Small));
-            score.Add(new Bar());
+            //for (int i = 0; i < 7; i++)
+            //    score.Add(new Note(Note.Letter.C + i, Note.Octave.Great));
+            //score.Add(new Bar());
 
-            for (int i = 0; i < 7; i++)
-                score.Add(new Note(Note.Letter.C + i, Note.Octave.OneLined));
-            score.Add(new Bar());
+            //for (int i = 0; i < 7; i++)
+            //    score.Add(new Note(Note.Letter.C + i, Note.Octave.Small));
+            //score.Add(new Bar());
 
-            for (int i = 0; i < 7; i++)
-                score.Add(new Note(Note.Letter.C + i, Note.Octave.TwoLined));
-            score.Add(new Bar());
+            //for (int i = 0; i < 7; i++)
+            //    score.Add(new Note(Note.Letter.C + i, Note.Octave.OneLined));
+            //score.Add(new Bar());
 
-            for (int i = 0; i < 7; i++)
-                score.Add(new Note(Note.Letter.C + i, Note.Octave.ThreeLined));
-            score.Add(new Bar());
+            //for (int i = 0; i < 7; i++)
+            //    score.Add(new Note(Note.Letter.C + i, Note.Octave.TwoLined));
+            //score.Add(new Bar());
 
-            for (int i = 0; i < 7; i++)
-                score.Add(new Note(Note.Letter.C + i, Note.Octave.FourLined));
-            score.Add(new Bar());
+            //for (int i = 0; i < 7; i++)
+            //    score.Add(new Note(Note.Letter.C + i, Note.Octave.ThreeLined));
+            //score.Add(new Bar());
 
-            for (int i = 0; i < 1; i++)
-                score.Add(new Note(Note.Letter.C + i, Note.Octave.FiveLined));
-            score.Add(new Bar());
+            //for (int i = 0; i < 7; i++)
+            //    score.Add(new Note(Note.Letter.C + i, Note.Octave.FourLined));
+            //score.Add(new Bar());
+
+            //for (int i = 0; i < 1; i++)
+            //    score.Add(new Note(Note.Letter.C + i, Note.Octave.FiveLined));
+            //score.Add(new Bar());
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)

@@ -53,6 +53,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Chord.cs" />
     <Compile Include="Clef.cs" />
     <Compile Include="Note.cs" />
     <Compile Include="Scale.cs" />

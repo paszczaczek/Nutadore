@@ -50,7 +50,7 @@ namespace Nutadore
 
         override public double Show(Score score, double left, double top)
         {           
-            base.code = "\x0055";
+            base.code = "\x0056";
             //base.brush = Brush;
             top -= 57.5 * score.Magnification;
             double right = base.Show(score, left, top);
@@ -173,13 +173,6 @@ namespace Nutadore
             return StaffPosition.ByLineNumber(lineNumber);
         }
 
-        private static SolidColorBrush brushRed    = new SolidColorBrush(Color.FromRgb(255, 204, 204)); //(255, 0, 0)
-        private static SolidColorBrush brushOrange = new SolidColorBrush(Color.FromRgb(255, 232, 178)); //(255, 165, 0);
-        private static SolidColorBrush brushYellow = new SolidColorBrush(Color.FromRgb(255, 255, 128)); //(255, 255, 0);
-        private static SolidColorBrush brushGreen  = new SolidColorBrush(Color.FromRgb(204, 255, 204)); //(0, 255, 0);
-        private static SolidColorBrush brushBlue   = new SolidColorBrush(Color.FromRgb(178, 179, 255)); //(0, 0, 255);
-        private static SolidColorBrush brushIndigo = new SolidColorBrush(Color.FromRgb(233, 204, 255)); //(75, 0, 130);
-        private static SolidColorBrush brushViolet = new SolidColorBrush(Color.FromRgb(255, 204, 255)); //(238, 130, 238);
         public SolidColorBrush Brush
         {
             get
@@ -187,20 +180,20 @@ namespace Nutadore
                 switch (letter)
                 {
                     case Letter.C:
-                        return brushRed;
+                        return Brushes.Red;
                     case Letter.D:
-                        return brushOrange;
+                        return Brushes.Orange;
                     case Letter.E:
-                        return brushYellow;
+                        return Brushes.Yellow;
                     case Letter.F:
-                        return brushGreen;
+                        return Brushes.Green;
                     case Letter.G:
-                        return brushBlue;
+                        return Brushes.Blue;
                     case Letter.A:
-                        return brushIndigo;
+                        return Brushes.Indigo;
                     case Letter.H:
                     default:
-                        return brushViolet;
+                        return Brushes.Violet;
                 }
             }
         }
