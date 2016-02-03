@@ -48,22 +48,20 @@ namespace Nutadore
             TwoOctaveHigher
         }
 
-        override public double Show(Score score, double left, double top)
+        override public double Show(Score score, double left, double staffTop)
         {           
             base.code = "\x0056";
             //base.brush = Brush;
-            top -= 57.5 * score.Magnification;
-            double right = base.Show(score, left, top);
+
+            double noteTop
+                    = staffTop
+                     + (4 - staffPosition.LineNumber) * Staff.spaceBetweenLines * score.Magnification;
+            noteTop -= 57.5 * score.Magnification;
+            double right = base.Show(score, left, noteTop);
 
             return right;
         }
 
-        /// <summary>
-        /// Wylicza numer linii na pięciolinii na której leży nuta.
-        /// </summary>
-        /// <param name="staffType">Na której pięciolinii basowej czy wiolinowej chcemy nutę. Nuty z od f do g1 mogą być umieszczane na obu.</param>
-        /// <param name="considerOttava">Dla linii pomocniczych pokazujących położenie nut C w różnych oktawach nie chcemy ottawy.</param>
-        /// <returns></returns>
         public StaffPosition CalculateStaffPosition(Staff.Type? preferredStaffType, bool withPerform = true)
         {
             // na której linii leży dźwięk C z oktawy w której jest nuta

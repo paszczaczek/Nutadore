@@ -92,7 +92,15 @@ namespace Nutadore
         private bool lineAbove;
         public double LineNumber
         {
-            get { return (double)lineName + (lineAbove ? 0.5 : 0.0); }
+            get
+            {
+                return (double)lineName + (lineAbove ? 0.5 : 0.0);
+            }
+            set
+            {
+                lineName = (LineName)(int)value;
+                lineAbove = (value % 1) == 0.5;
+            }
         }
 
         // Konstruktor prywatny

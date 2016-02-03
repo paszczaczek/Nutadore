@@ -35,11 +35,28 @@ namespace Nutadore
         {
             left = staffLeft;
             top = staffTop;
-            
+
             // Dodaję pięciolinię.
-            for (var staffPosition = StaffPosition.ByLine(1); 
-                 staffPosition <= StaffPosition.ByLine(5); 
-                 staffPosition.AddLine(1))
+            ShowLines(score, staffLeft);
+
+            // Dodaję pomocnicze kolorowe linie.
+            ShowHelperLines(score, staffLeft);
+
+            // Dodaję klucz.
+            double clefRight = ShowClef(score, staffLeft);
+
+            // Dodaję znaki przykluczowe.
+            double signRight = ShowScaleSigns(score, clefRight);
+
+            // Zwracam miejsce w którym mozna umieszczać następny znak
+            return signRight + spaceBetweenSigns;
+        }
+
+        private void ShowLines(Score score, double staffLeft)
+        {
+            for (var staffPosition = StaffPosition.ByLine(1);
+                staffPosition <= StaffPosition.ByLine(5);
+                staffPosition.AddLine(1))
             {
                 double y = StaffPositionToY(score, staffPosition);
                 Line shapeLine = new Line
@@ -53,11 +70,13 @@ namespace Nutadore
                 };
                 score.canvas.Children.Add(shapeLine);
             }
+        }
 
-            // Dodaję pomocnicze kolorowe linie.
+        private void ShowHelperLines(Score score, double staffLeft)
+        {
             for (var octave = Note.Octave.Great; octave <= Note.Octave.ThreeLined; octave++)
             {
-                for (var letter = Note.Letter.C; letter <= Note.Letter.C; letter++)
+                foreach (var letter in new[] { Note.Letter.C/*, Note.Letter.F*/ })
                 {
                     var note = new Note(letter, octave);
                     var staffPosition = note.CalculateStaffPosition(type, false);
@@ -70,19 +89,26 @@ namespace Nutadore
                         X2 = score.canvas.ActualWidth - marginLeft,
                         Y1 = y,
                         Y2 = y,
-                        Stroke = note.Brush,
-                        StrokeThickness = letter == Note.Letter.C ? 1.0 : spaceBetweenLines / 3 * score.Magnification,
+                        Stroke = Brushes.Red, // note.Brush,
+                        StrokeThickness = 0.4
                     };
+                    if (letter == Note.Letter.F)
+                        shapeLine.StrokeDashArray = new DoubleCollection { 6, 6 };
                     score.canvas.Children.Add(shapeLine);
                 }
             }
+        }
 
-            // Dodaję klucz.
+        private double ShowClef(Score score, double staffLeft)
+        {
             Clef clef = new Clef((Clef.Type)type);
             double clefTop = StaffPositionToY(score, StaffPosition.ByLine(2));
             double clefRight = clef.Show(score, staffLeft, clefTop);
+            return clefRight;
+        }
 
-            // Dodaję znaki przykluczowe.
+        private double ShowScaleSigns(Score score, double clefRight)
+        {
             double signLeft = clefRight + 10 * score.Magnification;
             foreach (Sign sign in score.scale.Signs())
             {
@@ -92,14 +118,11 @@ namespace Nutadore
                     + spaceBetweenScaleSigns * score.Magnification;
             }
 
-            // Zwracam miejsce w którym mozna umieszczać następny znak
-            return signLeft + spaceBetweenSigns;
+            return signLeft;
         }
 
         public double ShowSign(Score score, Sign sign, double left)
         {
-            // TODO: tak naprawdę sign będzie kolekcją zawierająca akordy wiolinowe i basowe
-            // TODO: wyznaczyć na podstwie wysokości nuty
             //double top = StaffPositionToY(score, sign.staffPosition);
             double right = sign.Show(score, left, top * score.Magnification);
 
@@ -111,34 +134,21 @@ namespace Nutadore
 
                 // Trzeba jeszcze narysować nienarysowane ottavy
                 if (perform != Note.Perform.AtPlace)
-                    ShowPerform(score);
+                    ShowPerformSign(score);
 
                 return -1;
             }
 
-            // Nuty mogą wymagać linii dodanych i znaków ottava
-            ShowLegerLines(score, sign, left, right);
-
-            // Mogą być potrzebne znaki zmiany wysokości wykonania
+            // Jeśli to nuta, to może wymagać dodatowych elementów graficznych
             if (sign is Note)
             {
                 Note note = sign as Note;
-                bool performChanged = note.perform != perform;
-                bool performNew = performChanged && note.perform != Note.Perform.AtPlace;
-                bool performEnd = performChanged && perform != Note.Perform.AtPlace;
-                if (performEnd)
-                {
-                    // Tu wystąpił koniec znaku zmiany wysokości. Rysuję go.
-                    ShowPerform(score);
-                    perform = Note.Perform.AtPlace;
-                }
-                if (performNew)
-                {
-                    // Tu wystąpił początek znaku zmiany wysokości. Zapamiętuję jego położnie i wysokość.
-                    perform = note.perform;
-                    performLeft = left;
-                }
-                performRight = right;
+
+                // Nuty mogą wymagać linii dodanych i znaków ottava
+                ShowLegerLines(score, note, left, right);
+
+                // Mogą być potrzebne znaki zmiany wysokości wykonania
+                FindPerformSign(score, note, left, right);
             }
 
             // Znak zmieścił sie na pięciolinii.
@@ -147,19 +157,16 @@ namespace Nutadore
             return right;
         }
 
-        private void ShowLegerLines(Score score, Sign sign, double left, double right)
+        private void ShowLegerLines(Score score, Note note, double left, double right)
         {
-            if (!(sign is Note))
-                return;
-            
             // Czy trzeba dorysować linie dodane?
             double legerLeft = left - (right - left) * 0.2;
             double legerRight = right + (right - left) * 0.2;
-            if (sign.staffPosition <= StaffPosition.ByLegerBelow(1))
+            if (note.staffPosition <= StaffPosition.ByLegerBelow(1))
             {
                 // Tak, trzeba dorysować linie dodane dolne.
                 for (var staffPosition = StaffPosition.ByLegerBelow(1);
-                     staffPosition >= sign.staffPosition;
+                     staffPosition >= note.staffPosition;
                      staffPosition.SubstractLine(1))
                 {
                     double y = StaffPositionToY(score, staffPosition);
@@ -175,11 +182,11 @@ namespace Nutadore
                     score.canvas.Children.Add(lagerLine);
                 }
             }
-            else if (sign.staffPosition >= StaffPosition.ByLegerAbove(1))
+            else if (note.staffPosition >= StaffPosition.ByLegerAbove(1))
             {
                 // Tak, trzeba dorysować linie dodane górne.
                 for (var staffPosition = StaffPosition.ByLegerAbove(1);
-                     staffPosition <= sign.staffPosition;
+                     staffPosition <= note.staffPosition;
                      staffPosition.AddLine(1))
                 {
                     double y = StaffPositionToY(score, staffPosition);
@@ -197,7 +204,27 @@ namespace Nutadore
             }
         }
 
-        public void ShowPerform(Score score)
+        private void FindPerformSign(Score score, Note note, double left, double right)
+        {
+            bool performChanged = note.perform != perform;
+            bool performNew = performChanged && note.perform != Note.Perform.AtPlace;
+            bool performEnd = performChanged && perform != Note.Perform.AtPlace;
+            if (performEnd)
+            {
+                // Tu wystąpił koniec znaku zmiany wysokości. Rysuję go.
+                ShowPerformSign(score);
+                perform = Note.Perform.AtPlace;
+            }
+            if (performNew)
+            {
+                // Tu wystąpił początek znaku zmiany wysokości. Zapamiętuję jego położnie i wysokość.
+                perform = note.perform;
+                performLeft = left;
+            }
+            performRight = right;
+        }
+
+        public void ShowPerformSign(Score score)
         {
             const double performHeight = 10;
 

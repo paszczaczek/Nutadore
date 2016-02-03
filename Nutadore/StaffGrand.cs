@@ -55,8 +55,24 @@ namespace Nutadore
             List<Sign> signsNotShown = score.signs.FindAll(sign => !sign.Shown);
             foreach (Sign sign in signsNotShown)
             {
-                // Rysuję znak na właściwej pięciolinii
-                if (sign is Bar)
+                if (sign is Chord)
+                {
+                    // Dla akrodu rysuję poczczególne nuty na właściwej pięciolinii
+                    Chord chord = sign as Chord;
+                    double chordRight = cursor;
+                    foreach (var note in chord.notes)
+                    {
+                        Staff staff
+                            = note.staffType == Staff.Type.Treble
+                            ? trebleStaff
+                            : bassStaff;
+                        double noteRight = staff.ShowSign(score, note, cursor);
+                        if (noteRight > chordRight)
+                            chordRight = noteRight;
+                    }
+                    cursor = chordRight;
+                }
+                else if (sign is Bar)
                 {
                     // Linie taktów muszą być na obu pięcioliniach.
                     trebleStaff.ShowSign(score, sign, cursor);
@@ -81,8 +97,8 @@ namespace Nutadore
             }
 
             // Narysuj te elementy które nie można było dokończyć jak ottvy
-            trebleStaff.ShowPerform(score);
-            bassStaff.ShowPerform(score);
+            trebleStaff.ShowPerformSign(score);
+            bassStaff.ShowPerformSign(score);
 
             // Wszystkie znaki zmieściły sie na tym StaffGrand
             return true;
