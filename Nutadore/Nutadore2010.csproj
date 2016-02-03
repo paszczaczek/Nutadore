@@ -55,11 +55,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Bar.cs" />
+    <Compile Include="Chord.cs" />
     <Compile Include="Scale.cs" />
     <Compile Include="Score.cs" />
     <Compile Include="Sharp.cs" />
     <Compile Include="Sign.cs" />
     <Compile Include="Staff.cs" />
+    <Compile Include="StaffGrand.cs" />
     <Compile Include="StaffPosition.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -70,7 +73,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Clef.cs" />
-    <Compile Include="GrandStaff.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
