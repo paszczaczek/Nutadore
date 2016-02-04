@@ -29,7 +29,7 @@ namespace Nutadore
             score = new Score(canvas);
             score.scale = new Scale(Scale.Based.C, Scale.Type.Minor);
 
-#if true
+#if false
             Chord chord1 = new Chord();
             chord1.Add(new Note(Note.Letter.A, Note.Octave.SubContra));
             chord1.Add(new Note(Note.Letter.C, Note.Octave.Contra));

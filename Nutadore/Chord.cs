@@ -27,17 +27,17 @@ namespace Nutadore
             return chordRight;
         }
 
-        public override void Hide()
+        public override void Hide(Score score)
         {
-            notes.ForEach(note => note.Hide());
+            notes.ForEach(note => note.Hide(score));
         }
 
 
-        override public bool Shown
+        override public bool IsShown
         {
             get
             {
-                return notes.Find(note => note.Shown) != null;
+                return notes.Find(note => note.IsShown) != null;
             }
         }
     }

@@ -16,16 +16,16 @@ namespace Nutadore
         public enum Type { Major, Minor }
         public enum Based { A, B, C, D, E, F, G }
 
-        public Sign[] Signs()
+        public Accidental[] Accidentals()
         {
-            return new Sign[] {
-                new Sharp(StaffPosition.ByLine(5)),
-                new Sharp(StaffPosition.ByLine(3, true)),
-                new Sharp(StaffPosition.ByLine(5, true)),
-                new Sharp(StaffPosition.ByLine(4)),
-                new Sharp(StaffPosition.ByLine(2, true)),
-                new Sharp(StaffPosition.ByLine(4, true)),
-                new Sharp(StaffPosition.ByLine(3))
+            return new Accidental[] {
+                new Accidental(StaffPosition.ByLine(5)),
+                new Accidental(StaffPosition.ByLine(3, true)),
+                new Accidental(StaffPosition.ByLine(5, true)),
+                new Accidental(StaffPosition.ByLine(4)),
+                new Accidental(StaffPosition.ByLine(2, true)),
+                new Accidental(StaffPosition.ByLine(4, true)),
+                new Accidental(StaffPosition.ByLine(3))
             };
         }
     }

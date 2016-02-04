@@ -47,7 +47,7 @@ namespace Nutadore
             double clefRight = ShowClef(score, staffLeft);
 
             // Dodaję znaki przykluczowe.
-            double signRight = ShowScaleSigns(score, clefRight);
+            double signRight = ShowScale(score, clefRight);
 
             // Zwracam miejsce w którym mozna umieszczać następny znak
             return signRight + spaceBetweenSigns;
@@ -108,14 +108,14 @@ namespace Nutadore
             return clefRight;
         }
 
-        private double ShowScaleSigns(Score score, double clefRight)
+        private double ShowScale(Score score, double clefRight)
         {
             double signLeft = clefRight + 10 * score.Magnification;
-            foreach (Sign sign in score.scale.Signs())
+            foreach (Accidental accidental in score.scale.Accidentals())
             {
-                double signTop = StaffPositionToY(score, sign.staffPosition);
+                double signTop = StaffPositionToY(score, accidental.staffPosition);
                 signLeft
-                    = sign.Show(score, signLeft, signTop)
+                    = accidental.Show(score, signLeft, signTop)
                     + spaceBetweenScaleSigns * score.Magnification;
             }
 
@@ -131,7 +131,7 @@ namespace Nutadore
             if (right >= score.canvas.ActualWidth - marginLeft)
             {
                 // Nie zmieścił się - narysujemy ją na następnej pieciolinii.
-                sign.Hide();
+                sign.Hide(score);
 
                 // Trzeba jeszcze narysować nienarysowane ottavy
                 if (perform != Note.Perform.AtPlace)

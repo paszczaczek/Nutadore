@@ -7,49 +7,18 @@ namespace Nutadore
 {
     abstract public class Sign
     {
-        public StaffPosition staffPosition = StaffPosition.ByLine(1);
-        public Staff.Type staffType;
+        //public StaffPosition staffPosition = StaffPosition.ByLine(1);
+        //public Staff.Type staffType;
 
-        protected string code;
         protected Brush brush = Brushes.Black;
         protected UIElement uiElement;
-        protected Score score;
 
         virtual public double Show(Score score, double left, double top)
         {
-            this.score = score;
-
-            const string familyName = "feta26";
-            double fontSize = 42 * score.Magnification;
-
-            uiElement = new Label
-            {
-                FontFamily = new FontFamily(familyName),
-                FontSize = fontSize,
-                Content = code,
-                Foreground = brush,
-                Padding = new Thickness(0, 0, 0, 0),
-                //Background = new SolidColorBrush(Colors.LightYellow),
-                Margin = new Thickness(
-                    left,
-                    top,
-                    0,
-                    0)
-            };
-            score.canvas.Children.Add(uiElement);
-
-            FormattedText formattedText = new FormattedText(
-                code,
-                CultureInfo.GetCultureInfo("en-us"),
-                FlowDirection.LeftToRight,
-                new Typeface(familyName),
-                fontSize,
-                Brushes.Black);
-
-            return left + formattedText.Width;
+            return left;
         }
 
-        virtual public void Hide()
+        virtual public void Hide(Score score)
         {
             if (score != null && uiElement != null)
             {
@@ -58,9 +27,38 @@ namespace Nutadore
             }
         }
 
-        virtual public bool Shown
+        virtual public bool IsShown
         {
             get { return uiElement != null; }
+        }
+
+        protected double ShowFetaGlyph(Score score, double glyphLeft, double glyphTop, string glyphCode)
+        {
+
+            const string familyName = "feta26";
+            double fontSize = 42 * score.Magnification;
+
+            uiElement = new Label
+            {
+                FontFamily = new FontFamily(familyName),
+                FontSize = fontSize,
+                Content = glyphCode,
+                Foreground = brush,
+                Padding = new Thickness(0, 0, 0, 0),
+                //Background = new SolidColorBrush(Colors.Gray),
+                Margin = new Thickness(glyphLeft, glyphTop, 0, 0)
+            };
+            score.canvas.Children.Add(uiElement);
+
+            FormattedText formattedText = new FormattedText(
+                glyphCode,
+                CultureInfo.GetCultureInfo("en-us"),
+                FlowDirection.LeftToRight,
+                new Typeface(familyName),
+                fontSize,
+                Brushes.Black);
+
+            return glyphLeft + formattedText.Width;
         }
     }
 }

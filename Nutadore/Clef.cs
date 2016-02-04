@@ -17,7 +17,7 @@ namespace Nutadore
             BassSmall
         }
 
-        private  Type type;
+        private Type type;
 
         public Clef(Type type)
         {
@@ -26,16 +26,17 @@ namespace Nutadore
 
         override public double Show(Score score, double left, double top)
         {
-            base.code = null;
+            string glyphCode = null;
+            double glyphTop = top;
             switch (type)
             {
                 case Type.Treble:
-                    base.code = "\x00c9";
-                    top -= 57 * score.Magnification;
+                    glyphCode = "\x00c9";
+                    glyphTop -= 57 * score.Magnification;
                     break;
                 case Type.Bass:
-                    base.code = "\x00c7";
-                    top -= 77.5 * score.Magnification;
+                    glyphCode = "\x00c7";
+                    glyphTop -= 77.5 * score.Magnification;
                     break;
                 case Type.TrebleSmall:
                     // TODO
@@ -46,7 +47,7 @@ namespace Nutadore
                 default:
                     break;
             }
-            double right = base.Show(score, left, top);
+            double right = base.ShowFetaGlyph(score, left, glyphTop, glyphCode);
 
             return right;
         }

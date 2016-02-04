@@ -7,12 +7,12 @@ namespace Nutadore
     {
         public Bar()
         {
-            base.staffPosition = StaffPosition.ByLine(5);
+            //base.staffPosition = StaffPosition.ByLine(5);
         }
 
         override public double Show(Score score, double left, double top)
         {
-            base.score = score;
+            //base.score = score;
             base.uiElement = new Line
             {
                 X1 = left,

@@ -51,7 +51,7 @@ namespace Nutadore
                 : bassStaffCursor;
 
             // Rysuję nienarysowane jeszcze na piecilinii nuty i inne znaki.
-            List<Sign> signsNotShown = score.signs.FindAll(sign => !sign.Shown);
+            List<Sign> signsNotShown = score.signs.FindAll(sign => !sign.IsShown);
             foreach (Sign sign in signsNotShown)
             {
                 if (sign is Chord)
@@ -59,20 +59,6 @@ namespace Nutadore
                     // Dla akrodu rysuję poczczególne nuty na właściwej pięciolinii
                     Chord chord = sign as Chord;
                     cursor = chord.Show(score, trebleStaff, bassStaff, cursor);
-                    //double chordRight = cursor;
-                    //foreach (var note in chord.notes)
-                    //{
-                    //    Staff staff
-                    //        = note.staffType == Staff.Type.Treble
-                    //        ? trebleStaff
-                    //        : bassStaff;
-                    //    double noteRight = staff.ShowSign(score, note, cursor);
-                    //    if (noteRight > chordRight || noteRight == -1)
-                    //        chordRight = noteRight;
-                    //    //if (noteRight == -1)
-                    //    //    break;
-                    //}
-                    //cursor = chordRight;
                 }
                 else if (sign is Bar)
                 {
@@ -80,11 +66,12 @@ namespace Nutadore
                     trebleStaff.ShowSign(score, sign, cursor);
                     cursor = bassStaff.ShowSign(score, sign, cursor);
                 }
-                else
+                else if (sign is Note)
                 {
+                    Note note = sign as Note;
                     // Pozostałe znaki na jednej pięciolinii.
                     Staff staff
-                        = sign.staffType == Staff.Type.Treble
+                        = note.staffType == Staff.Type.Treble
                         ? trebleStaff
                         : bassStaff;
                     cursor = staff.ShowSign(score, sign, cursor);

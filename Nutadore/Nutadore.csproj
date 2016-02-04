@@ -59,7 +59,7 @@
     <Compile Include="Scale.cs" />
     <Compile Include="Score.cs" />
     <Compile Include="Bar.cs" />
-    <Compile Include="Sharp.cs" />
+    <Compile Include="Accidental.cs" />
     <Compile Include="StaffPosition.cs" />
     <Compile Include="StaffGrand.cs" />
     <Compile Include="Sign.cs" />

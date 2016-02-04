@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace Nutadore
@@ -8,13 +10,14 @@ namespace Nutadore
         public Letter letter;
         public Octave octave;
         public Perform perform;
+        public StaffPosition staffPosition = StaffPosition.ByLine(1);
+        public Staff.Type staffType;
 
         public Note(Letter letter, Octave octave, Staff.Type? preferredStaffType = null)
         {
             this.letter = letter;
             this.octave = octave;
-            base.staffType = staffType;
-            base.staffPosition = CalculateStaffPosition(preferredStaffType);
+            this.staffPosition = CalculateStaffPosition(preferredStaffType);
         }
 
         public enum Letter {
@@ -48,16 +51,32 @@ namespace Nutadore
             TwoOctaveHigher
         }
 
-        override public double Show(Score score, double left, double staffTop)
+        override public double Show(Score score, double left, double top)
         {           
-            base.code = "\x0056";
+            string glyphCode = "\x0056";
             //base.brush = Brush;
 
-            double noteTop
-                    = staffTop
+            double glyphTop
+                    = top
                      + (4 - staffPosition.LineNumber) * Staff.spaceBetweenLines * score.Magnification;
-            noteTop -= 57.5 * score.Magnification;
-            double right = base.Show(score, left, noteTop);
+            glyphTop -= 57.5 * score.Magnification;
+            double right = base.ShowFetaGlyph(score, left, glyphTop, glyphCode);
+
+            double letterTop
+                    = top
+                    + (4 - staffPosition.LineNumber) * Staff.spaceBetweenLines * score.Magnification;
+            letterTop -= 7 * score.Magnification;
+            double letterLeft = left + 3 * score.Magnification;
+            Label letter = new Label
+            {
+                FontFamily = new FontFamily("Consolas"),
+                FontSize = 12 * score.Magnification,
+                Content = this.letter.ToString(),
+                Foreground = Brushes.White,
+                Padding = new Thickness(0, 0, 0, 0),
+                Margin = new Thickness(letterLeft, letterTop, 0, 0)
+            };
+            score.canvas.Children.Add(letter);
 
             return right;
         }
@@ -70,17 +89,17 @@ namespace Nutadore
             {
                 case Octave.SubContra:
                     // Wszystkie nuty z tej oktawy mogą leżeć tylko na pięciolinii basowej.
-                    base.staffType = Staff.Type.Bass;
+                    staffType = Staff.Type.Bass;
                     lineNumber = -9.0;
                     break;
                 case Octave.Contra:
                     // wszystkie nuty z tej oktawy mogą leżeć tylko na pięciolinii basowej
-                    base.staffType = Staff.Type.Bass;
+                    staffType = Staff.Type.Bass;
                     lineNumber = -5.5;
                     break;
                 case Octave.Great:
                     // wszystkie nuty z tej oktawy mogą leżeć tylko na pięciolinii basowej
-                    base.staffType = Staff.Type.Bass;
+                    staffType = Staff.Type.Bass;
                     lineNumber = -2.0;
                     break;
                 case Octave.Small:
@@ -90,12 +109,12 @@ namespace Nutadore
                         preferredStaffType == Staff.Type.Bass || 
                         preferredStaffType == Staff.Type.Treble && letter < Letter.F)
                     {
-                        base.staffType = Staff.Type.Bass;
+                        staffType = Staff.Type.Bass;
                         lineNumber = 1.5;
                     }
                     else
                     {
-                        base.staffType = Staff.Type.Treble;
+                        staffType = Staff.Type.Treble;
                         lineNumber = -4.5;
                     }
                     break;
@@ -106,33 +125,33 @@ namespace Nutadore
                         preferredStaffType == Staff.Type.Treble || 
                         preferredStaffType == Staff.Type.Bass && letter > Letter.G)
                     {
-                        base.staffType = Staff.Type.Treble;
+                        staffType = Staff.Type.Treble;
                         lineNumber = -1.0;
                     }
                     else
                     {
-                        base.staffType = Staff.Type.Bass;
+                        staffType = Staff.Type.Bass;
                         lineNumber = 5.0;
                     }
                     break;
                 case Octave.TwoLined:
                     // wszystkie nuty z tej oktawy mogą leżeć tylko na pięciolinii wiolinowej
-                    base.staffType = Staff.Type.Treble;
+                    staffType = Staff.Type.Treble;
                     lineNumber = 2.5;
                     break;
                 case Octave.ThreeLined:
                     // wszystkie nuty z tej oktawy mogą leżeć tylko na pięciolinii wiolinowej
-                    base.staffType = Staff.Type.Treble;
+                    staffType = Staff.Type.Treble;
                     lineNumber = 6.0;
                     break;
                 case Octave.FourLined:
                     // wszystkie nuty z tej oktawy mogą leżeć tylko na pięciolinii wiolinowej
-                    base.staffType = Staff.Type.Treble;
+                    staffType = Staff.Type.Treble;
                     lineNumber = 9.5;
                     break;
                 case Octave.FiveLined:
                     // wszystkie nuty z tej oktawy mogą leżeć tylko na pięciolinii wiolinowej
-                    base.staffType = Staff.Type.Treble;
+                    staffType = Staff.Type.Treble;
                     lineNumber = 13.0;
                     break;
                 default:
