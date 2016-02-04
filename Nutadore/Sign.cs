@@ -49,7 +49,7 @@ namespace Nutadore
             return left + formattedText.Width;
         }
 
-        public void Clear()
+        virtual public void Hide()
         {
             if (score != null && uiElement != null)
             {
@@ -58,7 +58,7 @@ namespace Nutadore
             }
         }
 
-        public bool Shown
+        virtual public bool Shown
         {
             get { return uiElement != null; }
         }

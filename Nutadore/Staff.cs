@@ -131,7 +131,7 @@ namespace Nutadore
             if (right >= score.canvas.ActualWidth - marginLeft)
             {
                 // Nie zmieścił się - narysujemy ją na następnej pieciolinii.
-                sign.Clear();
+                sign.Hide();
 
                 // Trzeba jeszcze narysować nienarysowane ottavy
                 if (perform != Note.Perform.AtPlace)

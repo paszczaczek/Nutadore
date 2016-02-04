@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -59,18 +58,21 @@ namespace Nutadore
                 {
                     // Dla akrodu rysuję poczczególne nuty na właściwej pięciolinii
                     Chord chord = sign as Chord;
-                    double chordRight = cursor;
-                    foreach (var note in chord.notes)
-                    {
-                        Staff staff
-                            = note.staffType == Staff.Type.Treble
-                            ? trebleStaff
-                            : bassStaff;
-                        double noteRight = staff.ShowSign(score, note, cursor);
-                        if (noteRight > chordRight)
-                            chordRight = noteRight;
-                    }
-                    cursor = chordRight;
+                    cursor = chord.Show(score, trebleStaff, bassStaff, cursor);
+                    //double chordRight = cursor;
+                    //foreach (var note in chord.notes)
+                    //{
+                    //    Staff staff
+                    //        = note.staffType == Staff.Type.Treble
+                    //        ? trebleStaff
+                    //        : bassStaff;
+                    //    double noteRight = staff.ShowSign(score, note, cursor);
+                    //    if (noteRight > chordRight || noteRight == -1)
+                    //        chordRight = noteRight;
+                    //    //if (noteRight == -1)
+                    //    //    break;
+                    //}
+                    //cursor = chordRight;
                 }
                 else if (sign is Bar)
                 {

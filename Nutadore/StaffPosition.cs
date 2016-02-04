@@ -98,8 +98,16 @@ namespace Nutadore
             }
             set
             {
-                lineName = (LineName)(int)value;
-                lineAbove = (value % 1) == 0.5;
+                if (value > 0)
+                {
+                    lineName = (LineName)(int)value;
+                    lineAbove = (value % 1) == 0.5;
+                }
+                else
+                {
+                    lineName = (LineName)(int)(value - 0.5);
+                    lineAbove = (value % 1) == -0.5;
+                }
             }
         }
 

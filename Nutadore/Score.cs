@@ -137,7 +137,7 @@ namespace Nutadore
         public void Clear()
         {
             // usuwamy wszystkie nuty
-            signs.ForEach(sign => sign.Clear());
+            signs.ForEach(sign => sign.Hide());
 
             // usuwamy pozostałe elemetny (klucze, znaki przykluczowe, itd.)
             canvas.Children.Clear();

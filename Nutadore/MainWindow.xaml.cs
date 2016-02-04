@@ -29,27 +29,33 @@ namespace Nutadore
             score = new Score(canvas);
             score.scale = new Scale(Scale.Based.C, Scale.Type.Minor);
 
-#if false
-            Chord chord = new Chord();
-
-            //chord.Add(new Note(Note.Letter.C, Note.Octave.OneLined));
-            //chord.Add(new Note(Note.Letter.E, Note.Octave.OneLined));
-            //chord.Add(new Note(Note.Letter.G, Note.Octave.OneLined));
-
-            //chord.Add(new Note(Note.Letter.C, Note.Octave.Small));
-            //chord.Add(new Note(Note.Letter.E, Note.Octave.Small));
-            //chord.Add(new Note(Note.Letter.G, Note.Octave.Small));
-
-            chord.Add(new Note(Note.Letter.H, Note.Octave.ThreeLined));
-            chord.Add(new Note(Note.Letter.D, Note.Octave.FourLined));
-            chord.Add(new Note(Note.Letter.F, Note.Octave.FourLined));
-            chord.Add(new Note(Note.Letter.A, Note.Octave.FourLined));
-            chord.Add(new Note(Note.Letter.C, Note.Octave.FiveLined));
-
-            score.Add(chord);
+#if true
+            Chord chord1 = new Chord();
+            chord1.Add(new Note(Note.Letter.A, Note.Octave.SubContra));
+            chord1.Add(new Note(Note.Letter.C, Note.Octave.Contra));
+            chord1.Add(new Note(Note.Letter.E, Note.Octave.Contra));
+            score.Add(chord1);
             
-            score.Add(new Note(Note.Letter.C, Note.Octave.OneLined));
-            score.Add(new Bar());
+            Chord chord2 = new Chord();
+            chord2.Add(new Note(Note.Letter.H, Note.Octave.SubContra));
+            chord2.Add(new Note(Note.Letter.D, Note.Octave.Contra));
+            chord2.Add(new Note(Note.Letter.F, Note.Octave.Contra));
+            score.Add(chord2);
+
+            Chord chord3 = new Chord();
+            chord3.Add(new Note(Note.Letter.C, Note.Octave.Contra));
+            chord3.Add(new Note(Note.Letter.E, Note.Octave.Contra));
+            chord3.Add(new Note(Note.Letter.G, Note.Octave.Contra));
+            score.Add(chord3);
+
+            //score.Add(new Note(Note.Letter.A, Note.Octave.SubContra));
+            //score.Add(new Note(Note.Letter.H, Note.Octave.SubContra));
+            score.Add(new Note(Note.Letter.D, Note.Octave.Contra));
+            score.Add(new Note(Note.Letter.E, Note.Octave.Contra));
+            score.Add(new Note(Note.Letter.F, Note.Octave.Contra));
+            score.Add(new Note(Note.Letter.G, Note.Octave.Contra));
+
+
 #else
             for (int i = 5; i < 7; i++)
                 score.Add(new Note(Note.Letter.C + i, Note.Octave.SubContra));
