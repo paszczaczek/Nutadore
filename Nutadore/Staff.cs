@@ -16,6 +16,7 @@ namespace Nutadore
         private double left;
         private double top;
 
+        // Ottaviation?
         Note.Perform perform = Note.Perform.AtPlace;
         double performLeft;
         double performRight;
