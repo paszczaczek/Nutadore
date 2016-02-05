@@ -123,13 +123,12 @@ namespace Nutadore
 			// Rysujemy tyle podwójnych pięciolinii, ile potrzeba
 			// aby zmieściły się na nich wszystkie znaki.
 			double top = 0;
-			while (true)
+			bool allSignsFitted = false;
+			while (!allSignsFitted)
 			{
 				StaffGrand staffGrand = new StaffGrand(this, top);
 				staffGrands.Add(staffGrand);
-				top = staffGrand.bottom;
-				if (staffGrand.allSignsFitted)
-					break;
+				top = staffGrand.Show(out allSignsFitted);
 			}
 		}
 

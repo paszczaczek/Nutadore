@@ -15,8 +15,6 @@ namespace Nutadore
 
 		private Score score;
 		private double top;
-		public double bottom { get; private set; }
-		public bool allSignsFitted { get; private set; }
         private Staff trebleStaff;
         private Staff bassStaff;
         private double cursor;
@@ -25,22 +23,28 @@ namespace Nutadore
 		{
 			this.score = score;
 			this.top = top;
-
-			// Rysuję klamrę.
-			ShowBrace();
-
-			// Rysuję pięciolinie wiolinową i basową.
-			ShowStaffs();
-
-			// Rysuję nienarysowane jeszcze na piecilinii nuty i inne znaki.
-			ShowNotShownSigns();
-
-			// Rysuję te elementy których nie można było dokończyć, np. ottvy
-			trebleStaff.ShowPerformSign(score);
-			bassStaff.ShowPerformSign(score);
 		}
 
-		private void ShowBrace()
+		public double Show(out bool allSignsFitted)
+		{
+			// Rysuję klamrę.
+			double braceRight = ShowBrace();
+
+			// Rysuję pięciolinie wiolinową i basową.
+			double bottom = ShowStaffs(braceRight);
+
+			// Rysuję nienarysowane jeszcze na piecilinii nuty i inne znaki.
+			allSignsFitted = ShowSigns();
+
+			// Rysuję te elementy których nie można było dokończyć, np. ottvy
+			trebleStaff.ShowPerform();
+			bassStaff.ShowPerform();
+
+			// Zwracam dolną krawędź StaffGrand.
+			return bottom;
+		}
+
+		private double ShowBrace()
 		{
             // wyznaczam wymiary klamry
             string familyName = "MS Mincho";
@@ -72,38 +76,41 @@ namespace Nutadore
             score.canvas.Children.Add(brace);
 
             // wyznaczem miejsce w którym kończy sie klamra i będa rozpoczynały sie pięciolinie
-            cursor = braceWidth - braceOffestX;
+            double braceRight = braceWidth - braceOffestX;
+			return braceRight;
         }
 
-		private void ShowStaffs()
+		private double ShowStaffs(double left)
 		{
 			// Rysuję pięciolinię wiolinową.
-			trebleStaff = new Staff(Staff.Type.Treble);
 			double trebleStaffTop = top + spaceAboveTrebleStaff;
-			double trebleStaffRight = trebleStaff.Show(score, cursor, trebleStaffTop);
+			trebleStaff = new Staff(score, Staff.Type.Treble, left, trebleStaffTop);
+			double trebleStaffRight = trebleStaff.Show();
 
 			// Rysuję pięciolinię basową.
-			bassStaff = new Staff(Staff.Type.Bass);
 			double bassStaffTop
 				= trebleStaffTop
 				+ Staff.spaceBetweenLines * 4
 				+ spaceBetweenTrebleAndBassStaff;
-			double bassStaffRight = bassStaff.Show(score, cursor, bassStaffTop);
-
-			// Wyznaczam dolną krawędź StaffGrand.
-			bottom
-				= bassStaffTop
-				+ Staff.spaceBetweenLines * 4
-				+ spaceBelowBassStaff;
+			bassStaff = new Staff(score, Staff.Type.Bass, left, bassStaffTop);
+			double bassStaffRight = bassStaff.Show();
 
 			// Wyznaczam połoznenie kursora na StaffGrand.
 			cursor
 				= trebleStaffRight > bassStaffRight
 				? trebleStaffRight
 				: bassStaffRight;
+
+			// Wyznaczam dolną krawędź StaffGrand i zwracam ją.
+			double bottom
+				= bassStaffTop
+				+ Staff.spaceBetweenLines * 4
+				+ spaceBelowBassStaff;
+
+			return bottom;
 		}
 
-		private void ShowNotShownSigns()
+		private bool ShowSigns()
 		{
 			List<Sign> signsNotShown = score.signs.FindAll(sign => !sign.IsShown);
 			foreach (Sign sign in signsNotShown)
@@ -117,8 +124,8 @@ namespace Nutadore
 				else if (sign is Bar)
 				{
 					// Linie taktów muszą być na obu pięcioliniach.
-					trebleStaff.ShowSign(score, sign, cursor);
-					cursor = bassStaff.ShowSign(score, sign, cursor);
+					trebleStaff.ShowSign(sign, cursor);
+					cursor = bassStaff.ShowSign(sign, cursor);
 				}
 				else if (sign is Note)
 				{
@@ -128,7 +135,7 @@ namespace Nutadore
 						= note.staffType == Staff.Type.Treble
 						? trebleStaff
 						: bassStaff;
-					cursor = staff.ShowSign(score, sign, cursor);
+					cursor = staff.ShowSign(sign, cursor);
 				}
 
 				// Czy znak zmieścil się na pieciolinii?
@@ -137,14 +144,12 @@ namespace Nutadore
 					// Nie - umieścimy go na kolejnym SraffGrand.
 					// Wycofujemy też wszyskie znaki do początku taktu.
 					HideToBeginOfMeasure(sign);
-					allSignsFitted = false;
-
-					return;
+					return false;
 				}
 			}
 
 			// Wszystkie znaki zmieściły się.
-			allSignsFitted = true;
+			return true;
 		}
 
 		private void HideToBeginOfMeasure(Sign fromSign)

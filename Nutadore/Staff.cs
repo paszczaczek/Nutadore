@@ -12,6 +12,7 @@ namespace Nutadore
         static private readonly double spaceBetweenScaleSigns = 1;
         static private readonly double spaceBetweenSigns = 15;
 
+		private Score score;
         private Type type;
         private double left;
         private double top;
@@ -27,42 +28,42 @@ namespace Nutadore
             Bass
         }
 
-        public Staff(Type type)
+        public Staff(Score score, Type type, double left, double top)
         {
-            this.type = type;            
+			this.score = score;
+            this.type = type;
+			this.left = left;
+			this.top = top;
         }
 
-        public double Show(Score score, double staffLeft, double staffTop)
+        public double Show()
         {
-            left = staffLeft;
-            top = staffTop;
-
             // Dodaję pięciolinię.
-            ShowLines(score, staffLeft);
+            ShowLines();
 
             // Dodaję pomocnicze kolorowe linie.
-            ShowHelperLines(score, staffLeft);
+            ShowHelperLines();
 
             // Dodaję klucz.
-            double clefRight = ShowClef(score, staffLeft);
+            double clefRight = ShowClef();
 
             // Dodaję znaki przykluczowe.
-            double signRight = ShowScale(score, clefRight);
+            double signRight = ShowScale(clefRight);
 
-            // Zwracam miejsce w którym mozna umieszczać następny znak
+            // Zwracam miejsce w którym mozna umieszczać następny znak.
             return signRight + spaceBetweenSigns;
         }
 
-        private void ShowLines(Score score, double staffLeft)
-        {
+        private void ShowLines()
+		{
             for (var staffPosition = StaffPosition.ByLine(1);
                 staffPosition <= StaffPosition.ByLine(5);
                 staffPosition.AddLine(1))
             {
-                double y = StaffPositionToY(score, staffPosition);
+                double y = StaffPositionToY(staffPosition);
                 Line shapeLine = new Line
                 {
-                    X1 = staffLeft,
+                    X1 = left,
                     X2 = score.canvas.ActualWidth - marginLeft,
                     Y1 = y,
                     Y2 = y,
@@ -73,8 +74,8 @@ namespace Nutadore
             }
         }
 
-        private void ShowHelperLines(Score score, double staffLeft)
-        {
+        private void ShowHelperLines()
+		{
             for (var octave = Note.Octave.Great; octave <= Note.Octave.ThreeLined; octave++)
             {
                 foreach (var letter in new[] { Note.Letter.C/*, Note.Letter.F*/ })
@@ -83,10 +84,10 @@ namespace Nutadore
                     var staffPosition = note.CalculateStaffPosition(type, false);
                     if (note.staffType != type)
                         continue;
-                    double y = StaffPositionToY(score, staffPosition);
+                    double y = StaffPositionToY(staffPosition);
                     Line shapeLine = new Line
                     {
-                        X1 = staffLeft,
+                        X1 = left,
                         X2 = score.canvas.ActualWidth - marginLeft,
                         Y1 = y,
                         Y2 = y,
@@ -100,20 +101,20 @@ namespace Nutadore
             }
         }
 
-        private double ShowClef(Score score, double staffLeft)
-        {
+        private double ShowClef()
+		{
             Clef clef = new Clef((Clef.Type)type);
-            double clefTop = StaffPositionToY(score, StaffPosition.ByLine(2));
-            double clefRight = clef.Show(score, staffLeft, clefTop);
+            double clefTop = StaffPositionToY(StaffPosition.ByLine(2));
+            double clefRight = clef.Show(score, left, clefTop);
             return clefRight;
         }
 
-        private double ShowScale(Score score, double clefRight)
-        {
+        private double ShowScale(double clefRight)
+		{
             double signLeft = clefRight + 10 * score.Magnification;
             foreach (Accidental accidental in score.scale.Accidentals())
             {
-                double signTop = StaffPositionToY(score, accidental.staffPosition);
+                double signTop = StaffPositionToY(accidental.staffPosition);
                 signLeft
                     = accidental.Show(score, signLeft, signTop)
                     + spaceBetweenScaleSigns * score.Magnification;
@@ -122,8 +123,8 @@ namespace Nutadore
             return signLeft;
         }
 
-        public double ShowSign(Score score, Sign sign, double left)
-        {
+        public double ShowSign(Sign sign, double left)
+		{
             //double top = StaffPositionToY(score, sign.staffPosition);
             double right = sign.Show(score, left, top * score.Magnification);
 
@@ -135,7 +136,7 @@ namespace Nutadore
 
                 // Trzeba jeszcze narysować nienarysowane ottavy
                 if (perform != Note.Perform.AtPlace)
-                    ShowPerformSign(score);
+                    ShowPerform();
 
                 return -1;
             }
@@ -146,10 +147,10 @@ namespace Nutadore
                 Note note = sign as Note;
 
                 // Nuty mogą wymagać linii dodanych i znaków ottava
-                ShowLegerLines(score, note, left, right);
+                ShowLegerLines(note, left, right);
 
                 // Mogą być potrzebne znaki zmiany wysokości wykonania
-                FindPerformSign(score, note, left, right);
+                FindPerform(note, left, right);
             }
 
             // Znak zmieścił sie na pięciolinii.
@@ -158,8 +159,8 @@ namespace Nutadore
             return right;
         }
 
-        private void ShowLegerLines(Score score, Note note, double left, double right)
-        {
+        private void ShowLegerLines(Note note, double left, double right)
+		{
             // Czy trzeba dorysować linie dodane?
             double legerLeft = left - (right - left) * 0.2;
             double legerRight = right + (right - left) * 0.2;
@@ -170,7 +171,7 @@ namespace Nutadore
                      staffPosition >= note.staffPosition;
                      staffPosition.SubstractLine(1))
                 {
-                    double y = StaffPositionToY(score, staffPosition);
+                    double y = StaffPositionToY(staffPosition);
                     Line lagerLine = new Line
                     {
                         X1 = legerLeft,
@@ -190,7 +191,7 @@ namespace Nutadore
                      staffPosition <= note.staffPosition;
                      staffPosition.AddLine(1))
                 {
-                    double y = StaffPositionToY(score, staffPosition);
+                    double y = StaffPositionToY(staffPosition);
                     Line lagerLine = new Line
                     {
                         X1 = legerLeft,
@@ -205,15 +206,15 @@ namespace Nutadore
             }
         }
 
-        private void FindPerformSign(Score score, Note note, double left, double right)
-        {
+        private void FindPerform(Note note, double left, double right)
+		{
             bool performChanged = note.perform != perform;
             bool performNew = performChanged && note.perform != Note.Perform.AtPlace;
             bool performEnd = performChanged && perform != Note.Perform.AtPlace;
             if (performEnd)
             {
                 // Tu wystąpił koniec znaku zmiany wysokości. Rysuję go.
-                ShowPerformSign(score);
+                ShowPerform();
                 perform = Note.Perform.AtPlace;
             }
             if (performNew)
@@ -225,8 +226,8 @@ namespace Nutadore
             performRight = right;
         }
 
-        public void ShowPerformSign(Score score)
-        {
+        public void ShowPerform()
+		{
             const double performHeight = 10;
 
             // Czy trzeba coś dorysować?
@@ -238,26 +239,26 @@ namespace Nutadore
             {
                 case Note.Perform.TwoOctaveHigher:
                     // Tak, trzeba dorysować znak 15ma
-                    y = StaffPositionToY(score, StaffPosition.ByLegerAbove(3));
+                    y = StaffPositionToY(StaffPosition.ByLegerAbove(3));
                     vertLineTop = y;
                     verLineBottom = y + performHeight;
-                    textTop = StaffPositionToY(score, StaffPosition.ByLegerAbove(5));
+                    textTop = StaffPositionToY(StaffPosition.ByLegerAbove(5));
                     text = "15ma";
                     break;
                 case Note.Perform.OneOctaveHigher:
                     // Tak, trzeba dorysować znak 8va.
-                    y = StaffPositionToY(score, StaffPosition.ByLegerAbove(6));
+                    y = StaffPositionToY(StaffPosition.ByLegerAbove(6));
                     vertLineTop = y;
                     verLineBottom = y + performHeight;
-                    textTop = StaffPositionToY(score, StaffPosition.ByLegerAbove(8));
+                    textTop = StaffPositionToY(StaffPosition.ByLegerAbove(8));
                     text = "8va";
                     break;
                 case Note.Perform.OneOctaveLower:
                     // Tak, trzeba dorysować znak 8vb.
-                    y = StaffPositionToY(score, StaffPosition.ByLegerBelow(4));
+                    y = StaffPositionToY(StaffPosition.ByLegerBelow(4));
                     vertLineTop = y - performHeight;
                     verLineBottom = y;
-                    textTop = StaffPositionToY(score, StaffPosition.ByLegerBelow(4));
+                    textTop = StaffPositionToY(StaffPosition.ByLegerBelow(4));
                     text = "8vb";
                     break;
                 case Note.Perform.AtPlace:
@@ -304,8 +305,8 @@ namespace Nutadore
             score.canvas.Children.Add(name);
         }
 
-        public double StaffPositionToY(Score score, StaffPosition staffPosition)
-        {
+        public double StaffPositionToY(StaffPosition staffPosition)
+		{
             return
                 // tu będzie piąta linia
                 top * score.Magnification

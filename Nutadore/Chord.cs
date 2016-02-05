@@ -20,7 +20,7 @@ namespace Nutadore
                     = note.staffType == Staff.Type.Treble
                     ? trebleStaff
                     : bassStaff;
-                double noteRight = staff.ShowSign(score, note, left);
+                double noteRight = staff.ShowSign(note, left);
                 if (noteRight > chordRight || noteRight == -1)
                     chordRight = noteRight;
             }
