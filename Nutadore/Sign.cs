@@ -10,7 +10,6 @@ namespace Nutadore
         //public StaffPosition staffPosition = StaffPosition.ByLine(1);
         //public Staff.Type staffType;
 
-        protected Brush brush = Brushes.Black;
         protected UIElement uiElement;
 
         virtual public double Show(Score score, double left, double top)
@@ -43,7 +42,6 @@ namespace Nutadore
                 FontFamily = new FontFamily(familyName),
                 FontSize = fontSize,
                 Content = glyphCode,
-                Foreground = brush,
                 Padding = new Thickness(0, 0, 0, 0),
                 //Background = new SolidColorBrush(Colors.Gray),
                 Margin = new Thickness(glyphLeft, glyphTop, 0, 0)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,7 +13,7 @@ namespace Nutadore
         static private readonly double spaceBetweenTrebleAndBassStaff = Staff.spaceBetweenLines * 7;
         static private readonly double spaceBelowBassStaff = Staff.spaceBetweenLines * /*7*/5;
 
-        private double top;
+        //private double top;
         private Staff trebleStaff;
         private Staff bassStaff;
         private double cursor;
@@ -20,10 +21,10 @@ namespace Nutadore
         // Rysuje pięciolinie i klamrę je spinającą.
         public bool Show(Score score, double top, out double bottom)
         {
-            this.top = top;
+            //this.top = top;
 
             // Rysuję klamrę.
-            cursor = ShowBrace(score);
+            cursor = ShowBrace(score, top);
 
             // Rysuję pięciolinię wiolinową.
             trebleStaff = new Staff(Staff.Type.Treble);
@@ -79,8 +80,10 @@ namespace Nutadore
 
                 // Czy znak zmieścil się na pieciolinii?
                 if (cursor == -1)
-                {                    
-                    // nie - trzeba go będzie umieścić na kolejnym SraffGrand
+                {
+					// Nie - umieścimy go na kolejnym SraffGrand.
+					// Wycofujemy też wszyskie znaki do początku taktu
+					HideFromSignToBeginOfMeasure(score, sign);
                     return false;
                 }
             }
@@ -93,8 +96,8 @@ namespace Nutadore
             return true;
         }
 
-        // Rysuje klamrę spinającą pięciolinię wiolinową i basową.
-        private double ShowBrace(Score score)
+		// Rysuje klamrę spinającą pięciolinię wiolinową i basową.
+		private double ShowBrace(Score score, double top)
         {
             // wyznaczam wymiary klamry
             string familyName = "MS Mincho";
@@ -128,5 +131,17 @@ namespace Nutadore
             // zwracam miejsce w którym kończy sie klamra i będa rozpoczynały sie pięciolinie
             return braceWidth - braceOffestX;
         }
-    }
+
+		private void HideFromSignToBeginOfMeasure(Score score, Sign fromSign)
+		{
+			for (int idx = score.signs.IndexOf(fromSign); idx >= 0 ; idx--)
+			{
+				Sign sign = score.signs[idx];
+				if (!(sign is Bar))
+					sign.Hide(score);
+				else
+					break;
+			}
+		}
+	}
 }

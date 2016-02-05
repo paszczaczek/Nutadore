@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace Nutadore
 {
@@ -13,7 +14,9 @@ namespace Nutadore
         public StaffPosition staffPosition = StaffPosition.ByLine(1);
         public Staff.Type staffType;
 
-        public Note(Letter letter, Octave octave, Staff.Type? preferredStaffType = null)
+		private Label letterLabel;
+
+		public Note(Letter letter, Octave octave, Staff.Type? preferredStaffType = null)
         {
             this.letter = letter;
             this.octave = octave;
@@ -53,9 +56,8 @@ namespace Nutadore
 
         override public double Show(Score score, double left, double top)
         {           
+			// Rysujemy znak nuty.
             string glyphCode = "\x0056";
-            //base.brush = Brush;
-
             double glyphTop
                     = top
                      + (4 - staffPosition.LineNumber) * Staff.spaceBetweenLines * score.Magnification;
@@ -67,7 +69,7 @@ namespace Nutadore
                     + (4 - staffPosition.LineNumber) * Staff.spaceBetweenLines * score.Magnification;
             letterTop -= 7 * score.Magnification;
             double letterLeft = left + 3 * score.Magnification;
-            Label letter = new Label
+            letterLabel = new Label
             {
                 FontFamily = new FontFamily("Consolas"),
                 FontSize = 12 * score.Magnification,
@@ -76,12 +78,64 @@ namespace Nutadore
                 Padding = new Thickness(0, 0, 0, 0),
                 Margin = new Thickness(letterLeft, letterTop, 0, 0)
             };
-            score.canvas.Children.Add(letter);
+            score.canvas.Children.Add(letterLabel);
 
-            return right;
+#if false
+			// Czy trzeba dorysować linie dodane?
+			double legerLeft = left - (right - left) * 0.2;
+			double legerRight = right + (right - left) * 0.2;
+			if (this.staffPosition <= StaffPosition.ByLegerBelow(1))
+			{
+				// Tak, trzeba dorysować linie dodane dolne.
+				for (var staffPosition = StaffPosition.ByLegerBelow(1);
+					 staffPosition >= this.staffPosition;
+					 staffPosition.SubstractLine(1))
+				{
+					double y = StaffPositionToY(score, staffPosition);
+					Line lagerLine = new Line
+					{
+						X1 = legerLeft,
+						X2 = legerRight,
+						Y1 = y,
+						Y2 = y,
+						Stroke = Brushes.Black,
+						StrokeThickness = 0.5
+					};
+					score.canvas.Children.Add(lagerLine);
+				}
+			}
+			else if (this.staffPosition >= StaffPosition.ByLegerAbove(1))
+			{
+				// Tak, trzeba dorysować linie dodane górne.
+				for (var staffPosition = StaffPosition.ByLegerAbove(1);
+					 staffPosition <= this.staffPosition;
+					 staffPosition.AddLine(1))
+				{
+					double y = StaffPositionToY(score, staffPosition);
+					Line lagerLine = new Line
+					{
+						X1 = legerLeft,
+						X2 = legerRight,
+						Y1 = y,
+						Y2 = y,
+						Stroke = Brushes.Black,
+						StrokeThickness = 0.5
+					};
+					score.canvas.Children.Add(lagerLine);
+				}
+			}
+#endif
+
+			return right;
         }
 
-        public StaffPosition CalculateStaffPosition(Staff.Type? preferredStaffType, bool withPerform = true)
+		override public void Hide(Score score)
+		{
+			base.Hide(score);
+			score.canvas.Children.Remove(letterLabel);
+		}
+
+		public StaffPosition CalculateStaffPosition(Staff.Type? preferredStaffType, bool withPerform = true)
         {
             // na której linii leży dźwięk C z oktawy w której jest nuta
             double lineNumber = 0;
