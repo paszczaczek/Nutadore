@@ -14,6 +14,7 @@ namespace Nutadore
     {
         public Canvas canvas;
         public Scale scale = new Scale(Scale.Based.C, Scale.Type.Major);
+		private List<StaffGrand> staffGrands = new List<StaffGrand>();
         public List<Sign> signs = new List<Sign>();
 
         public Score(Canvas canvas)
@@ -119,28 +120,29 @@ namespace Nutadore
             // Czyscimy partyturę.
             Clear();
 
-            // Rysujemy podwójną pieciolinię.
-            StaffGrand staffGrand = new StaffGrand();
-            double top = 0;
-            double bottom;
-            while (!staffGrand.Show(this, top, out bottom))
-            {
-                // Nie wszystkie znaki zmieściły się na tej podwójnej pięciolinii.
-                // Pozostałe umieścimi na kolejnej podwójnej pięciolinii.
-                top = bottom;
-                // Jeśli wyszliśmy poza dolną krawędź canvas, to kończymy rysowanie.
-                if (top > canvas.ActualHeight)
-                    break;
-            }
-        }
+			// Rysujemy tyle podwójnych pięciolinii, ile potrzeba
+			// aby zmieściły się na nich wszystkie znaki.
+			double top = 0;
+			while (true)
+			{
+				StaffGrand staffGrand = new StaffGrand(this, top);
+				staffGrands.Add(staffGrand);
+				top = staffGrand.bottom;
+				if (staffGrand.allSignsFitted)
+					break;
+			}
+		}
 
-        public void Clear()
+		public void Clear()
         {
             // usuwamy wszystkie nuty
             signs.ForEach(sign => sign.Hide(this));
 
             // usuwamy pozostałe elemetny (klucze, znaki przykluczowe, itd.)
             canvas.Children.Clear();
+
+			// usuwamy wszystkie podwójne pięciolinie
+			staffGrands.Clear();
         }
     }
 }

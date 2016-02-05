@@ -13,92 +13,35 @@ namespace Nutadore
         static private readonly double spaceBetweenTrebleAndBassStaff = Staff.spaceBetweenLines * 7;
         static private readonly double spaceBelowBassStaff = Staff.spaceBetweenLines * /*7*/5;
 
-        //private double top;
+		private Score score;
+		private double top;
+		public double bottom { get; private set; }
+		public bool allSignsFitted { get; private set; }
         private Staff trebleStaff;
         private Staff bassStaff;
         private double cursor;
 
-        // Rysuje pięciolinie i klamrę je spinającą.
-        public bool Show(Score score, double top, out double bottom)
-        {
-            //this.top = top;
+		public StaffGrand(Score score, double top)
+		{
+			this.score = score;
+			this.top = top;
 
-            // Rysuję klamrę.
-            cursor = ShowBrace(score, top);
+			// Rysuję klamrę.
+			ShowBrace();
 
-            // Rysuję pięciolinię wiolinową.
-            trebleStaff = new Staff(Staff.Type.Treble);
-            double trebleStaffTop = top + spaceAboveTrebleStaff;
-            double trebleStaffCursor = trebleStaff.Show(score, cursor, trebleStaffTop);
+			// Rysuję pięciolinie wiolinową i basową.
+			ShowStaffs();
 
-            // Rysuję pięciolinię basową.
-            bassStaff = new Staff(Staff.Type.Bass);
-            double bassStaffTop 
-                = trebleStaffTop
-                + Staff.spaceBetweenLines * 4 
-                + spaceBetweenTrebleAndBassStaff;
-            double bassStaffCursor = bassStaff.Show(score, cursor, bassStaffTop);
+			// Rysuję nienarysowane jeszcze na piecilinii nuty i inne znaki.
+			ShowNotShownSigns();
 
-            // Wyznaczam dolną krawędź StaffGrand.
-            bottom
-                = bassStaffTop
-                + Staff.spaceBetweenLines * 4
-                + spaceBelowBassStaff;
+			// Rysuję te elementy których nie można było dokończyć, np. ottvy
+			trebleStaff.ShowPerformSign(score);
+			bassStaff.ShowPerformSign(score);
+		}
 
-            // Wyznaczam połoznenie kursora na StaffGrand.
-            cursor 
-                = trebleStaffCursor > bassStaffCursor
-                ? trebleStaffCursor
-                : bassStaffCursor;
-
-            // Rysuję nienarysowane jeszcze na piecilinii nuty i inne znaki.
-            List<Sign> signsNotShown = score.signs.FindAll(sign => !sign.IsShown);
-            foreach (Sign sign in signsNotShown)
-            {
-                if (sign is Chord)
-                {
-                    // Dla akrodu rysuję poczczególne nuty na właściwej pięciolinii
-                    Chord chord = sign as Chord;
-                    cursor = chord.Show(score, trebleStaff, bassStaff, cursor);
-                }
-                else if (sign is Bar)
-                {
-                    // Linie taktów muszą być na obu pięcioliniach.
-                    trebleStaff.ShowSign(score, sign, cursor);
-                    cursor = bassStaff.ShowSign(score, sign, cursor);
-                }
-                else if (sign is Note)
-                {
-                    Note note = sign as Note;
-                    // Pozostałe znaki na jednej pięciolinii.
-                    Staff staff
-                        = note.staffType == Staff.Type.Treble
-                        ? trebleStaff
-                        : bassStaff;
-                    cursor = staff.ShowSign(score, sign, cursor);
-                }
-
-                // Czy znak zmieścil się na pieciolinii?
-                if (cursor == -1)
-                {
-					// Nie - umieścimy go na kolejnym SraffGrand.
-					// Wycofujemy też wszyskie znaki do początku taktu
-					HideFromSignToBeginOfMeasure(score, sign);
-                    return false;
-                }
-            }
-
-            // Narysuj te elementy które nie można było dokończyć jak ottvy
-            trebleStaff.ShowPerformSign(score);
-            bassStaff.ShowPerformSign(score);
-
-            // Wszystkie znaki zmieściły sie na tym StaffGrand
-            return true;
-        }
-
-		// Rysuje klamrę spinającą pięciolinię wiolinową i basową.
-		private double ShowBrace(Score score, double top)
-        {
+		private void ShowBrace()
+		{
             // wyznaczam wymiary klamry
             string familyName = "MS Mincho";
             //double fontSize = 116 * score.Magnification;
@@ -128,11 +71,83 @@ namespace Nutadore
                     0);
             score.canvas.Children.Add(brace);
 
-            // zwracam miejsce w którym kończy sie klamra i będa rozpoczynały sie pięciolinie
-            return braceWidth - braceOffestX;
+            // wyznaczem miejsce w którym kończy sie klamra i będa rozpoczynały sie pięciolinie
+            cursor = braceWidth - braceOffestX;
         }
 
-		private void HideFromSignToBeginOfMeasure(Score score, Sign fromSign)
+		private void ShowStaffs()
+		{
+			// Rysuję pięciolinię wiolinową.
+			trebleStaff = new Staff(Staff.Type.Treble);
+			double trebleStaffTop = top + spaceAboveTrebleStaff;
+			double trebleStaffRight = trebleStaff.Show(score, cursor, trebleStaffTop);
+
+			// Rysuję pięciolinię basową.
+			bassStaff = new Staff(Staff.Type.Bass);
+			double bassStaffTop
+				= trebleStaffTop
+				+ Staff.spaceBetweenLines * 4
+				+ spaceBetweenTrebleAndBassStaff;
+			double bassStaffRight = bassStaff.Show(score, cursor, bassStaffTop);
+
+			// Wyznaczam dolną krawędź StaffGrand.
+			bottom
+				= bassStaffTop
+				+ Staff.spaceBetweenLines * 4
+				+ spaceBelowBassStaff;
+
+			// Wyznaczam połoznenie kursora na StaffGrand.
+			cursor
+				= trebleStaffRight > bassStaffRight
+				? trebleStaffRight
+				: bassStaffRight;
+		}
+
+		private void ShowNotShownSigns()
+		{
+			List<Sign> signsNotShown = score.signs.FindAll(sign => !sign.IsShown);
+			foreach (Sign sign in signsNotShown)
+			{
+				if (sign is Chord)
+				{
+					// Dla akrodu rysuję poczczególne nuty na właściwej pięciolinii
+					Chord chord = sign as Chord;
+					cursor = chord.Show(score, trebleStaff, bassStaff, cursor);
+				}
+				else if (sign is Bar)
+				{
+					// Linie taktów muszą być na obu pięcioliniach.
+					trebleStaff.ShowSign(score, sign, cursor);
+					cursor = bassStaff.ShowSign(score, sign, cursor);
+				}
+				else if (sign is Note)
+				{
+					Note note = sign as Note;
+					// Pozostałe znaki na jednej pięciolinii.
+					Staff staff
+						= note.staffType == Staff.Type.Treble
+						? trebleStaff
+						: bassStaff;
+					cursor = staff.ShowSign(score, sign, cursor);
+				}
+
+				// Czy znak zmieścil się na pieciolinii?
+				if (cursor == -1)
+				{
+					// Nie - umieścimy go na kolejnym SraffGrand.
+					// Wycofujemy też wszyskie znaki do początku taktu.
+					HideToBeginOfMeasure(sign);
+					allSignsFitted = false;
+
+					return;
+				}
+			}
+
+			// Wszystkie znaki zmieściły się.
+			allSignsFitted = true;
+		}
+
+		private void HideToBeginOfMeasure(Sign fromSign)
 		{
 			for (int idx = score.signs.IndexOf(fromSign); idx >= 0 ; idx--)
 			{
