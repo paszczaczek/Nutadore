@@ -122,15 +122,15 @@ namespace Nutadore
 
 			// Rysujemy tyle podwójnych pięciolinii, ile potrzeba
 			// aby zmieściły się na nich wszystkie znaki.
-			double top = 0;
+			double staffGrandTop = 0;
 			bool allSignsIsShown = false;
 			Sign fromSign = signs.First();
 			while (!allSignsIsShown)
 			{
-				StaffGrand staffGrand = new StaffGrand(this, top);
+				StaffGrand staffGrand = new StaffGrand(this, staffGrandTop);
 				staffGrands.Add(staffGrand);
 
-				top = staffGrand.Show(fromSign);
+				staffGrandTop = staffGrand.Show(fromSign);
 				fromSign = staffGrand.lastSign;
 
 				allSignsIsShown = staffGrand.lastSign == signs.Last();
@@ -142,11 +142,13 @@ namespace Nutadore
             // usuwamy wszystkie nuty
             signs.ForEach(sign => sign.Hide(this));
 
-            // usuwamy pozostałe elemetny (klucze, znaki przykluczowe, itd.)
-            canvas.Children.Clear();
-
 			// usuwamy wszystkie podwójne pięciolinie
+			foreach (var staffGrand in staffGrands)
+				staffGrand.Hide();
 			staffGrands.Clear();
-        }
-    }
+
+			// usuwamy pozostałe elemetny (klucze, znaki przykluczowe, itd.)
+			canvas.Children.Clear();
+		}
+	}
 }

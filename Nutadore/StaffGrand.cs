@@ -185,6 +185,14 @@ namespace Nutadore
 			}
 		}
 
+		public void Hide()
+		{
+			foreach(var perform in performs)
+				perform.Hide(score);
+
+			performs.Clear();
+		}
+
 		private Sign HideToBeginOfMeasure(Sign fromSign)
 		{
 			for (int idx = score.signs.IndexOf(fromSign) - 1; idx >= 0 ; idx--)
