@@ -13,7 +13,7 @@ namespace Nutadore
     public class Score
     {
         public Canvas canvas;
-        public Scale scale = new Scale(Scale.Based.C, Scale.Type.Major);
+        public Scale scale = new Scale(Note.Letter.C, Scale.Type.Major);
 		private List<StaffGrand> staffGrands = new List<StaffGrand>();
         public List<Sign> signs = new List<Sign>();
 
@@ -38,39 +38,39 @@ namespace Nutadore
             var trebleNotes = chord.notes.FindAll(note => note.staffType == Staff.Type.Treble);
 
             // Czy sa jakieś nuty wymagające zmiany wysokości wykonania?
-            if (trebleNotes.Any(note => note.perform == Note.Perform.TwoOctaveHigher))
+            if (trebleNotes.Any(note => note.performHowTo == Perform.HowTo.TwoOctaveHigher))
             {
                 // Sa nuty wymagające zmiany wysokości wykonania o dwie oktawy wyżej.
                 // Wyszukaj wszystkie nuty wymagające wykonania o jedną oktawę wyżej
                 // i zmień je na wymagające wykonania o dwie oktawy wyżej.
                 trebleNotes
-                    .FindAll(note => note.perform == Note.Perform.OneOctaveHigher)
+                    .FindAll(note => note.performHowTo == Perform.HowTo.OneOctaveHigher)
                     .ForEach(note =>
                     {
-                        note.perform = Note.Perform.TwoOctaveHigher;
+                        note.performHowTo = Perform.HowTo.TwoOctaveHigher;
                         note.staffPosition.LineNumber -= 3.5;
                     });
 
                 // Wyszukaj wszystkie nuty nie wymagające zmiany wykonania i zmień je na
                 // wymagające wykonania o dwie oktawy wyżej.
                 trebleNotes
-                    .FindAll(note => note.perform == Note.Perform.AtPlace)
+                    .FindAll(note => note.performHowTo == Perform.HowTo.AtPlace)
                     .ForEach(note =>
                     {
-                        note.perform = Note.Perform.TwoOctaveHigher;
+                        note.performHowTo = Perform.HowTo.TwoOctaveHigher;
                         note.staffPosition.LineNumber -= 3.5 * 2;
                     });
             }
-            else if (trebleNotes.Any(note => note.perform == Note.Perform.OneOctaveHigher))
+            else if (trebleNotes.Any(note => note.performHowTo == Perform.HowTo.OneOctaveHigher))
             {
                 // Są nuty wymagające zmiany wysokści wykonania o oktawę wyżej.
                 // Wyszukaj wszystkie nuty nie wymagające zmiany wykonania i zmień je na
                 // wymagające wykonania o jedną oktawę wyżej.
                 trebleNotes
-                    .FindAll(note => note.perform == Note.Perform.AtPlace)
+                    .FindAll(note => note.performHowTo == Perform.HowTo.AtPlace)
                     .ForEach(note =>
                     {
-                        note.perform = Note.Perform.OneOctaveHigher;
+                        note.performHowTo = Perform.HowTo.OneOctaveHigher;
                         note.staffPosition.LineNumber -= 3.5;
                     });
             }
@@ -79,16 +79,16 @@ namespace Nutadore
             var bassNotes = chord.notes.FindAll(note => note.staffType == Staff.Type.Bass);
 
             // Czy sa jakieś nuty wymagające zmiany wysokości wykonania?
-            if (bassNotes.Any(note => note.perform == Note.Perform.OneOctaveLower))
+            if (bassNotes.Any(note => note.performHowTo == Perform.HowTo.OneOctaveLower))
             {
                 // Jest przynajmniej jedna nuta wymagająca wykonania o oktawę niżej.
                 // Wyszukaj wszystkie nuty nie wymagające zmiany wykonania i zmień je na
                 // wymagające wykonania o jedną oktawę niżej.
                 bassNotes
-                    .FindAll(note => note.perform == Note.Perform.AtPlace)
+                    .FindAll(note => note.performHowTo == Perform.HowTo.AtPlace)
                     .ForEach(note =>
                     {
-                        note.perform = Note.Perform.OneOctaveLower;
+                        note.performHowTo = Perform.HowTo.OneOctaveLower;
                         note.staffPosition.LineNumber += 3.5;
                     });
             }
@@ -123,12 +123,17 @@ namespace Nutadore
 			// Rysujemy tyle podwójnych pięciolinii, ile potrzeba
 			// aby zmieściły się na nich wszystkie znaki.
 			double top = 0;
-			bool allSignsFitted = false;
-			while (!allSignsFitted)
+			bool allSignsIsShown = false;
+			Sign fromSign = signs.First();
+			while (!allSignsIsShown)
 			{
 				StaffGrand staffGrand = new StaffGrand(this, top);
 				staffGrands.Add(staffGrand);
-				top = staffGrand.Show(out allSignsFitted);
+
+				top = staffGrand.Show(fromSign);
+				fromSign = staffGrand.lastSign;
+
+				allSignsIsShown = staffGrand.lastSign == signs.Last();
 			}
 		}
 

@@ -4,17 +4,16 @@ namespace Nutadore
 {
     public class Scale
     {
-        private Based based;
+        private Note.Letter based;
         private Type type;
 
-        public Scale(Based based, Type type)
+        public Scale(Note.Letter based, Type type)
         {
             this.based = based;
             this.type = type;
         }
 
         public enum Type { Major, Minor }
-        public enum Based { A, B, C, D, E, F, G }
 
         public Accidental[] Accidentals()
         {

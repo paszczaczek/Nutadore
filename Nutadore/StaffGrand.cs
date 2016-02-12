@@ -18,6 +18,9 @@ namespace Nutadore
         private Staff trebleStaff;
         private Staff bassStaff;
         private double cursor;
+		public Sign firstSign;
+		public Sign lastSign;
+		private List<Perform> performs = new List<Perform>();
 
 		public StaffGrand(Score score, double top)
 		{
@@ -25,7 +28,7 @@ namespace Nutadore
 			this.top = top;
 		}
 
-		public double Show(out bool allSignsFitted)
+		public double Show(Sign fromSign)
 		{
 			// Rysuję klamrę.
 			double braceRight = ShowBrace();
@@ -34,11 +37,10 @@ namespace Nutadore
 			double bottom = ShowStaffs(braceRight);
 
 			// Rysuję nienarysowane jeszcze na piecilinii nuty i inne znaki.
-			allSignsFitted = ShowSigns();
+			ShowSigns(fromSign);
 
-			// Rysuję te elementy których nie można było dokończyć, np. ottvy
-			trebleStaff.ShowPerform();
-			bassStaff.ShowPerform();
+			// Rysuję znaki zmiany wysokości wykonania (ottava)
+			ShowPerform();
 
 			// Zwracam dolną krawędź StaffGrand.
 			return bottom;
@@ -110,58 +112,91 @@ namespace Nutadore
 			return bottom;
 		}
 
-		private bool ShowSigns()
+		private void ShowSigns(Sign fromSign)
 		{
-			List<Sign> signsNotShown = score.signs.FindAll(sign => !sign.IsShown);
-			foreach (Sign sign in signsNotShown)
+			firstSign = fromSign;
+			for (int idx = score.signs.IndexOf(fromSign); idx < score.signs.Count; idx++)
 			{
-				if (sign is Chord)
-				{
-					// Dla akrodu rysuję poczczególne nuty na właściwej pięciolinii
-					Chord chord = sign as Chord;
-					cursor = chord.Show(score, trebleStaff, bassStaff, cursor);
-				}
-				else if (sign is Bar)
-				{
-					// Linie taktów muszą być na obu pięcioliniach.
-					trebleStaff.ShowSign(sign, cursor);
-					cursor = bassStaff.ShowSign(sign, cursor);
-				}
-				else if (sign is Note)
-				{
-					Note note = sign as Note;
-					// Pozostałe znaki na jednej pięciolinii.
-					Staff staff
-						= note.staffType == Staff.Type.Treble
-						? trebleStaff
-						: bassStaff;
-					cursor = staff.ShowSign(sign, cursor);
-				}
+				Sign sign = score.signs[idx];
+				cursor = sign.Show(score, trebleStaff, bassStaff, cursor);
 
 				// Czy znak zmieścil się na pieciolinii?
 				if (cursor == -1)
 				{
 					// Nie - umieścimy go na kolejnym SraffGrand.
 					// Wycofujemy też wszyskie znaki do początku taktu.
-					HideToBeginOfMeasure(sign);
-					return false;
+					lastSign = HideToBeginOfMeasure(sign);
+					break;
+				}
+				else
+				{
+					// Tak - zmieścił się.
+					lastSign = sign;
 				}
 			}
-
-			// Wszystkie znaki zmieściły się.
-			return true;
 		}
 
-		private void HideToBeginOfMeasure(Sign fromSign)
+		private void ShowPerform()
 		{
-			for (int idx = score.signs.IndexOf(fromSign); idx >= 0 ; idx--)
+			Perform.HowTo performHowTo = Perform.HowTo.AtPlace;
+			double performLeft = 0;
+			double performRight = 0;
+
+			int idxFirst = score.signs.IndexOf(firstSign);
+			int idxLast = score.signs.IndexOf(lastSign);
+			for (int idx = idxFirst; idx <= idxLast; idx++)
 			{
 				Sign sign = score.signs[idx];
-				if (!(sign is Bar))
-					sign.Hide(score);
-				else
-					break;
+				if (!(sign is Note))
+					continue;
+
+				Note note = sign as Note;
+
+				bool performChanged = note.performHowTo != performHowTo;
+				bool performNew = performChanged && note.performHowTo != Perform.HowTo.AtPlace;
+				bool performEnd = performChanged && performHowTo != Perform.HowTo.AtPlace;
+				if (performEnd)
+				{
+					// Tu wystąpił koniec znaku zmiany wysokości. Rysuję go.
+					// TODO: konstruktor+show() ?
+					Perform perform = new Perform(performHowTo, performLeft, performRight);
+					performs.Add(perform);
+					perform.Show(score, trebleStaff, bassStaff);
+					performHowTo = Perform.HowTo.AtPlace;
+				}
+				if (performNew)
+				{
+					// Tu wystąpił początek znaku zmiany wysokości. Zapamiętuję jego położnie i wysokość.
+					performHowTo = note.performHowTo;
+					performLeft = note.left;
+				}
+				performRight = note.right;
 			}
+
+
+			if (performHowTo != Perform.HowTo.AtPlace)
+			{
+				// Tu wystąpił koniec znaku zmiany wysokości. Rysuję go.
+				// TODO: konstruktor+show() ?
+				Perform perform = new Perform(performHowTo, performLeft, performRight);
+				performs.Add(perform);
+				perform.Show(score, trebleStaff, bassStaff);
+				performHowTo = Perform.HowTo.AtPlace;
+			}
+		}
+
+		private Sign HideToBeginOfMeasure(Sign fromSign)
+		{
+			for (int idx = score.signs.IndexOf(fromSign) - 1; idx >= 0 ; idx--)
+			{
+				Sign sign = score.signs[idx];
+				if (sign is Bar)
+					return sign;
+				else
+					sign.Hide(score);
+			}
+
+			return null;
 		}
 	}
 }

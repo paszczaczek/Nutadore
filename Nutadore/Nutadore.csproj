@@ -23,6 +23,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -56,6 +57,7 @@
     <Compile Include="Chord.cs" />
     <Compile Include="Clef.cs" />
     <Compile Include="Note.cs" />
+    <Compile Include="Perform.cs" />
     <Compile Include="Scale.cs" />
     <Compile Include="Score.cs" />
     <Compile Include="Bar.cs" />
@@ -106,6 +108,7 @@
     <Resource Include="Misc\Fonts\feta-braces-h.ttf" />
     <Resource Include="Misc\Fonts\feta-braces-i.ttf" />
     <Resource Include="Misc\Fonts\feta.ttf" />
+    <None Include="ClassDiagram.cd" />
     <None Include="Misc\LilyPond\essay.pdf" />
     <None Include="Misc\LilyPond\music-glossary.pdf" />
     <None Include="Misc\LilyPond\snippets.pdf" />

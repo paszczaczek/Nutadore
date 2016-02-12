@@ -27,7 +27,7 @@ namespace Nutadore
             InitializeComponent();
 
             score = new Score(canvas);
-            score.scale = new Scale(Scale.Based.C, Scale.Type.Minor);
+            score.scale = new Scale(Note.Letter.C, Scale.Type.Minor);
 
 #if false
             Chord chord1 = new Chord();

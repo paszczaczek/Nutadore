@@ -10,17 +10,19 @@ namespace Nutadore
     {
         public Letter letter;
         public Octave octave;
-        public Perform perform;
+        //public Perform perform;
+		public Perform.HowTo performHowTo;
         public StaffPosition staffPosition = StaffPosition.ByLine(1);
         public Staff.Type staffType;
 
-		private Label letterLabel;
+		public double left;
+		public double right; 
 
 		public Note(Letter letter, Octave octave, Staff.Type? preferredStaffType = null)
         {
             this.letter = letter;
             this.octave = octave;
-            this.staffPosition = CalculateStaffPosition(preferredStaffType);
+            this.staffPosition = ToStaffPosition(preferredStaffType);
         }
 
         public enum Letter {
@@ -46,15 +48,124 @@ namespace Nutadore
             FiveLined
         }
 
-        public enum Perform
-        {
-            AtPlace,
-            OneOctaveHigher,
-            OneOctaveLower,
-            TwoOctaveHigher
-        }
+        //public enum Perform
+        //{
+        //    AtPlace,
+        //    OneOctaveHigher,
+        //    OneOctaveLower,
+        //    TwoOctaveHigher
+        //}
 
-        override public double Show(Score score, double left, double top)
+		public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		{
+			// Left i right będą potrzebne do rysowania znaków ottavy
+			this.left = left;
+
+			// Na której pięciolinii ma być umieszczona nuta?
+			Staff staff
+				= staffType == Staff.Type.Treble
+				? trebleStaff
+				: bassStaff;
+
+			// Rysujemy znak nuty.
+			string glyphCode = "\x0056";
+			double glyphTop
+					= staff.top * score.Magnification
+					 + (4 - staffPosition.LineNumber) * Staff.spaceBetweenLines * score.Magnification;
+			glyphTop -= 57.5 * score.Magnification;
+			right = base.ShowFetaGlyph(score, left, glyphTop, glyphCode);
+
+			// Czy trzeba dorysować linie dodane?
+			double legerLeft = left - (right - left) * 0.2;
+			double legerRight = right + (right - left) * 0.2;
+			if (this.staffPosition <= StaffPosition.ByLegerBelow(1))
+			{
+				// Tak, trzeba dorysować linie dodane dolne.
+				for (var staffPosition = StaffPosition.ByLegerBelow(1);
+					 staffPosition >= this.staffPosition;
+					 staffPosition.SubstractLine(1))
+				{
+					double y = staff.StaffPositionToY(staffPosition);
+					Line legerLine = new Line
+					{
+						X1 = legerLeft,
+						X2 = legerRight,
+						Y1 = y,
+						Y2 = y,
+						Stroke = Brushes.Black,
+						StrokeThickness = 0.5
+					};
+					base.AddElement(score, legerLine);
+				}
+				right = legerRight;
+			}
+			else if (this.staffPosition >= StaffPosition.ByLegerAbove(1))
+			{
+				// Tak, trzeba dorysować linie dodane górne.
+				for (var staffPosition = StaffPosition.ByLegerAbove(1);
+					 staffPosition <= this.staffPosition;
+					 staffPosition.AddLine(1))
+				{
+					double y = staff.StaffPositionToY(staffPosition);
+					Line legerLine = new Line
+					{
+						X1 = legerLeft,
+						X2 = legerRight,
+						Y1 = y,
+						Y2 = y,
+						Stroke = Brushes.Black,
+						StrokeThickness = 0.5
+					};
+					base.AddElement(score, legerLine);
+				}
+				right = legerRight;
+			}
+
+			// Rysujemy pomocniczą nazwę nuty.
+			double letterTop
+					= staff.top * score.Magnification
+					+ (4 - staffPosition.LineNumber) * Staff.spaceBetweenLines * score.Magnification;
+			letterTop -= 7 * score.Magnification;
+			double letterLeft = left + 3 * score.Magnification;
+			Label letterLabel = new Label
+			{
+				FontFamily = new FontFamily("Consolas"),
+				FontSize = 12 * score.Magnification,
+				Content = this.letter.ToString(),
+				Foreground = Brushes.White,
+				Padding = new Thickness(0, 0, 0, 0),
+				Margin = new Thickness(letterLeft, letterTop, 0, 0)
+			};
+			base.AddElement(score, letterLabel);
+
+			// Czy znak zmieścił sie na pięcolinii?
+			if (right >= score.canvas.ActualWidth - Staff.marginLeft)
+			{
+				// Nie zmieścił się - narysujemy ją na następnej pieciolinii.
+				base.Hide(score);
+
+				// Trzeba jeszcze narysować nienarysowane ottavy
+				//if (staff.performHowTo != Perform.HowTo.AtPlace)
+				//	staff.ShowPerform_OLD(); // TODO: to chyba trzeba wyrzucić
+
+				return -1;
+			}
+			else
+			{
+				// Mogą być potrzebne znaki zmiany wysokości wykonania
+				//staff.FindPerform(this, left, right); // TODO: to chyba trzeba wywalić
+
+				// Znak zmieścił sie na pięciolinii.
+				//right += Staff.spaceBetweenSigns * score.Magnification;
+				return right + Staff.spaceBetweenSigns * score.Magnification;
+			}
+
+			//return right;
+		}
+
+
+		// TODO: wywalić
+		override public double Show(Score score, double left, double top)
         {           
 			// Rysujemy znak nuty.
             string glyphCode = "\x0056";
@@ -69,7 +180,7 @@ namespace Nutadore
                     + (4 - staffPosition.LineNumber) * Staff.spaceBetweenLines * score.Magnification;
             letterTop -= 7 * score.Magnification;
             double letterLeft = left + 3 * score.Magnification;
-            letterLabel = new Label
+            UIElement letterLabel = new Label
             {
                 FontFamily = new FontFamily("Consolas"),
                 FontSize = 12 * score.Magnification,
@@ -79,7 +190,7 @@ namespace Nutadore
                 Margin = new Thickness(letterLeft, letterTop, 0, 0)
             };
             score.canvas.Children.Add(letterLabel);
-
+			uiElements.Add(letterLabel);
 #if false
 			// Czy trzeba dorysować linie dodane?
 			double legerLeft = left - (right - left) * 0.2;
@@ -132,10 +243,9 @@ namespace Nutadore
 		override public void Hide(Score score)
 		{
 			base.Hide(score);
-			score.canvas.Children.Remove(letterLabel);
 		}
 
-		public StaffPosition CalculateStaffPosition(Staff.Type? preferredStaffType, bool withPerform = true)
+		public StaffPosition ToStaffPosition(Staff.Type? preferredStaffType, bool withPerform = true)
         {
             // na której linii leży dźwięk C z oktawy w której jest nuta
             double lineNumber = 0;
@@ -218,7 +328,7 @@ namespace Nutadore
                 if (octave == Octave.FiveLined)
                 {
                     // Tak, na pięcionii wiolinowej rysujemy o dwie oktawy niżej.
-                    perform = Perform.TwoOctaveHigher;
+                    performHowTo = Perform.HowTo.TwoOctaveHigher;
                     lineNumber -= 3.5 * 2;
                 }
                 // else if (octave == Octave.FourLined && letter >= Letter.D ||
@@ -226,14 +336,14 @@ namespace Nutadore
                     octave > Octave.FourLined)
                 {
                     // Tak, na pięcionii wiolinowej rysujemy o oktawę niżej.
-                    perform = Perform.OneOctaveHigher;
+                    performHowTo = Perform.HowTo.OneOctaveHigher;
                     lineNumber -= 3.5;
                 }
                 else if (octave == Octave.Contra && letter <= Letter.E ||
                     octave < Octave.Contra)
                 {
                     // Tak, na pięciolinii basowej rysujemy o oktawę wyżej
-                    perform = Perform.OneOctaveLower;
+                    performHowTo = Perform.HowTo.OneOctaveLower;
                     lineNumber += 3.5;
                 }
             }

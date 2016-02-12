@@ -11,7 +11,7 @@ namespace Nutadore
             notes.Add(note);
         }
 
-        public double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
+        public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
         {
             double chordRight = left;
             foreach (var note in notes)
@@ -20,7 +20,8 @@ namespace Nutadore
                     = note.staffType == Staff.Type.Treble
                     ? trebleStaff
                     : bassStaff;
-                double noteRight = staff.ShowSign(note, left);
+                // double noteRight = staff.ShowSign(note, left); // TODO: sprawdzić czy to działa!
+				double noteRight = note.Show(score, trebleStaff, bassStaff, left);
                 if (noteRight > chordRight || noteRight == -1)
                     chordRight = noteRight;
             }
