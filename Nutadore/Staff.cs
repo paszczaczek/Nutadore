@@ -9,11 +9,11 @@ namespace Nutadore
     {
         static public readonly double marginLeft = 10;
         static public readonly double spaceBetweenLines = 10;
-        static private readonly double spaceBetweenScaleSigns = 1;
+        static public readonly double spaceBetweenScaleSigns = 1;
         static public readonly double spaceBetweenSigns = 15;
 
 		private Score score;
-        private Type type;
+        public Type type;
         private double left;
         public double top;
 
@@ -39,14 +39,7 @@ namespace Nutadore
             // Dodaję pomocnicze kolorowe linie.
             ShowHelperLines();
 
-            // Dodaję klucz.
-            double clefRight = ShowClef();
-
-            // Dodaję znaki przykluczowe.
-            double signRight = ShowScale(clefRight);
-
-            // Zwracam miejsce w którym mozna umieszczać następny znak.
-            return signRight + spaceBetweenSigns;
+			return left;
         }
 
         private void ShowLines()
@@ -96,34 +89,12 @@ namespace Nutadore
             }
         }
 
-        private double ShowClef()
-		{
-            Clef clef = new Clef((Clef.Type)type);
-            double clefTop = StaffPositionToY(StaffPosition.ByLine(2));
-            double clefRight = clef.Show(score, left, clefTop);
-            return clefRight;
-        }
-
-        private double ShowScale(double clefRight)
-		{
-            double signLeft = clefRight + 10 * score.Magnification;
-            foreach (Accidental accidental in score.scale.Accidentals())
-            {
-                double signTop = StaffPositionToY(accidental.staffPosition);
-                signLeft
-                    = accidental.Show(score, signLeft, signTop)
-                    + spaceBetweenScaleSigns * score.Magnification;
-            }
-
-            return signLeft;
-        }
-
         public double StaffPositionToY(StaffPosition staffPosition)
 		{
             return
                 // tu będzie piąta linia
                 top * score.Magnification
-                + (4 - staffPosition.LineNumber) * spaceBetweenLines * score.Magnification;
+                + (4 - staffPosition.Number) * spaceBetweenLines * score.Magnification;
         }
     }
 }

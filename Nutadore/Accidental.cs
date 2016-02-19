@@ -16,14 +16,20 @@ namespace Nutadore
             this.staffPosition = statfPosition;
         }
 
-        override public double Show(Score score, double left, double top)
+		public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
         {
-            string glyphCode = "\x002e";
-            double glyphTop = top;
-            glyphTop -= 57 * score.Magnification;
-            double right = base.ShowFetaGlyph(score, left, glyphTop, glyphCode);
+			double right = left;
 
-            return right;
+            string glyphCode = "\x002e";
+			foreach (Staff staff in new[] { trebleStaff, bassStaff })
+			{
+				double glyphTop = staff.StaffPositionToY(staffPosition);
+
+				glyphTop -= 57 * score.Magnification;
+				right = base.ShowFetaGlyph(score, left, glyphTop, glyphCode);
+			}
+
+			return right;
         }
     }
 }

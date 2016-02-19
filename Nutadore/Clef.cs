@@ -9,45 +9,34 @@ namespace Nutadore
 {
     public class Clef : Sign
     {
-        public enum Type
+        public Clef()
         {
-            Treble,
-            Bass,
-            TrebleSmall,
-            BassSmall
         }
 
-        private Type type;
+		public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		{
+			double maxRightClef = left;
+			foreach (Staff staff in new[] { trebleStaff, bassStaff })
+			{
+				string glyphCode = null;
+				double glyphTop = staff.StaffPositionToY(StaffPosition.ByLine(2));
+				switch (staff.type)
+				{
+					case Staff.Type.Treble:
+						glyphCode = "\x00c9";
+						glyphTop -= 57 * score.Magnification;
+						break;
+					case Staff.Type.Bass:
+						glyphCode = "\x00c7";
+						glyphTop -= 77.5 * score.Magnification;
+						break;
+				}
+				double rightClef = base.ShowFetaGlyph(score, left, glyphTop, glyphCode);
+				if (rightClef > maxRightClef)
+					maxRightClef = rightClef;
+			}
 
-        public Clef(Type type)
-        {
-            this.type = type;
-        }
-
-        override public double Show(Score score, double left, double top)
-        {
-            string glyphCode = null;
-            double glyphTop = top;
-            switch (type)
-            {
-                case Type.Treble:
-                    glyphCode = "\x00c9";
-                    glyphTop -= 57 * score.Magnification;
-                    break;
-                case Type.Bass:
-                    glyphCode = "\x00c7";
-                    glyphTop -= 77.5 * score.Magnification;
-                    break;
-                case Type.TrebleSmall:
-                    // TODO
-                    break;
-                case Type.BassSmall:
-                    // TODO
-                    break;
-                default:
-                    break;
-            }
-            double right = base.ShowFetaGlyph(score, left, glyphTop, glyphCode);
+			double right = maxRightClef + Staff.spaceBetweenSigns * score.Magnification;
 
             return right;
         }

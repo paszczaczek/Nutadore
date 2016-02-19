@@ -8,30 +8,24 @@ namespace Nutadore
 {
     abstract public class Sign
     {
-		//public StaffPosition staffPosition = StaffPosition.ByLine(1);
-		//public Staff.Type staffType;
-
 		protected List<UIElement> uiElements = new List<UIElement>();
 
-		virtual public double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		public virtual double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
 		{
 			return left;
 		}
 
-		virtual public double Show(Score score, double left, double top)
-        {
-            return left;
-        }
+		public virtual void Hide(Score score)
+		{
+			foreach (var uiElement in uiElements)
+				score.canvas.Children.Remove(uiElement);
 
-        virtual public void Hide(Score score)
-        {
-			if (score != null)
-			{
-				//uiElements.ForEach(uie => score.canvas.Children.Remove(uie));
-				foreach (var uie in uiElements)
-					score.canvas.Children.Remove(uie);
-			}
 			uiElements.Clear();
+		}
+
+        public virtual bool IsShown
+        {
+            get { return uiElements.Count > 0; }
         }
 
 		protected void AddElement(Score score, UIElement uiElement)
@@ -40,14 +34,8 @@ namespace Nutadore
 			uiElements.Add(uiElement);
 		}
 
-        virtual public bool IsShown
+		protected double ShowFetaGlyph(Score score, double glyphLeft, double glyphTop, string glyphCode)
         {
-            get { return uiElements.Count > 0; }
-        }
-
-        protected double ShowFetaGlyph(Score score, double glyphLeft, double glyphTop, string glyphCode)
-        {
-
             const string familyName = "feta26";
             double fontSize = 42 * score.Magnification;
 

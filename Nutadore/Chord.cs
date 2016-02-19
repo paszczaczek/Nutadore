@@ -33,8 +33,7 @@ namespace Nutadore
             notes.ForEach(note => note.Hide(score));
         }
 
-
-        override public bool IsShown
+        public override bool IsShown
         {
             get
             {

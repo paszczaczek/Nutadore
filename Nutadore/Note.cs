@@ -10,7 +10,6 @@ namespace Nutadore
     {
         public Letter letter;
         public Octave octave;
-        //public Perform perform;
 		public Perform.HowTo performHowTo;
         public StaffPosition staffPosition = StaffPosition.ByLine(1);
         public Staff.Type staffType;
@@ -48,14 +47,6 @@ namespace Nutadore
             FiveLined
         }
 
-        //public enum Perform
-        //{
-        //    AtPlace,
-        //    OneOctaveHigher,
-        //    OneOctaveLower,
-        //    TwoOctaveHigher
-        //}
-
 		public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
 		{
 			// Left i right będą potrzebne do rysowania znaków ottavy
@@ -71,7 +62,7 @@ namespace Nutadore
 			string glyphCode = "\x0056";
 			double glyphTop
 					= staff.top * score.Magnification
-					 + (4 - staffPosition.LineNumber) * Staff.spaceBetweenLines * score.Magnification;
+					 + (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
 			glyphTop -= 57.5 * score.Magnification;
 			right = base.ShowFetaGlyph(score, left, glyphTop, glyphCode);
 
@@ -124,7 +115,7 @@ namespace Nutadore
 			// Rysujemy pomocniczą nazwę nuty.
 			double letterTop
 					= staff.top * score.Magnification
-					+ (4 - staffPosition.LineNumber) * Staff.spaceBetweenLines * score.Magnification;
+					+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
 			letterTop -= 7 * score.Magnification;
 			double letterLeft = left + 3 * score.Magnification;
 			Label letterLabel = new Label
@@ -162,83 +153,6 @@ namespace Nutadore
 
 			//return right;
 		}
-
-
-		// TODO: wywalić
-		override public double Show(Score score, double left, double top)
-        {           
-			// Rysujemy znak nuty.
-            string glyphCode = "\x0056";
-            double glyphTop
-                    = top
-                     + (4 - staffPosition.LineNumber) * Staff.spaceBetweenLines * score.Magnification;
-            glyphTop -= 57.5 * score.Magnification;
-            double right = base.ShowFetaGlyph(score, left, glyphTop, glyphCode);
-
-            double letterTop
-                    = top
-                    + (4 - staffPosition.LineNumber) * Staff.spaceBetweenLines * score.Magnification;
-            letterTop -= 7 * score.Magnification;
-            double letterLeft = left + 3 * score.Magnification;
-            UIElement letterLabel = new Label
-            {
-                FontFamily = new FontFamily("Consolas"),
-                FontSize = 12 * score.Magnification,
-                Content = this.letter.ToString(),
-                Foreground = Brushes.White,
-                Padding = new Thickness(0, 0, 0, 0),
-                Margin = new Thickness(letterLeft, letterTop, 0, 0)
-            };
-            score.canvas.Children.Add(letterLabel);
-			uiElements.Add(letterLabel);
-#if false
-			// Czy trzeba dorysować linie dodane?
-			double legerLeft = left - (right - left) * 0.2;
-			double legerRight = right + (right - left) * 0.2;
-			if (this.staffPosition <= StaffPosition.ByLegerBelow(1))
-			{
-				// Tak, trzeba dorysować linie dodane dolne.
-				for (var staffPosition = StaffPosition.ByLegerBelow(1);
-					 staffPosition >= this.staffPosition;
-					 staffPosition.SubstractLine(1))
-				{
-					double y = StaffPositionToY(score, staffPosition);
-					Line lagerLine = new Line
-					{
-						X1 = legerLeft,
-						X2 = legerRight,
-						Y1 = y,
-						Y2 = y,
-						Stroke = Brushes.Black,
-						StrokeThickness = 0.5
-					};
-					score.canvas.Children.Add(lagerLine);
-				}
-			}
-			else if (this.staffPosition >= StaffPosition.ByLegerAbove(1))
-			{
-				// Tak, trzeba dorysować linie dodane górne.
-				for (var staffPosition = StaffPosition.ByLegerAbove(1);
-					 staffPosition <= this.staffPosition;
-					 staffPosition.AddLine(1))
-				{
-					double y = StaffPositionToY(score, staffPosition);
-					Line lagerLine = new Line
-					{
-						X1 = legerLeft,
-						X2 = legerRight,
-						Y1 = y,
-						Y2 = y,
-						Stroke = Brushes.Black,
-						StrokeThickness = 0.5
-					};
-					score.canvas.Children.Add(lagerLine);
-				}
-			}
-#endif
-
-			return right;
-        }
 
 		override public void Hide(Score score)
 		{
@@ -351,32 +265,7 @@ namespace Nutadore
             // dodajemy przesunięcie względem dzięku C
             lineNumber += (double)letter / 2;
 
-            return StaffPosition.ByLineNumber(lineNumber);
-        }
-
-        public SolidColorBrush Brush
-        {
-            get
-            {
-                switch (letter)
-                {
-                    case Letter.C:
-                        return Brushes.Red;
-                    case Letter.D:
-                        return Brushes.Orange;
-                    case Letter.E:
-                        return Brushes.Yellow;
-                    case Letter.F:
-                        return Brushes.Green;
-                    case Letter.G:
-                        return Brushes.Blue;
-                    case Letter.A:
-                        return Brushes.Indigo;
-                    case Letter.H:
-                    default:
-                        return Brushes.Violet;
-                }
-            }
+            return StaffPosition.ByNumber(lineNumber);
         }
     }
 }

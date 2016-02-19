@@ -15,7 +15,22 @@ namespace Nutadore
 
         public enum Type { Major, Minor }
 
-        public Accidental[] Accidentals()
+		public double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		{
+			double signLeft = left;
+			foreach (Accidental accidental in score.scale.Accidentals())
+			{
+				signLeft
+					= accidental.Show(score, trebleStaff, bassStaff, signLeft)
+					+ Staff.spaceBetweenScaleSigns * score.Magnification;
+			}
+
+			double scaleRight = signLeft + Staff.spaceBetweenSigns;
+
+			return scaleRight;
+		}
+
+		public Accidental[] Accidentals()
         {
             return new Accidental[] {
                 new Accidental(StaffPosition.ByLine(5)),

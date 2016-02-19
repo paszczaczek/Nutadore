@@ -17,6 +17,7 @@ namespace Nutadore
 		private double top;
         private Staff trebleStaff;
         private Staff bassStaff;
+		private Clef clef;
         private double cursor;
 		public Sign firstSign;
 		public Sign lastSign;
@@ -28,21 +29,21 @@ namespace Nutadore
 			this.top = top;
 		}
 
-		public double Show(Sign fromSign)
+		public double Show(Sign fromSign, out Sign nextSign)
 		{
 			// Rysuję klamrę.
 			double braceRight = ShowBrace();
 
-			// Rysuję pięciolinie wiolinową i basową.
+			// Rysuję pięciolinie wiolinową i basową, klucze i znaki przykluczowe.
 			double bottom = ShowStaffs(braceRight);
 
-			// Rysuję nienarysowane jeszcze na piecilinii nuty i inne znaki.
-			ShowSigns(fromSign);
+			// Rysuję nuty i inne znaki.
+			nextSign = ShowSigns(fromSign);
 
 			// Rysuję znaki zmiany wysokości wykonania (ottava)
 			ShowPerform();
 
-			// Zwracam dolną krawędź StaffGrand.
+			// Zwracam pierwszą nutę do narysowania na następnym StaffGrand
 			return bottom;
 		}
 
@@ -87,7 +88,7 @@ namespace Nutadore
 			// Rysuję pięciolinię wiolinową.
 			double trebleStaffTop = top + spaceAboveTrebleStaff;
 			trebleStaff = new Staff(score, Staff.Type.Treble, left, trebleStaffTop);
-			double trebleStaffRight = trebleStaff.Show();
+			trebleStaff.Show();
 
 			// Rysuję pięciolinię basową.
 			double bassStaffTop
@@ -95,13 +96,14 @@ namespace Nutadore
 				+ Staff.spaceBetweenLines * 4
 				+ spaceBetweenTrebleAndBassStaff;
 			bassStaff = new Staff(score, Staff.Type.Bass, left, bassStaffTop);
-			double bassStaffRight = bassStaff.Show();
+			bassStaff.Show();
 
-			// Wyznaczam połoznenie kursora na StaffGrand.
-			cursor
-				= trebleStaffRight > bassStaffRight
-				? trebleStaffRight
-				: bassStaffRight;
+			// Rysuję klucz wiolinowy i basowy.
+			clef = new Clef();
+			cursor = clef.Show(score, trebleStaff, bassStaff, left);
+
+			// Rysuję znaki przykluczowe wynikające z tonacji.
+			cursor = score.scale.Show(score, trebleStaff, bassStaff, cursor);
 
 			// Wyznaczam dolną krawędź StaffGrand i zwracam ją.
 			double bottom
@@ -112,7 +114,7 @@ namespace Nutadore
 			return bottom;
 		}
 
-		private void ShowSigns(Sign fromSign)
+		private Sign ShowSigns(Sign fromSign)
 		{
 			firstSign = fromSign;
 			for (int idx = score.signs.IndexOf(fromSign); idx < score.signs.Count; idx++)
@@ -125,8 +127,10 @@ namespace Nutadore
 				{
 					// Nie - umieścimy go na kolejnym SraffGrand.
 					// Wycofujemy też wszyskie znaki do początku taktu.
-					lastSign = HideToBeginOfMeasure(sign);
-					break;
+					int idxBar = HideToBeginOfMeasure(sign);
+					lastSign = score.signs[idxBar];
+					Sign nextSign = score.signs[idxBar + 1];
+					return nextSign;
 				}
 				else
 				{
@@ -134,6 +138,9 @@ namespace Nutadore
 					lastSign = sign;
 				}
 			}
+
+			// Wszystkie zmieściły się.
+			return null;
 		}
 
 		private void ShowPerform()
@@ -193,18 +200,19 @@ namespace Nutadore
 			performs.Clear();
 		}
 
-		private Sign HideToBeginOfMeasure(Sign fromSign)
+		private int HideToBeginOfMeasure(Sign fromSign)
 		{
 			for (int idx = score.signs.IndexOf(fromSign) - 1; idx >= 0 ; idx--)
 			{
 				Sign sign = score.signs[idx];
+				// Zwraca index pierwszego znaku taktu.
 				if (sign is Bar)
-					return sign;
+					return idx;
 				else
 					sign.Hide(score);
 			}
 
-			return null;
+			return score.signs.Count - 1;
 		}
 	}
 }

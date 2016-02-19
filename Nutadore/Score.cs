@@ -48,7 +48,7 @@ namespace Nutadore
                     .ForEach(note =>
                     {
                         note.performHowTo = Perform.HowTo.TwoOctaveHigher;
-                        note.staffPosition.LineNumber -= 3.5;
+                        note.staffPosition.Number -= 3.5;
                     });
 
                 // Wyszukaj wszystkie nuty nie wymagające zmiany wykonania i zmień je na
@@ -58,7 +58,7 @@ namespace Nutadore
                     .ForEach(note =>
                     {
                         note.performHowTo = Perform.HowTo.TwoOctaveHigher;
-                        note.staffPosition.LineNumber -= 3.5 * 2;
+                        note.staffPosition.Number -= 3.5 * 2;
                     });
             }
             else if (trebleNotes.Any(note => note.performHowTo == Perform.HowTo.OneOctaveHigher))
@@ -71,7 +71,7 @@ namespace Nutadore
                     .ForEach(note =>
                     {
                         note.performHowTo = Perform.HowTo.OneOctaveHigher;
-                        note.staffPosition.LineNumber -= 3.5;
+                        note.staffPosition.Number -= 3.5;
                     });
             }
 
@@ -89,7 +89,7 @@ namespace Nutadore
                     .ForEach(note =>
                     {
                         note.performHowTo = Perform.HowTo.OneOctaveLower;
-                        note.staffPosition.LineNumber += 3.5;
+                        note.staffPosition.Number += 3.5;
                     });
             }
         }
@@ -127,12 +127,22 @@ namespace Nutadore
 			Sign fromSign = signs.First();
 			while (!allSignsIsShown)
 			{
+				// Rysujemy nowy StaffGrand.
 				StaffGrand staffGrand = new StaffGrand(this, staffGrandTop);
 				staffGrands.Add(staffGrand);
 
-				staffGrandTop = staffGrand.Show(fromSign);
-				fromSign = staffGrand.lastSign;
+				// Wyświetlamy na nim znaki.
+				Sign nextSign;
+				staffGrandTop = staffGrand.Show(fromSign, out nextSign);
+				if (nextSign == fromSign)
+				{
+					// Żadnej nuty nie udało się narysować (nie zmieścił się żaden takt).
+					// Za wąska partytura - przerywany rysowanie.
+					break;
+				}
+				fromSign = nextSign;
 
+				// Czy wszystkie znaki zmieściły się na nim?
 				allSignsIsShown = staffGrand.lastSign == signs.Last();
 			}
 		}

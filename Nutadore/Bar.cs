@@ -8,7 +8,6 @@ namespace Nutadore
     {
         public Bar()
         {
-            //base.staffPosition = StaffPosition.ByLine(5);
         }
 
 		public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
@@ -44,24 +43,5 @@ namespace Nutadore
 
 			return right;
 		}
-
-		// TODO: wywalic
-		override public double Show(Score score, double left, double top)
-        {
-            //base.score = score;
-            UIElement barLine = new Line
-            {
-                X1 = left,
-                X2 = left,
-                Y1 = top,
-                Y2 = top + Staff.spaceBetweenLines * 4 * score.Magnification,
-                Stroke = Brushes.Black,
-                StrokeThickness = 1
-            };
-            score.canvas.Children.Add(barLine);
-			uiElements.Add(barLine);
-
-            return left + 1;
-        }
     }
 }
