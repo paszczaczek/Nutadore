@@ -23,61 +23,24 @@ namespace Nutadore
             return new StaffPosition(Line.Base1 - lineNo, above);
         }
 
-        static private void CheckLineNo(int lineNo, int lineNoMin, int lineNoMax, string lineName)
-        {
-            if (lineNo < lineNoMin || lineNo > lineNoMax)
-                throw new ArgumentOutOfRangeException(
-                    "line", 
-                    lineNo, string.Format(
-						"Numer {0} pieciolinii musi być liczba {1}..{2}", 
-						lineName, lineNoMin, lineNoMax));
-        }
-
-#if false
-		static public StaffPosition ByLineNumber(double lineNumber)
-        {
-            double lineNumberMin = (int)Line.LegerBelow6;
-            double lineNumberMax = (int)Line.LegerAbove5 + 0.5;
-            double remainder = lineNumber % 1;
-            if (lineNumber < lineNumberMin ||
-                lineNumber > lineNumberMax ||
-                remainder != 0 && Math.Abs(remainder) != 0.5)
-            {
-                string message = string.Format(
-                    "Numeracja wewnętrzna linii pięciolinii musi być liczą {0}..{1} podzielną przez 1 lub 0.5",
-                    lineNumberMin, lineNumberMax);
-                throw new ArgumentOutOfRangeException("number", lineNumber, message);
-            }
-
-            Line lineName;
-            bool lineAbove;
-            if (remainder == 0)
-            {
-                lineName = (Line)(int)lineNumber;
-                lineAbove = false;
-            }
-            else if (remainder > 0)
-            {
-                lineName = (Line)(int)lineNumber;
-                lineAbove = true;
-            }
-            else // remainder < 0
-            {
-                lineName = (Line)(int)(lineNumber - 1);
-                lineAbove = true;
-            }
-
-            return new StaffPosition(lineName, lineAbove);
-        }
-#endif
-
 		static public StaffPosition ByNumber(double number)
 		{
 			return new StaffPosition(number);
 		}
-        #endregion
 
-        public enum Line
+		static private void CheckLineNo(int lineNo, int lineNoMin, int lineNoMax, string lineName)
+		{
+			if (lineNo < lineNoMin || lineNo > lineNoMax)
+				throw new ArgumentOutOfRangeException(
+					"line",
+					lineNo, string.Format(
+						"Numer {0} pieciolinii musi być liczba {1}..{2}",
+						lineName, lineNoMin, lineNoMax));
+		}
+		#endregion
+
+		#region enum i property
+		public enum Line
         {
             LegerBelow6 = -6,
             LegerBelow5 = -5,
@@ -96,38 +59,15 @@ namespace Nutadore
             LegerAbove4 = 8,
             LegerAbove5 = 9
         }
-
-        //private Line lineName;
-        //private bool lineAbove;
-        //public double LineNumber
-        //{
-        //    get
-        //    {
-        //        return (double)lineName + (lineAbove ? 0.5 : 0.0);
-        //    }
-        //    set
-        //    {
-        //        if (value > 0)
-        //        {
-        //            lineName = (Line)(int)value;
-        //            lineAbove = (value % 1) == 0.5;
-        //        }
-        //        else
-        //        {
-        //            lineName = (Line)(int)(value - 0.5);
-        //            lineAbove = (value % 1) == -0.5;
-        //        }
-        //    }
-        //}
-
-		double lineNumberMin = (int)Line.LegerBelow6;
-		double lineNumberMax = (int)Line.LegerAbove5 + 0.5 + 3.0/* to 3.0 jest dla napisów 8va */;
-
+		
 		private double number;
 		public double Number
 		{
 			set
 			{
+				const double lineNumberMin = (int)Line.LegerBelow6;
+				const double lineNumberMax = (int)Line.LegerAbove5 + 0.5 + 3.0/* to 3.0 jest dla napisów 8va */;
+
 				double remainder = value % 1;
 				if (value < lineNumberMin ||
 					value > lineNumberMax ||
@@ -182,20 +122,21 @@ namespace Nutadore
 				}
 			}
 		}
+		#endregion
 
-
+		#region Konstruktory prywatne
 		// Konstruktor prywatny
 		private StaffPosition(Line lineName, bool lineAbove)
         {
-            // this.lineName = lineName;
-            // this.lineAbove = lineAbove;
 			Number = (double)lineName + (lineAbove ? 0.5 : 0.0);
 		}
 
+		// Konstruktor prywatny
 		private StaffPosition(double number)
 		{
 			Number = number;
 		}
+		#endregion
 
 		#region Funkcje do obsługi petli for()
 		public int CompareTo(object obj)
@@ -208,19 +149,6 @@ namespace Nutadore
 				return 1;
 			else
 				return -1;
-			/*
-            if (this.lineName == staffPosition.lineName)
-            {
-                if (this.lineAbove == staffPosition.lineAbove)
-                    return 0;
-                if (this.lineAbove && !staffPosition.lineAbove)
-                    return 1;
-                return -1;
-            }
-            if (this.lineName > staffPosition.lineName)
-                return 1;
-            return -1;
-			*/
         }
 
         static public bool operator <=(StaffPosition staffPosition1, StaffPosition staffPosition2)
@@ -235,14 +163,12 @@ namespace Nutadore
 
         public StaffPosition AddLine(int count)
         {
-			//lineName += count;
 			Number += count;
             return this;
         }
 
         public StaffPosition SubstractLine(int count)
         {
-			//lineName -= count;
 			Number -= count;
             return this;
         }
