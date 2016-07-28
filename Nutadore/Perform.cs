@@ -10,6 +10,11 @@ using System.Windows.Shapes;
 
 namespace Nutadore
 {
+    /// <summary>
+    /// Znak tak zwanej ottavy czyli pozioma linia zakończona krótka pionową kreseczką
+    /// umieszczana nad lub pod pięciolinią informująca że nutę trzeba zagrać jedną lub więcej
+    /// oktaw wyżej lub niżej.
+    /// </summary>
 	public class Perform : Sign
 	{
 		private double left;
