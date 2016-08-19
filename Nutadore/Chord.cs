@@ -21,7 +21,7 @@ namespace Nutadore
                     ? trebleStaff
                     : bassStaff;
                 // double noteRight = staff.ShowSign(note, left); // TODO: sprawdzić czy to działa!
-				double noteRight = note.Show(score, trebleStaff, bassStaff, left);
+                double noteRight = note.Show(score, trebleStaff, bassStaff, left);
                 if (noteRight > chordRight || noteRight == -1)
                     chordRight = noteRight;
             }

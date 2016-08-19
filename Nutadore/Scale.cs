@@ -15,22 +15,22 @@ namespace Nutadore
 
         public enum Type { Major, Minor }
 
-		public double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
-		{
-			double signLeft = left;
-			foreach (Accidental accidental in score.scale.Accidentals())
-			{
-				signLeft
-					= accidental.Show(score, trebleStaff, bassStaff, signLeft)
-					+ Staff.spaceBetweenScaleSigns * score.Magnification;
-			}
+        public double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
+        {
+            double signLeft = left;
+            foreach (Accidental accidental in score.scale.Accidentals())
+            {
+                signLeft
+                    = accidental.Show(score, trebleStaff, bassStaff, signLeft)
+                    + Staff.spaceBetweenScaleSigns * score.Magnification;
+            }
 
-			double scaleRight = signLeft + Staff.spaceBetweenSigns;
+            double scaleRight = signLeft + Staff.spaceBetweenSigns;
 
-			return scaleRight;
-		}
+            return scaleRight;
+        }
 
-		public Accidental[] Accidentals()
+        public Accidental[] Accidentals()
         {
             return new Accidental[] {
                 new Accidental(StaffPosition.ByLine(5)),

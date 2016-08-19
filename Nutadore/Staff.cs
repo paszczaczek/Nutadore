@@ -12,7 +12,7 @@ namespace Nutadore
         static public readonly double spaceBetweenScaleSigns = 1;
         static public readonly double spaceBetweenSigns = 15;
 
-		private Score score;
+        private Score score;
         public Type type;
         private double left;
         public double top;
@@ -25,10 +25,10 @@ namespace Nutadore
 
         public Staff(Score score, Type type, double left, double top)
         {
-			this.score = score;
+            this.score = score;
             this.type = type;
-			this.left = left;
-			this.top = top;
+            this.left = left;
+            this.top = top;
         }
 
         public double Show()
@@ -39,11 +39,11 @@ namespace Nutadore
             // Dodaję pomocnicze kolorowe linie.
             ShowHelperLines();
 
-			return left;
+            return left;
         }
 
         private void ShowLines()
-		{
+        {
             for (var staffPosition = StaffPosition.ByLine(1);
                 staffPosition <= StaffPosition.ByLine(5);
                 staffPosition.AddLine(1))
@@ -63,7 +63,7 @@ namespace Nutadore
         }
 
         private void ShowHelperLines()
-		{
+        {
             for (var octave = Note.Octave.Great; octave <= Note.Octave.ThreeLined; octave++)
             {
                 foreach (var letter in new[] { Note.Letter.C/*, Note.Letter.F*/ })
@@ -90,7 +90,7 @@ namespace Nutadore
         }
 
         public double StaffPositionToY(StaffPosition staffPosition)
-		{
+        {
             return
                 // tu będzie piąta linia
                 top * score.Magnification

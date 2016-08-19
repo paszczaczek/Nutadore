@@ -14,7 +14,7 @@ namespace Nutadore
     {
         public Canvas canvas;
         public Scale scale = new Scale(Note.Letter.C, Scale.Type.Major);
-		private List<StaffGrand> staffGrands = new List<StaffGrand>();
+        private List<StaffGrand> staffGrands = new List<StaffGrand>();
         public List<Sign> signs = new List<Sign>();
 
         public Score(Canvas canvas)
@@ -120,45 +120,45 @@ namespace Nutadore
             // Czyscimy partyturę.
             Clear();
 
-			// Rysujemy tyle podwójnych pięciolinii, ile potrzeba
-			// aby zmieściły się na nich wszystkie znaki.
-			double staffGrandTop = 0;
-			bool allSignsIsShown = false;
-			Sign fromSign = signs.First();
-			while (!allSignsIsShown)
-			{
-				// Rysujemy nowy StaffGrand.
-				StaffGrand staffGrand = new StaffGrand(this, staffGrandTop);
-				staffGrands.Add(staffGrand);
+            // Rysujemy tyle podwójnych pięciolinii, ile potrzeba
+            // aby zmieściły się na nich wszystkie znaki.
+            double staffGrandTop = 0;
+            bool allSignsIsShown = false;
+            Sign fromSign = signs.First();
+            while (!allSignsIsShown)
+            {
+                // Rysujemy nowy StaffGrand.
+                StaffGrand staffGrand = new StaffGrand(this, staffGrandTop);
+                staffGrands.Add(staffGrand);
 
-				// Wyświetlamy na nim znaki.
-				Sign nextSign;
-				staffGrandTop = staffGrand.Show(fromSign, out nextSign);
-				if (nextSign == fromSign)
-				{
-					// Żadnej nuty nie udało się narysować (nie zmieścił się żaden takt).
-					// Za wąska partytura - przerywany rysowanie.
-					break;
-				}
-				fromSign = nextSign;
+                // Wyświetlamy na nim znaki.
+                Sign nextSign;
+                staffGrandTop = staffGrand.Show(fromSign, out nextSign);
+                if (nextSign == fromSign)
+                {
+                    // Żadnej nuty nie udało się narysować (nie zmieścił się żaden takt).
+                    // Za wąska partytura - przerywany rysowanie.
+                    break;
+                }
+                fromSign = nextSign;
 
-				// Czy wszystkie znaki zmieściły się na nim?
-				allSignsIsShown = staffGrand.lastSign == signs.Last();
-			}
-		}
+                // Czy wszystkie znaki zmieściły się na nim?
+                allSignsIsShown = staffGrand.lastSign == signs.Last();
+            }
+        }
 
-		public void Clear()
+        public void Clear()
         {
             // usuwamy wszystkie nuty
             signs.ForEach(sign => sign.Hide(this));
 
-			// usuwamy wszystkie podwójne pięciolinie
-			foreach (var staffGrand in staffGrands)
-				staffGrand.Hide();
-			staffGrands.Clear();
+            // usuwamy wszystkie podwójne pięciolinie
+            foreach (var staffGrand in staffGrands)
+                staffGrand.Hide();
+            staffGrands.Clear();
 
-			// usuwamy pozostałe elemetny (klucze, znaki przykluczowe, itd.)
-			canvas.Children.Clear();
-		}
-	}
+            // usuwamy pozostałe elemetny (klucze, znaki przykluczowe, itd.)
+            canvas.Children.Clear();
+        }
+    }
 }
