@@ -37,11 +37,12 @@ namespace Nutadore
             // Rysuję pięciolinie wiolinową i basową, klucze i znaki przykluczowe.
             double bottom = ShowStaffs(braceRight);
 
-            // Rysuję nuty i inne znaki.
+            // Rysuję nuty i inne znaki - tyle ile sie zmiesci.
             nextSign = ShowSigns(fromSign);
 
             // Rysuję znaki zmiany wysokości wykonania (ottava)
-            ShowPerform();
+            ShowPerform(Staff.Type.Bass);
+            ShowPerform(Staff.Type.Treble);
 
             // Zwracam pierwszą nutę do narysowania na następnym StaffGrand
             return bottom;
@@ -116,6 +117,10 @@ namespace Nutadore
 
         private Sign ShowSigns(Sign fromSign)
         {
+            // Może nie być żadnych znaków do rysowania.
+            if (fromSign == null)
+                return null;
+
             firstSign = fromSign;
             for (int idx = score.signs.IndexOf(fromSign); idx < score.signs.Count; idx++)
             {
@@ -143,8 +148,11 @@ namespace Nutadore
             return null;
         }
 
-        private void ShowPerform()
+        private void ShowPerform(Staff.Type staffType)
         {
+            if (score.signs.Count == 0)
+                return;
+
             Perform.HowTo performHowTo = Perform.HowTo.AtPlace;
             double performLeft = 0;
             double performRight = 0;
@@ -154,13 +162,37 @@ namespace Nutadore
             for (int idx = idxFirst; idx <= idxLast; idx++)
             {
                 Sign sign = score.signs[idx];
-                if (!(sign is Note))
+
+                Perform.HowTo singPerformHowTo;
+                double signLeft;
+                double signRight;
+                if (sign is Chord)
+                {
+                    Chord chord = sign as Chord;
+                    singPerformHowTo = staffType
+                        == Staff.Type.Treble
+                        ? chord.performHowToStaffTreble
+                        : chord.performHowToStaffBass;
+                    signLeft = chord.left;
+                    signRight = chord.right;
+                }
+                else if (sign is Note)
+                {
+                    Note note = sign as Note;
+                    if (note.staffType != staffType)
+                        continue;
+                    singPerformHowTo = note.performHowTo;
+                    signLeft = note.left;
+                    signRight = note.right;
+                }
+                else
+                {
                     continue;
+                }
 
-                Note note = sign as Note;
 
-                bool performChanged = note.performHowTo != performHowTo;
-                bool performNew = performChanged && note.performHowTo != Perform.HowTo.AtPlace;
+                bool performChanged = singPerformHowTo != performHowTo;
+                bool performNew = performChanged && singPerformHowTo != Perform.HowTo.AtPlace;
                 bool performEnd = performChanged && performHowTo != Perform.HowTo.AtPlace;
                 if (performEnd)
                 {
@@ -174,10 +206,10 @@ namespace Nutadore
                 if (performNew)
                 {
                     // Tu wystąpił początek znaku zmiany wysokości. Zapamiętuję jego położnie i wysokość.
-                    performHowTo = note.performHowTo;
-                    performLeft = note.left;
+                    performHowTo = singPerformHowTo;
+                    performLeft = signLeft;
                 }
-                performRight = note.right;
+                performRight = signRight;
             }
 
 

@@ -17,12 +17,8 @@ namespace Nutadore
         public double left;
         public double right; 
 
-        public Note(Letter letter, Octave octave, Staff.Type? preferredStaffType = null)
-        {
-            this.letter = letter;
-            this.octave = octave;
-            this.staffPosition = ToStaffPosition(preferredStaffType);
-        }
+        public static readonly Note lowest = new Note(Letter.A, Octave.SubContra);
+        public static readonly Note highest = new Note(Letter.C, Octave.FiveLined);
 
         public enum Letter {
             C,
@@ -45,6 +41,13 @@ namespace Nutadore
             ThreeLined,
             FourLined,
             FiveLined
+        }
+
+        public Note(Letter letter, Octave octave, Staff.Type? preferredStaffType = null)
+        {
+            this.letter = letter;
+            this.octave = octave;
+            this.staffPosition = ToStaffPosition(preferredStaffType);
         }
 
         public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
@@ -237,6 +240,7 @@ namespace Nutadore
             }
 
             // Może nutę należy rysować w ottavie?
+            performHowTo = Perform.HowTo.AtPlace;
             if (withPerform)
             {
                 if (octave == Octave.FiveLined)
@@ -267,5 +271,32 @@ namespace Nutadore
 
             return StaffPosition.ByNumber(lineNumber);
         }
+
+        public Note Copy()
+        {
+            return new Note(letter, octave, staffType);
+        }
+
+        public Note Transpose(int halfSpaceCount)
+        {
+            int newLetter = (int)letter + halfSpaceCount;
+            if (newLetter >= 0)
+            {
+                octave += newLetter / 7;
+                letter = (Letter)(newLetter % 7);
+            }
+            else
+            {
+                octave += newLetter / 7 - 1;
+                letter = (Letter)newLetter + 7;
+                while (letter < 0)
+                    letter += 7;
+            }
+
+            staffPosition = ToStaffPosition(staffType);
+
+            return this;
+        }
+
     }
 }

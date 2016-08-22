@@ -25,11 +25,13 @@ namespace Nutadore
 
         public void Add(Sign sign)
         {
-            if (sign is Chord)
-                CorrectPerform(sign as Chord);
+            //if (sign is Chord)
+            //    CorrectPerform(sign as Chord);
             signs.Add(sign);
         }
 
+#if false
+        // wywalic
         private static void CorrectPerform(Chord chord)
         {
             //return;
@@ -93,6 +95,7 @@ namespace Nutadore
                     });
             }
         }
+#endif
 
         public Note FindNextNote(Sign sign)
         {
@@ -124,7 +127,7 @@ namespace Nutadore
             // aby zmieściły się na nich wszystkie znaki.
             double staffGrandTop = 0;
             bool allSignsIsShown = false;
-            Sign fromSign = signs.First();
+            Sign fromSign = signs.FirstOrDefault();
             while (!allSignsIsShown)
             {
                 // Rysujemy nowy StaffGrand.
