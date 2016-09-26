@@ -35,7 +35,7 @@ namespace Nutadore
 			for (int keyNumber = 1; keyNumber <= Keyboard.numberOfWhiteKeys - 4; keyNumber++)
 			{
 				Chord chord = new Chord();
-				chord.Add(Keyboard.NoteOfKeyNumber(keyNumber));
+				chord.Add(Keyboard.NoteOfKeyNumber(keyNumber)); 
 				chord.Add(Keyboard.NoteOfKeyNumber(keyNumber + 2));
 				chord.Add(Keyboard.NoteOfKeyNumber(keyNumber + 4));
 				chord.Add(Keyboard.NoteOfKeyNumber(Keyboard.numberOfWhiteKeys + 1 - keyNumber));
