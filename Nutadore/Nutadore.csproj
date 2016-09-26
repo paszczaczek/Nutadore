@@ -56,6 +56,7 @@
     </ApplicationDefinition>
     <Compile Include="Chord.cs" />
     <Compile Include="Clef.cs" />
+    <Compile Include="Keyboard.cs" />
     <Compile Include="Note.cs" />
     <Compile Include="Perform.cs" />
     <Compile Include="Scale.cs" />

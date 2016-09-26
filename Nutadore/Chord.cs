@@ -21,7 +21,7 @@ namespace Nutadore
 
         public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
         {
-            CalculatAndCorrectPerformHowTo();
+            CalculateAndCorrectPerformHowTo();
 
             double chordLeft = left;
             double chordRight = left;
@@ -58,7 +58,7 @@ namespace Nutadore
             }
         }
 
-        public void CalculatAndCorrectPerformHowTo()
+        public void CalculateAndCorrectPerformHowTo()
         {
             // Wyszukaj wszystkie nuty akordu leżące na pięcilinii wilonowej.
             var trebleNotes = notes.FindAll(note => note.staffType == Staff.Type.Treble);
@@ -101,7 +101,7 @@ namespace Nutadore
                     .ForEach(note =>
                     {
                         note.performHowTo = Perform.HowTo.OneOctaveHigher;
-                        note.staffPosition.Number -= 0.0; // To ma tak byc!
+                        note.staffPosition.Number -= 3.5; // 0.0; // To ma tak byc!
                     });
 
                 // Teraz wszyskie nuty akordu leżące na pęciolinii wiolinowej będą

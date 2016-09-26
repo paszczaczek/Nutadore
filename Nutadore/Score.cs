@@ -21,6 +21,7 @@ namespace Nutadore
         {
             this.canvas = canvas;
             canvas.ClipToBounds = true;
+            Magnification = Properties.Settings.Default.ScoreMagnification;
         }
 
         public void Add(Sign sign)

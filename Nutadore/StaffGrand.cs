@@ -133,6 +133,11 @@ namespace Nutadore
                     // Nie - umieścimy go na kolejnym SraffGrand.
                     // Wycofujemy też wszyskie znaki do początku taktu.
                     int idxBar = HideToBeginOfMeasure(sign);
+                    if (idxBar == -1)
+                    {
+                        // Nie znaleziono znaku taktu. Nie robimy wycofywania.
+                        return sign;
+                    }
                     lastSign = score.signs[idxBar];
                     Sign nextSign = score.signs[idxBar + 1];
                     return nextSign;
@@ -234,17 +239,25 @@ namespace Nutadore
 
         private int HideToBeginOfMeasure(Sign fromSign)
         {
+            List<Sign> signsForHide = new List<Sign>();
+
             for (int idx = score.signs.IndexOf(fromSign) - 1; idx >= 0 ; idx--)
             {
                 Sign sign = score.signs[idx];
-                // Zwraca index pierwszego znaku taktu.
                 if (sign is Bar)
+                {
+                    // Jest znak taktu. Ukrywamy znaki i zwracamy jego index.
+                    signsForHide.ForEach(s => s.Hide(score));
                     return idx;
+                }
                 else
-                    sign.Hide(score);
+                {
+                    signsForHide.Add(sign);
+                }
             }
 
-            return score.signs.Count - 1;
+            // Nie znaleziono znaku taktu.
+            return -1;
         }
     }
 }
