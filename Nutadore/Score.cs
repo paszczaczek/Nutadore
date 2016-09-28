@@ -23,11 +23,12 @@ namespace Nutadore
 			ClipToBounds = true;
 			Magnification = Properties.Settings.Default.ScoreMagnification;
 
+			base.Background = Brushes.Transparent;
 			base.SizeChanged += _SizeChanged;
 			base.PreviewMouseWheel += _PreviewMouseWheel;
 		}
 
-		public void _SizeChanged(object sender, SizeChangedEventArgs e)
+		private void _SizeChanged(object sender, SizeChangedEventArgs e)
 		{
 			Show();
 		}

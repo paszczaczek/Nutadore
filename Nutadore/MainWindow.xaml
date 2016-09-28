@@ -4,6 +4,12 @@
         xmlns:local="clr-namespace:Nutadore" x:Class="Nutadore.MainWindow"
         Title="MainWindow" Height="668.831" Width="1272.489">
     <Grid>
-        <local:Score Background="Transparent" x:Name="score" Margin="10" Focusable="True"/>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <local:Score x:Name="score" Grid.Row="0" Focusable="True" Margin="10"/>
+        <local:Keyboard x:Name="keyboard" Grid.Row="1" Margin="10"/>
+        <Rectangle x:Name="rectangle" Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="100" Stroke="#FFD81313" VerticalAlignment="Top" Width="100" StrokeThickness="33" Margin="10,10,0,0" Panel.ZIndex="1"/>
     </Grid>
 </Window>

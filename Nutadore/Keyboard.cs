@@ -3,15 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Nutadore
 {
 	/// <summary>
 	/// Klawiatura.
 	/// </summary>
-	public class Keyboard
+	public class Keyboard : Canvas
 	{
-		//private static readonly int numberOfWhiteKeys = 52;
+		public static readonly int numberOfWhiteKeys = 52;
 		//private static readonly int numberOfBlackKeys = 36;
 
 		/// <summary>
@@ -40,6 +43,44 @@ namespace Nutadore
 
 			// FileLined C
 			keys.Add(new Key(Note.Octave.FiveLined, 0));
+
+			// Podłączenie eventów
+			base.Background = Brushes.Transparent;
+			base.SizeChanged += Keyboard_SizeChanged;
 		}
+
+		public void Show()
+		{
+			base.Children.Clear();
+			foreach (Key key in keys)
+			{
+				key.Show(this);
+			}
+			//keys[0].Show(this);
+			//keys[1].Show(this);
+			//keys[2].Show(this);
+
+			//keys[3].Show(this);
+			//keys[4].Show(this);
+			//keys[5].Show(this);
+			//keys[6].Show(this);
+			//keys[7].Show(this);
+			//keys[8].Show(this);
+			//keys[9].Show(this);
+			//keys[10].Show(this);
+			//keys[11].Show(this);
+			//keys[12].Show(this);
+			//keys[13].Show(this);
+			//keys[14].Show(this);
+
+			//keys[15].Show(this);
+		}
+
+		private void Keyboard_SizeChanged(object sender, SizeChangedEventArgs e)
+		{
+			Show();
+		}
+
+
 	}
 }
