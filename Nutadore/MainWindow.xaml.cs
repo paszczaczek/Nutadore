@@ -29,24 +29,25 @@ namespace Nutadore
 			score = new Score(canvas);
 			score.scale = new Scale(Note.Letter.C, Scale.Type.Minor);
 
-			//AddTriad(Note.Letter.G, Note.Octave.FourLined);
-			//FromLowestToHighestAdd((letter, octave) => new Note(letter, octave));
-			//FromLowestToHighestAdd((letter, octave) => Triad(letter, octave));
-			for (int keyNumber = 1; keyNumber <= Keyboard.numberOfWhiteKeys - 4; keyNumber++)
+			Keyboard keyboard = new Keyboard();
+			List<Key> whiteKeys = keyboard.keys.FindAll(key => key.IsWhite);
+			for (int k = 0; k < whiteKeys.Count - 4; k++)
 			{
 				Chord chord = new Chord();
-				chord.Add(Keyboard.NoteOfKeyNumber(keyNumber)); 
-				chord.Add(Keyboard.NoteOfKeyNumber(keyNumber + 2));
-				chord.Add(Keyboard.NoteOfKeyNumber(keyNumber + 4));
-				chord.Add(Keyboard.NoteOfKeyNumber(Keyboard.numberOfWhiteKeys + 1 - keyNumber));
-				chord.Add(Keyboard.NoteOfKeyNumber(Keyboard.numberOfWhiteKeys + 1 - keyNumber - 2));
-				chord.Add(Keyboard.NoteOfKeyNumber(Keyboard.numberOfWhiteKeys + 1 - keyNumber - 4));
+
+				chord.Add(new Note(whiteKeys[k + 0].Letter, whiteKeys[k + 0].octave));
+				chord.Add(new Note(whiteKeys[k + 2].Letter, whiteKeys[k + 2].octave));
+				chord.Add(new Note(whiteKeys[k + 4].Letter, whiteKeys[k + 4].octave));
+
+				int u = whiteKeys.Count - 1 - 4 - k;
+				chord.Add(new Note(whiteKeys[u + 0].Letter, whiteKeys[u + 0].octave));
+				chord.Add(new Note(whiteKeys[u + 2].Letter, whiteKeys[u + 2].octave));
+				chord.Add(new Note(whiteKeys[u + 4].Letter, whiteKeys[u + 4].octave));
 
 				score.Add(chord);
 			}
+
 			AddBar();
-			//AddBar();
-			//FromLowestToHighestAdd((letter, octave) => new Note(letter, octave));
 
 			//score.Add(new Note(Note.Letter.C, Note.Octave.ThreeLined));
 			//score.Add(new Bar());
@@ -113,21 +114,6 @@ namespace Nutadore
 			score.Add(new Bar());
 		}
 
-		private Sign Triad(Note.Letter letter, Note.Octave octave)
-		{
-			Chord chord = new Chord();
-			Note rootNote = new Note(letter, octave);
-
-			if (rootNote.octave == Note.Octave.FiveLined && rootNote.letter == Note.Letter.C ||
-				rootNote.octave == Note.Octave.FourLined && rootNote.letter > Note.Letter.F)
-				return null;
-
-			chord.Add(rootNote.Copy().Transpose(0));
-			chord.Add(rootNote.Copy().Transpose(2));
-			chord.Add(rootNote.Copy().Transpose(4));
-
-			return chord;
-		}
 
 		private void FromLowestToHighestAdd(Func<Note.Letter, Note.Octave, Sign> makeSign, bool showBars = true)
 		{

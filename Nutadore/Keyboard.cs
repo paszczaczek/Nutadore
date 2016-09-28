@@ -6,34 +6,40 @@ using System.Threading.Tasks;
 
 namespace Nutadore
 {
+	/// <summary>
+	/// Klawiatura.
+	/// </summary>
 	public class Keyboard
 	{
-		public static int numberOfWhiteKeys = 52;
+		//private static readonly int numberOfWhiteKeys = 52;
+		//private static readonly int numberOfBlackKeys = 36;
 
-		public static Note NoteOfKeyNumber(int keyNumber)
+		/// <summary>
+		/// Lista wszystkich klawiszy na klawiaturze.
+		/// </summary>
+		public readonly List<Key> keys = new List<Key>();
+
+		public Keyboard()
 		{
-			if (keyNumber < 1 || keyNumber > numberOfWhiteKeys)
-				throw new ArgumentOutOfRangeException("keyNumber", "Poza zakresem!");
-			else if (keyNumber >= 1 && keyNumber <= 2)
-				return new Note(Note.Letter.A + keyNumber - 1, Note.Octave.SubContra);
-			else if (keyNumber >= 3 && keyNumber <= 9)
-				return new Note(Note.Letter.C + keyNumber - 3, Note.Octave.Contra);
-			else if (keyNumber >= 10 && keyNumber <= 16)
-				return new Note(Note.Letter.C + keyNumber - 10, Note.Octave.Great);
-			else if (keyNumber >=  17 && keyNumber <= 23)
-				return new Note(Note.Letter.C + keyNumber - 17, Note.Octave.Small);
-			else if (keyNumber >=  24 && keyNumber <= 30)
-				return new Note(Note.Letter.C + keyNumber - 24, Note.Octave.OneLined);
-			else if (keyNumber >=  31 && keyNumber <= 37)
-				return new Note(Note.Letter.C + keyNumber - 31, Note.Octave.TwoLined);
-			else if (keyNumber >=  38 && keyNumber <= 44)
-				return new Note(Note.Letter.C + keyNumber - 38, Note.Octave.ThreeLined);
-			else if (keyNumber >=  45 && keyNumber <= 51)
-				return new Note(Note.Letter.C + keyNumber - 45, Note.Octave.FourLined);
-			else if (keyNumber >=  52)
-				return new Note(Note.Letter.C, Note.Octave.FiveLined);
+			// Subcontra A, A#, H
+			keys.Add(new Key(Note.Octave.SubContra, 9));
+			keys.Add(new Key(Note.Octave.SubContra, 10));
+			keys.Add(new Key(Note.Octave.SubContra, 11));
 
-			return null;
+			// Contra .. FourLined
+			for (Note.Octave octave = Note.Octave.Contra; 
+				octave <= Note.Octave.FourLined; 
+				octave++)
+			{
+				for (int keyNoInOctave = 0; keyNoInOctave < 12; keyNoInOctave++)
+				{
+					int keyNoInKeyboard = 3 + ((int)octave - 1) * 12 + keyNoInOctave;
+					keys.Add(new Key(octave, keyNoInOctave));
+				}
+			}
+
+			// FileLined C
+			keys.Add(new Key(Note.Octave.FiveLined, 0));
 		}
 	}
 }

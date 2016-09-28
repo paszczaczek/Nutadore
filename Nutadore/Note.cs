@@ -6,13 +6,18 @@ using System.Windows.Shapes;
 
 namespace Nutadore
 {
-	public class Note : Sign
+	public class Note : Sign, IComparable<Note>
 	{
 		public Letter letter;
 		public Octave octave;
 		public Perform.HowTo performHowTo;
 		public StaffPosition staffPosition = StaffPosition.ByLine(1);
 		public Staff.Type staffType;
+
+		/// <summary>
+		/// Pozwala zablokowac rysowanie linii dodanych. Wykorzysytwane w rysowaniu akordów.
+		/// </summary>
+		public bool showLegerLines = true;
 
 		public double left;
 		public double right; 
@@ -69,6 +74,51 @@ namespace Nutadore
 			glyphTop -= 57.5 * score.Magnification;
 			right = base.ShowFetaGlyph(score, left, glyphTop, glyphCode);
 
+			// Rysujemy linie dodane górne i dolne - jeśli nuta nie jest częścią akordu.
+			if (showLegerLines)
+				ShowLegerLines(score, trebleStaff, bassStaff, left);
+
+			// Rysujemy pomocniczą nazwę nuty.
+			double letterTop
+					= staff.top * score.Magnification
+					+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
+			letterTop -= 7 * score.Magnification;
+			double letterLeft = left + 3 * score.Magnification;
+			Label letterLabel = new Label
+			{
+				FontFamily = new FontFamily("Consolas"),
+				FontSize = 12 * score.Magnification,
+				Content = this.letter.ToString(),
+				Foreground = Brushes.White,
+				Padding = new Thickness(0, 0, 0, 0),
+				Margin = new Thickness(letterLeft, letterTop, 0, 0)
+			};
+			base.AddElement(score, letterLabel);
+
+			// Czy znak zmieścił sie na pięcolinii?
+			if (right >= score.canvas.ActualWidth - Staff.marginLeft)
+			{
+				// Nie zmieścił się - narysujemy ją na następnej pieciolinii.
+				base.Hide(score);
+
+				return -1;
+			}
+			else
+			{
+				// Znak zmieścił sie na pięciolinii.
+				//right += Staff.spaceBetweenSigns * score.Magnification;
+				return right + Staff.spaceBetweenSigns * score.Magnification;
+			}
+		}
+
+		public void ShowLegerLines(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		{
+			// Na której pięciolinii ma być umieszczona nuta?
+			Staff staff
+				= staffType == Staff.Type.Treble
+				? trebleStaff
+				: bassStaff;
+
 			// Czy trzeba dorysować linie dodane?
 			double legerLeft = left - (right - left) * 0.2;
 			double legerRight = right + (right - left) * 0.2;
@@ -114,47 +164,6 @@ namespace Nutadore
 				}
 				right = legerRight;
 			}
-
-			// Rysujemy pomocniczą nazwę nuty.
-			double letterTop
-					= staff.top * score.Magnification
-					+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
-			letterTop -= 7 * score.Magnification;
-			double letterLeft = left + 3 * score.Magnification;
-			Label letterLabel = new Label
-			{
-				FontFamily = new FontFamily("Consolas"),
-				FontSize = 12 * score.Magnification,
-				Content = this.letter.ToString(),
-				Foreground = Brushes.White,
-				Padding = new Thickness(0, 0, 0, 0),
-				Margin = new Thickness(letterLeft, letterTop, 0, 0)
-			};
-			base.AddElement(score, letterLabel);
-
-			// Czy znak zmieścił sie na pięcolinii?
-			if (right >= score.canvas.ActualWidth - Staff.marginLeft)
-			{
-				// Nie zmieścił się - narysujemy ją na następnej pieciolinii.
-				base.Hide(score);
-
-				// Trzeba jeszcze narysować nienarysowane ottavy
-				//if (staff.performHowTo != Perform.HowTo.AtPlace)
-				//	staff.ShowPerform_OLD(); // TODO: to chyba trzeba wyrzucić
-
-				return -1;
-			}
-			else
-			{
-				// Mogą być potrzebne znaki zmiany wysokości wykonania
-				//staff.FindPerform(this, left, right); // TODO: to chyba trzeba wywalić
-
-				// Znak zmieścił sie na pięciolinii.
-				//right += Staff.spaceBetweenSigns * score.Magnification;
-				return right + Staff.spaceBetweenSigns * score.Magnification;
-			}
-
-			//return right;
 		}
 
 		override public void Hide(Score score)
@@ -314,6 +323,27 @@ namespace Nutadore
 				return false;
 
 			return letter == note.letter && octave == note.octave;
+		}
+
+		public override int GetHashCode()
+		{
+			return (int)octave * 10 + (int)letter;
+		}
+
+		public int CompareTo(Note other)
+		{
+			if (other == null)
+				return 1;
+
+			int hashCode = GetHashCode();
+			int otherHashCode = other.GetHashCode();
+
+			if (hashCode == otherHashCode)
+				return 0;
+			else if (hashCode > otherHashCode)
+				return 1;
+			else
+				return -1;
 		}
 	}
 }

@@ -16,6 +16,8 @@ namespace Nutadore
 
         public void Add(Note note)
         {
+            // Nuta bedzie częścią akordu i będzie rysowana troszką inaczej niż nuta zwykła.
+            //note.showLegerLines = true;
             notes.Add(note);
         }
 
@@ -26,13 +28,29 @@ namespace Nutadore
             double chordLeft = left;
             double chordRight = left;
             double cursor = left;
+
+            // Wyszukaj najwyższą nutę na pięciolinii wiolinowej.
+            var trebleNotes = notes.FindAll(note => note.staffType == Staff.Type.Treble);
+            trebleNotes.Sort();
+            Note trebleHighestNote = trebleNotes.LastOrDefault();
+
+            // Wyszukaj najniższa nutę na pięciolinii basowej.
+            var bassNotes = notes.FindAll(note => note.staffType == Staff.Type.Bass);
+            bassNotes.Sort();
+            Note bassLowestNote = bassNotes.FirstOrDefault();
+
+            // Narysuj wszystkie nuty akordu.
             foreach (var note in notes)
             {
+                // Linie dodane rysuj tylko dla najwyzszej i najniższej nuty.
+                note.showLegerLines = note == trebleHighestNote || note == bassLowestNote;
                 Staff staff
                     = note.staffType == Staff.Type.Treble
                     ? trebleStaff
                     : bassStaff;
                 double noteCursor = note.Show(score, trebleStaff, bassStaff, left);
+                if (noteCursor == -1)
+                    return -1;
                 if (noteCursor > cursor)
                     cursor = noteCursor;
                 if (note.right > chordRight || note.right == -1)
@@ -58,6 +76,10 @@ namespace Nutadore
             }
         }
 
+        /// <summary>
+        /// W akordzie nuty mogą być w różnych ottavach, a akord jako całość musi być w jednej.
+        /// Ta funcja koryguje ottavy poszczególnych nut żeby akord był w jednej ottavie.
+        /// </summary>
         public void CalculateAndCorrectPerformHowTo()
         {
             // Wyszukaj wszystkie nuty akordu leżące na pięcilinii wilonowej.
