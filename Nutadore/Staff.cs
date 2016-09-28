@@ -52,13 +52,13 @@ namespace Nutadore
                 Line shapeLine = new Line
                 {
                     X1 = left,
-                    X2 = score.canvas.ActualWidth - marginLeft,
+                    X2 = score.ActualWidth - marginLeft,
                     Y1 = y,
                     Y2 = y,
                     Stroke = Brushes.Black,
                     StrokeThickness = 1
                 };
-                score.canvas.Children.Add(shapeLine);
+                score.Children.Add(shapeLine);
             }
         }
 
@@ -76,7 +76,7 @@ namespace Nutadore
                     Line shapeLine = new Line
                     {
                         X1 = left,
-                        X2 = score.canvas.ActualWidth - marginLeft,
+                        X2 = score.ActualWidth - marginLeft,
                         Y1 = y,
                         Y2 = y,
                         Stroke = Brushes.Red, // note.Brush,
@@ -84,7 +84,7 @@ namespace Nutadore
                     };
                     if (letter == Note.Letter.F)
                         shapeLine.StrokeDashArray = new DoubleCollection { 6, 6 };
-                    score.canvas.Children.Add(shapeLine);
+                    score.Children.Add(shapeLine);
                 }
             }
         }

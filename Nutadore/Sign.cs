@@ -18,7 +18,7 @@ namespace Nutadore
         public virtual void Hide(Score score)
         {
             foreach (var uiElement in uiElements)
-                score.canvas.Children.Remove(uiElement);
+                score.Children.Remove(uiElement);
 
             uiElements.Clear();
         }
@@ -30,7 +30,7 @@ namespace Nutadore
 
         protected void AddElement(Score score, UIElement uiElement)
         {
-            score.canvas.Children.Add(uiElement);
+            score.Children.Add(uiElement);
             uiElements.Add(uiElement);
         }
 

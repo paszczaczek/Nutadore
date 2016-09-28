@@ -77,7 +77,7 @@ namespace Nutadore
                     (top + spaceAboveTrebleStaff) * score.Magnification - braceOffsetY, 
                     0, 
                     0);
-            score.canvas.Children.Add(brace);
+            score.Children.Add(brace);
 
             // wyznaczem miejsce w którym kończy sie klamra i będa rozpoczynały sie pięciolinie
             double braceRight = braceWidth - braceOffestX;

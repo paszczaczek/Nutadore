@@ -96,7 +96,7 @@ namespace Nutadore
 			base.AddElement(score, letterLabel);
 
 			// Czy znak zmieścił sie na pięcolinii?
-			if (right >= score.canvas.ActualWidth - Staff.marginLeft)
+			if (right >= score.ActualWidth - Staff.marginLeft)
 			{
 				// Nie zmieścił się - narysujemy ją na następnej pieciolinii.
 				base.Hide(score);

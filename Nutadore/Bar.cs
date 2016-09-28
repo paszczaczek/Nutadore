@@ -24,14 +24,14 @@ namespace Nutadore
                     Stroke = Brushes.Black,
                     StrokeThickness = 1
                 };
-                score.canvas.Children.Add(barLine);
+                score.Children.Add(barLine);
                 base.uiElements.Add(barLine);
             }
 
             double right = left + 1;
 
             // Czy znak zmieścił sie na pięcolinii?
-            if (right >= score.canvas.ActualWidth - Staff.marginLeft)
+            if (right >= score.ActualWidth - Staff.marginLeft)
             {
                 // Nie zmieścił się - narysujemy ją na następnej pieciolinii.
                 Hide(score);
