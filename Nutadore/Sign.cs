@@ -34,16 +34,14 @@ namespace Nutadore
 
 		protected void AddElement(Score score, UIElement uiElement, int zindex = 0, AddToBoundaryBox addToBoundaryBox = AddToBoundaryBox.No)
 		{
+			// TODO obsluga addToBoundaryBox
 			Canvas.SetZIndex(uiElement, zindex);
 			score.Children.Add(uiElement);
 			uiElements.Add(uiElement);
 		}
 
 		protected enum AddToBoundaryBox { Yes, No };
-		public Rect boundaryBox {
-			get;
-			protected set;
-		} = Rect.Empty;
+		public Rect boundaryBox { get; protected set; } = Rect.Empty;
 
 		protected /*Rect*/double AddFetaGlyph(Score score, double glyphLeft, double glyphTop, string glyphCode, int zindex = 0, AddToBoundaryBox addToBoundaryBox = AddToBoundaryBox.No)
 		{
