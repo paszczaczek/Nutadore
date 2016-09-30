@@ -12,110 +12,119 @@ namespace Nutadore
 {
 	public class Key
 	{
-		private static readonly double keyHeightRatio = 5.0;
-
-		public Key(Note.Octave octave, int keyNoInOctave)
+		public Key(int keyNo)
 		{
-			if (keyNoInOctave < 0 || keyNoInOctave > 11)
-				throw new ArgumentOutOfRangeException("keyNoInOctave", "Number klawisza w oktawie musi mieścić się zakresie [0, 11]");
+			this.keyNo = keyNo;
 
-			this.octave = octave;
-			this.keyNoInOctave = keyNoInOctave;
+			// Wyznaczam oktawe i numer klawisza w oktawie dla klawisza.
+			const int keysInOctave = 12;
+			if (keyNo >= 0 && keyNo <= 2)
+			{
+				// Subcontra A, A#, H
+				octave = Note.Octave.SubContra;
+				keyNoInOctave = 9 + keyNo;
+			}
+			else if (keyNo >= 3 && keyNo <= 86)
+			{
+				// Great..FourLined C..H
+				octave = (Note.Octave)((keyNo - 3) / keysInOctave + 1);
+				keyNoInOctave = (keyNo - 3) % keysInOctave;
+			}
+			else if (keyNo == 87)
+			{
+				// FiveLined C
+				octave = Note.Octave.FiveLined;
+				keyNoInOctave = 0;
+			}
+			else
+			{
+				string message = string.Format("Numer klawisza {0} spoza zakresu [0, 88]!", keyNo);
+				throw new ArgumentOutOfRangeException("keyNo", message);
+			}
+
+			// Wyznaczam literę nuty dla klawisza.
+			switch (keyNoInOctave)
+			{
+				case 0:
+					letter = Note.Letter.C;
+					break;
+				case 1:
+					// TODO krzyżyk
+					letter = Note.Letter.C;
+					break;
+				case 2:
+					letter = Note.Letter.D;
+					break;
+				case 3:
+					// TODO krzyżyk
+					letter = Note.Letter.D;
+					break;
+				case 4:
+					letter = Note.Letter.E;
+					break;
+				case 5:
+					letter = Note.Letter.F;
+					break;
+				case 6:
+					// TODO krzyżyk
+					letter = Note.Letter.F;
+					break;
+				case 7:
+					letter = Note.Letter.G;
+					break;
+				case 8:
+					// TODO krzyżyk
+					letter = Note.Letter.G;
+					break;
+				case 9:
+					letter = Note.Letter.A;
+					break;
+				case 10:
+					// TODO krzyżyk
+					letter = Note.Letter.A;
+					break;
+				case 11:
+					letter = Note.Letter.H;
+					break;
+				default:
+					throw new ArgumentOutOfRangeException("keyNoInOctave");
+			}
+
+			// Wyznaczam kolor klawisza.
+			isWhite =
+				keyNoInOctave == 0 ||
+				keyNoInOctave == 2 ||
+				keyNoInOctave == 4 ||
+				keyNoInOctave == 5 ||
+				keyNoInOctave == 7 ||
+				keyNoInOctave == 9 ||
+				keyNoInOctave == 11;
 		}
 
-		/// <summary>
-		/// Numer klawisza w oktawie. Przyjmuje wartości od 0 do 11. 0 to C, 11 to H.
-		/// </summary>
+		private readonly int keyNo;
 		private readonly int keyNoInOctave;
 
-		/// <summary>
-		/// Oktawa klawisza.
-		/// </summary>
+		public readonly Note.Letter letter;
 		public readonly Note.Octave octave;
-
-		/// <summary>
-		/// Nazwę dźwięku klawisza.
-		/// </summary>
-		public Note.Letter Letter
-		{
-			get
-			{
-				switch (keyNoInOctave)
-				{
-					case 0:
-					case 1:
-						return Note.Letter.C;
-					case 2:
-					case 3:
-						return Note.Letter.D;
-					case 4:
-						return Note.Letter.E;
-					case 5:
-					case 6:
-						return Note.Letter.F;
-					case 7:
-					case 8:
-						return Note.Letter.G;
-					case 9:
-					case 10:
-						return Note.Letter.A;
-					case 11:
-						return Note.Letter.H;
-					default:
-						throw new ArgumentOutOfRangeException("keyNoInOctave");
-				}
-			}
-		}
-
-		/// <summary>
-		/// Określa czy klawisz ma kolor biały.
-		/// </summary>
-		public bool IsWhite
-		{
-			get
-			{
-				return
-					keyNoInOctave == 0 ||
-					keyNoInOctave == 2 ||
-					keyNoInOctave == 4 ||
-					keyNoInOctave == 5 ||
-					keyNoInOctave == 7 ||
-					keyNoInOctave == 9 ||
-					keyNoInOctave == 11;
-			}
-		}
-
-		// Określa czy klawisz mak kolor czarny.
-		public bool IsBlack
-		{
-			get
-			{
-				return !IsBlack;
-			}
-		}
-
-		private int KeyNoInKeyboard
-		{
-			get
-			{
-				if (octave == Note.Octave.SubContra)
-					return keyNoInOctave - 9;
-				else 
-					return ((int)octave - 1) * 12 + keyNoInOctave;
-			}
-		}
+		public readonly bool isWhite;
 
 		public void Show(Keyboard keyboard)
 		{
+			// szerokość klawiszy białych i czarnych
 			double whiteWidth = keyboard.ActualWidth / Keyboard.numberOfWhiteKeys;
-			double blackWidth = whiteWidth * 2 / 3;
+			double blackWidth = whiteWidth * 0.6;
 
-			bool isWhite = IsWhite;
+			// wysokość klawiszy białych i czarnych
+			double whiteHeight = whiteWidth * 4.0;
+			double blackHeight = whiteHeight * 0.6;
+
+			// serokość i długość klawisza
 			double width = isWhite ? whiteWidth : blackWidth;
-			double height = width * keyHeightRatio;
+			double height = isWhite ? whiteHeight : blackHeight;
 
+			// położenie klawisza wynikające z położenia w oktawie
 			double left = 0;
-			switch(KeyNoInKeyboard)
+			switch(keyNoInOctave)
 			{
 				case 0: left = 0; break;
 				case 1: left = whiteWidth - blackWidth / 2; break;
@@ -130,20 +139,35 @@ namespace Nutadore
 				case 10: left = whiteWidth * 6 - blackWidth / 2; break;
 				case 11: left = whiteWidth * 6; break;
 			}
-			if (octave > Note.Octave.SubContra)
-				left += whiteWidth * 2 + ((int)octave - 1) * whiteWidth * 7;
+			// przesunięcie wynikające z oktawy
+			left += (int)octave * whiteWidth * 7;
+			// przesunięcie wynikające z tego że w oktawie SubContra są tylko klawisze A, A# i H
+			left -= whiteWidth * 5;
 
-			Rectangle key = new Rectangle
+			// Rysuje klawisz.
+			Rectangle rect = new Rectangle
 			{
 				Width = width,
 				Height = height,
 				Margin = new Thickness(left, 0, 0, 0),
 				Fill = isWhite ? Brushes.LightGray : Brushes.Black,
-				Stroke = Brushes.Black,
-				StrokeThickness = 1
+				//Stroke = Brushes.Black,
+				//StrokeThickness = 1
 			};
-			Canvas.SetZIndex(key, isWhite ? 0 : 1);
-			keyboard.Children.Add(key);
+			Canvas.SetZIndex(rect, isWhite ? 0 : 1);
+			keyboard.Children.Add(rect);
+
+			Line line = new Line
+			{
+				X1 = left,
+				Y1 = 0,
+				X2 = left,
+				Y2 = height,
+				Stroke = Brushes.Black,
+				StrokeThickness = letter == Note.Letter.C && isWhite ? 1.0 : 0.4
+			};
+			Canvas.SetZIndex(line, 2);
+			keyboard.Children.Add(line);
 		}
 	}
 }
