@@ -1,46 +1,74 @@
-﻿using System.Windows.Controls;
+﻿using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace Nutadore
 {
-    public class Scale
-    {
-        private Note.Letter based;
-        private Type type;
+	public class Scale : Sign
+	{
+		private Note.Letter based;
+		private Type type;
+		Accidental[] accidentals;
 
-        public Scale(Note.Letter based, Type type)
-        {
-            this.based = based;
-            this.type = type;
-        }
+		public Scale(Note.Letter based, Type type)
+		{
+			this.based = based;
+			this.type = type;
+			focusable = true;
+			accidentals = Accidentals();
+		}
 
-        public enum Type { Major, Minor }
+		public enum Type { Major, Minor }
 
-        public double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
-        {
-            double signLeft = left;
-            foreach (Accidental accidental in score.scale.Accidentals())
-            {
-                signLeft
-                    = accidental.Show(score, trebleStaff, bassStaff, signLeft)
-                    + Staff.spaceBetweenScaleSigns * score.Magnification;
-            }
+		public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		{
+			double signLeft = left;
+			foreach (Accidental accidental in accidentals)
+			{
+				signLeft
+					= accidental.Show(score, trebleStaff, bassStaff, signLeft)
+					+ Staff.spaceBetweenScaleSigns * score.Magnification;
+				base.ExtendBounds(score, accidental.Bounds, 101);
+			}
 
-            double scaleRight = signLeft + Staff.spaceBetweenSigns;
+			double scaleRight = signLeft + Staff.spaceBetweenSigns;
 
-            return scaleRight;
-        }
+			return scaleRight;
+		}
 
-        public Accidental[] Accidentals()
-        {
-            return new Accidental[] {
-                new Accidental(StaffPosition.ByLine(5)),
-                new Accidental(StaffPosition.ByLine(3, true)),
-                new Accidental(StaffPosition.ByLine(5, true)),
-                new Accidental(StaffPosition.ByLine(4)),
-                new Accidental(StaffPosition.ByLine(2, true)),
-                new Accidental(StaffPosition.ByLine(4, true)),
-                new Accidental(StaffPosition.ByLine(3))
-            };
-        }
-    }
+		public override void Hide(Score score)
+		{
+			base.Hide(score);
+			foreach (Accidental accidental in accidentals)
+				accidental.Hide(score);
+		}
+
+		public override void Bounds_MouseLeave(object sender, MouseEventArgs e)
+		{
+			foreach (Accidental accidental in accidentals)
+				accidental.Bounds_MouseLeave(sender, e);
+		}
+
+		public override void Bounds_MouseEnter(object sender, MouseEventArgs e)
+		{
+			foreach (Accidental accidental in accidentals)
+				accidental.Bounds_MouseEnter(sender, e);
+		}
+
+		public Accidental[] Accidentals()
+		{
+			return new Accidental[] {
+				new Accidental(StaffPosition.ByLine(5)),
+				new Accidental(StaffPosition.ByLine(3, true)),
+				new Accidental(StaffPosition.ByLine(5, true)),
+				new Accidental(StaffPosition.ByLine(4)),
+				new Accidental(StaffPosition.ByLine(2, true)),
+				new Accidental(StaffPosition.ByLine(4, true)),
+				new Accidental(StaffPosition.ByLine(3))
+			};
+		}
+	}
 }

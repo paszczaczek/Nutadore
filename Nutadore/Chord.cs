@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Shapes;
 
 namespace Nutadore
@@ -19,7 +20,7 @@ namespace Nutadore
 		public void Add(Note note)
 		{
 			// Nuta bedzie częścią akordu i będzie rysowana troszką inaczej niż nuta zwykła.
-			note.addBoundryBox = false;
+			focusable = true;
 			notes.Add(note);
 		}
 
@@ -57,18 +58,9 @@ namespace Nutadore
 					cursor = noteCursor;
 				if (note.right > chordRight || note.right == -1)
 					chordRight = note.right;
-				// Sumujemy granice w których mieszczą się nuty.
-				if (base.boundaryBox == Rect.Empty)
-					base.boundaryBox = note.boundaryBox;
-				else
-					base.boundaryBox = Rect.Union(base.boundaryBox, note.boundaryBox);
+				// Rozszerz obszar akrodru o obszar nuty.
+				base.ExtendBounds(score, note.Bounds, 101);
 			}
-
-			// Dodajemy przezroczysty prostokąt w którym mieści się nuta i podłączamy pod niego 
-			// zdarzenie MouseEnter i MouseLeave żeby nuta zmieniała kolor po najechaniu na nią myszą.
-			Rectangle boundaryBox = base.AddBoundaryBox(score, 100);
-			boundaryBox.MouseEnter += MouseEnter;
-			boundaryBox.MouseLeave += MouseLeave;
 
 			this.left = chordLeft;
 			this.right = chordRight;
@@ -168,16 +160,17 @@ namespace Nutadore
 			}
 		}
 
-		private void MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+		public override void Bounds_MouseLeave(object sender, MouseEventArgs e)
 		{
+			//if ((System.Windows.Input.Keyboard.GetKeyStates(System.Windows.Input.Key.LeftShift) & KeyStates.Down) == 0)
 			foreach (var note in notes)
-				note.MouseLeave(sender, e);
+				note.Bounds_MouseLeave(sender, e);
 		}
 
-		private void MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+		public override void Bounds_MouseEnter(object sender, MouseEventArgs e)
 		{
 			foreach (var note in notes)
-				note.MouseEnter(sender, e);
+				note.Bounds_MouseEnter(sender, e);
 		}
 	}
 }

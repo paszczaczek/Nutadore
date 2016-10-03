@@ -15,6 +15,7 @@ namespace Nutadore
 		public Accidental(StaffPosition statfPosition)
 		{
 			this.staffPosition = statfPosition;
+			focusable = true;
 		}
 
 		public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
@@ -28,8 +29,6 @@ namespace Nutadore
 
 				glyphTop -= 57 * score.Magnification;
 				right = base.AddFetaGlyph(score, left, glyphTop, glyphCode);
-				//Rect boundaryAccidental = base.AddFetaGlyph(score, left, glyphTop, glyphCode);
-				//right = boundaryAccidental.Left + boundaryAccidental.Width;
 			}
 
 			return right;

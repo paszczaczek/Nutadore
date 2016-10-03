@@ -10,8 +10,21 @@ namespace Nutadore
 {
 	abstract public class Sign
 	{
-		protected List<UIElement> uiElements = new List<UIElement>();
-
+		private List<UIElement> elements = new List<UIElement>();
+		private List<UIElement> boundsElements = new List<UIElement>();
+		private Rectangle boundsRectangle;
+		public Rect Bounds
+		{
+			get
+			{
+				return new Rect(
+					boundsRectangle.Margin.Left,
+					boundsRectangle.Margin.Top,
+					boundsRectangle.Width,
+					boundsRectangle.Height);
+			}
+		}
+		public bool focusable = false;
 
 		public virtual double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
 		{
@@ -20,30 +33,27 @@ namespace Nutadore
 
 		public virtual void Hide(Score score)
 		{
-			foreach (var uiElement in uiElements)
+			foreach (var uiElement in elements)
 				score.Children.Remove(uiElement);
+			elements.Clear();
 
-			uiElements.Clear();
-			boundaryBox = Rect.Empty;
+			boundsElements.Clear();
+			boundsRectangle = null;
 		}
 
 		public virtual bool IsShown
 		{
-			get { return uiElements.Count > 0; }
+			get { return elements.Count > 0; }
 		}
 
-		protected void AddElement(Score score, UIElement uiElement, int zindex = 0, AddToBoundaryBox addToBoundaryBox = AddToBoundaryBox.No)
+		protected void AddElement(Score score, UIElement uiElement, int zindex = 0)
 		{
-			// TODO obsluga addToBoundaryBox
-			Canvas.SetZIndex(uiElement, zindex);
 			score.Children.Add(uiElement);
-			uiElements.Add(uiElement);
+			Canvas.SetZIndex(uiElement, zindex);
+			elements.Add(uiElement);
 		}
 
-		protected enum AddToBoundaryBox { Yes, No };
-		public Rect boundaryBox { get; protected set; } = Rect.Empty;
-
-		protected /*Rect*/double AddFetaGlyph(Score score, double glyphLeft, double glyphTop, string glyphCode, int zindex = 0, AddToBoundaryBox addToBoundaryBox = AddToBoundaryBox.No)
+		protected double AddFetaGlyph(Score score, double glyphLeft, double glyphTop, string glyphCode, int zindex = 0)
 		{
 			const string familyName = "feta26";
 			double fontSize = 42 * score.Magnification;
@@ -68,40 +78,71 @@ namespace Nutadore
 				fontSize,
 				Brushes.Black);
 
-			// Wyznaczamy granice w ktorych mieści się symbol (czarne piksele)
-			// i dodajemy do granich pozostałych elementów.
-			if (addToBoundaryBox == AddToBoundaryBox.Yes)
-			{
-				Rect glyphBoundaryBox = new Rect(
-					glyphLeft,
-					glyphTop + formattedText.Height + formattedText.OverhangAfter - formattedText.Extent,
-					formattedText.Width,
-					formattedText.Extent);
-				if (boundaryBox.IsEmpty)
-					boundaryBox = glyphBoundaryBox;
-				else
-					boundaryBox = Rect.Union(boundaryBox, glyphBoundaryBox);
-			}
+			// Wyznaczamy granice w ktorych mieszczą się czarne piksele symbolu.
+			Rect boundsGlyph = new Rect(
+				glyphLeft,
+				glyphTop + formattedText.Height + formattedText.OverhangAfter - formattedText.Extent,
+				formattedText.Width,
+				formattedText.Extent);
+			ExtendBounds(score, boundsGlyph, 100);
+			boundsElements.Add(uiElement);
 
-			//return boundaryRect;
+			// Zwracamy nowe położenie kursora.
 			return glyphLeft + formattedText.Width;
 		}
 
-		protected Rectangle AddBoundaryBox(Score score, int zindex = 0)
+		protected void ExtendBounds(Score score, Rect extendBy, int zindex = 0)
 		{
-			// Dodajemy przezroczysty prostokąt w którym mieści się znak i podłączamy pod niego 
-			// zdarzenie MouseEnter i MouseLeave.
-			Rectangle boundaryRect = new Rectangle
+			// Czy już został utworzona ramka bounds?
+			if (boundsRectangle == null)
 			{
-				Width = boundaryBox.Width,
-				Height = boundaryBox.Height,
-				Margin = new Thickness(boundaryBox.Left, boundaryBox.Top, 0, 0),
-				Fill = Brushes.Transparent,
-				Stroke = Brushes.Blue
-			};
-			AddElement(score, boundaryRect, zindex);
+				// Nie, jescze nie. Tworzymy ją i podczepiamy obsługę zdarzeń.
+				//boundsRectangle = new Rectangle
+				boundsRectangle = new Rectangle
+				{
+					Width = extendBy.Width,
+					Height = extendBy.Height,
+					Margin = new Thickness(extendBy.Left, extendBy.Top, 0, 0),
+					Fill = Brushes.Transparent
+					//Stroke = zindex == 101 ? Brushes.Green : Brushes.Blue
+				};
+				if (focusable)
+				{
+					boundsRectangle.MouseEnter += Bounds_MouseEnter;
+					boundsRectangle.MouseLeave += Bounds_MouseLeave;
+				}
+				AddElement(score, boundsRectangle, zindex);
+			}
+			else
+			{
+				// Tak, już była utworzona ramka bounds. Powiąkszamy ją o extenBy
+				//Rect boundsRect = new Rect(bounds.Margin.Left, bounds.Margin.Top, bounds.Width, bounds.Height);
+				Rect boundExtended = Rect.Union(Bounds, extendBy);
+				boundsRectangle.Width = boundExtended.Width;
+				boundsRectangle.Height = boundExtended.Height;
+				Thickness margin = boundsRectangle.Margin;
+				margin.Left = boundExtended.Left;
+				margin.Top = boundExtended.Top;
+				boundsRectangle.Margin = margin;
+			}
+		}
 
-			return boundaryRect;
+		public virtual void Bounds_MouseLeave(object sender, MouseEventArgs e)
+		{
+			foreach (var be in boundsElements)
+			{
+				if (be is TextBlock)
+					(be as TextBlock).Foreground = Brushes.Black;
+			}
+		}
+
+		public virtual void Bounds_MouseEnter(object sender, MouseEventArgs e)
+		{
+			foreach (UIElement be in boundsElements)
+			{
+				if (be is TextBlock)
+					(be as TextBlock).Foreground = Brushes.DarkGray;
+			}
 		}
 	}
 }

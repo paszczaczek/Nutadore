@@ -130,6 +130,9 @@ namespace Nutadore
 			// usuwamy wszystkie nuty
 			signs.ForEach(sign => sign.Hide(this));
 
+			// usuwamy znaki przykuczowe
+			scale.Hide(this);
+
 			// usuwamy wszystkie podwójne pięciolinie
 			foreach (var staffGrand in staffGrands)
 				staffGrand.Hide();

@@ -19,15 +19,12 @@ namespace Nutadore
 		/// Pozwala zablokowac rysowanie linii dodanych. Wykorzysytwane w rysowaniu akordów.
 		/// </summary>
 		public bool showLegerLines = true;
-		public bool addBoundryBox = true;
 
 		public double left;
 		public double right; 
 
 		public static readonly Note lowest = new Note(Letter.A, Octave.SubContra);
 		public static readonly Note highest = new Note(Letter.C, Octave.FiveLined);
-
-		private TextBlock head;
 
 		public enum Letter {
 			C,
@@ -57,6 +54,7 @@ namespace Nutadore
 			this.letter = letter;
 			this.octave = octave;
 			this.staffPosition = ToStaffPosition(preferredStaffType);
+			focusable = true;
 		}
 
 		public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
@@ -76,11 +74,7 @@ namespace Nutadore
 					= staff.top * score.Magnification
 					 + (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
 			glyphTop -= 57.5 * score.Magnification;
-			right = base.AddFetaGlyph(score, left, glyphTop, glyphCode, 1, AddToBoundaryBox.Yes);
-			//Rect boundaryHead = base.AddFetaGlyph(score, left, glyphTop, glyphCode, 1);
-			//right = boundaryHead.Left + boundaryHead.Width;
-			head = uiElements.FindLast(e => true) as TextBlock;
-
+			right = base.AddFetaGlyph(score, left, glyphTop, glyphCode, 1);
 			// Rysujemy linie dodane górne i dolne - jeśli nuta nie jest częścią akordu.
 			if (showLegerLines)
 				ShowLegerLines(score, trebleStaff, bassStaff, left);
@@ -102,15 +96,6 @@ namespace Nutadore
 			};
 			base.AddElement(score, letterLabel, 2);
 
-			// Dodajemy przezroczysty prostokąt w którym mieści się nuta i podłączamy pod niego 
-			// zdarzenie MouseEnter i MouseLeave żeby nuta zmieniała kolor po najechaniu na nią myszą.
-			if (addBoundryBox)
-			{
-				Rectangle boundaryBox = base.AddBoundaryBox(score, 100);
-				boundaryBox.MouseEnter += MouseEnter;
-				boundaryBox.MouseLeave += MouseLeave;
-			}
-
 			// Czy znak zmieścił sie na pięcolinii?
 			if (right >= score.ActualWidth - Staff.marginLeft)
 			{
@@ -125,16 +110,6 @@ namespace Nutadore
 				//right += Staff.spaceBetweenSigns * score.Magnification;
 				return right + Staff.spaceBetweenSigns * score.Magnification;
 			}
-		}
-
-		public void MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
-		{
-			head.Foreground = Brushes.Black;
-		}
-
-		public void MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
-		{
-			head.Foreground = Brushes.Red;
 		}
 
 		public void ShowLegerLines(Score score, Staff trebleStaff, Staff bassStaff, double left)
