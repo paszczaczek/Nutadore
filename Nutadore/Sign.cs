@@ -12,19 +12,7 @@ namespace Nutadore
 	{
 		private List<UIElement> elements = new List<UIElement>();
 		private List<UIElement> boundsElements = new List<UIElement>();
-		private Rectangle boundsRectangle;
-		public Rect Bounds
-		{
-			get
-			{
-				return new Rect(
-					boundsRectangle.Margin.Left,
-					boundsRectangle.Margin.Top,
-					boundsRectangle.Width,
-					boundsRectangle.Height);
-			}
-		}
-		public bool focusable = false;
+		public Rect bounds { get; protected set; } = Rect.Empty;
 
 		public virtual double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
 		{
@@ -38,7 +26,7 @@ namespace Nutadore
 			elements.Clear();
 
 			boundsElements.Clear();
-			boundsRectangle = null;
+			bounds = Rect.Empty;
 		}
 
 		public virtual bool IsShown
@@ -84,47 +72,31 @@ namespace Nutadore
 				glyphTop + formattedText.Height + formattedText.OverhangAfter - formattedText.Extent,
 				formattedText.Width,
 				formattedText.Extent);
-			ExtendBounds(score, boundsGlyph, 100);
+			ExtendBounds(score, boundsGlyph);
 			boundsElements.Add(uiElement);
 
 			// Zwracamy nowe położenie kursora.
 			return glyphLeft + formattedText.Width;
 		}
 
-		protected void ExtendBounds(Score score, Rect extendBy, int zindex = 0)
+		protected void ExtendBounds(Score score, Rect extendBy)
 		{
-			// Czy już został utworzona ramka bounds?
-			if (boundsRectangle == null)
+			bounds = Rect.Union(bounds, extendBy);
+		}
+
+		public void AddFocusRectangle(Score score, int zindex)
+		{
+			Rectangle boundsRectangle = new Rectangle
 			{
-				// Nie, jescze nie. Tworzymy ją i podczepiamy obsługę zdarzeń.
-				//boundsRectangle = new Rectangle
-				boundsRectangle = new Rectangle
-				{
-					Width = extendBy.Width,
-					Height = extendBy.Height,
-					Margin = new Thickness(extendBy.Left, extendBy.Top, 0, 0),
-					Fill = Brushes.Transparent
-					//Stroke = zindex == 101 ? Brushes.Green : Brushes.Blue
-				};
-				if (focusable)
-				{
-					boundsRectangle.MouseEnter += Bounds_MouseEnter;
-					boundsRectangle.MouseLeave += Bounds_MouseLeave;
-				}
-				AddElement(score, boundsRectangle, zindex);
-			}
-			else
-			{
-				// Tak, już była utworzona ramka bounds. Powiąkszamy ją o extenBy
-				//Rect boundsRect = new Rect(bounds.Margin.Left, bounds.Margin.Top, bounds.Width, bounds.Height);
-				Rect boundExtended = Rect.Union(Bounds, extendBy);
-				boundsRectangle.Width = boundExtended.Width;
-				boundsRectangle.Height = boundExtended.Height;
-				Thickness margin = boundsRectangle.Margin;
-				margin.Left = boundExtended.Left;
-				margin.Top = boundExtended.Top;
-				boundsRectangle.Margin = margin;
-			}
+				Width = bounds.Width,
+				Height = bounds.Height,
+				Margin = new Thickness(bounds.Left, bounds.Top, 0, 0),
+				Fill = Brushes.Transparent/*,
+				Stroke = zindex == 101 ? Brushes.Green : Brushes.Blue*/
+			};
+			boundsRectangle.MouseEnter += Bounds_MouseEnter;
+			boundsRectangle.MouseLeave += Bounds_MouseLeave;
+			AddElement(score, boundsRectangle, zindex);
 		}
 
 		public virtual void Bounds_MouseLeave(object sender, MouseEventArgs e)

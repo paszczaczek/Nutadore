@@ -17,7 +17,6 @@ namespace Nutadore
 		{
 			this.based = based;
 			this.type = type;
-			focusable = true;
 			accidentals = Accidentals();
 		}
 
@@ -31,7 +30,7 @@ namespace Nutadore
 				signLeft
 					= accidental.Show(score, trebleStaff, bassStaff, signLeft)
 					+ Staff.spaceBetweenScaleSigns * score.Magnification;
-				base.ExtendBounds(score, accidental.Bounds, 101);
+				base.ExtendBounds(score, accidental.bounds);
 			}
 
 			double scaleRight = signLeft + Staff.spaceBetweenSigns;

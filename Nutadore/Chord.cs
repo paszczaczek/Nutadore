@@ -19,8 +19,7 @@ namespace Nutadore
 
 		public void Add(Note note)
 		{
-			// Nuta bedzie częścią akordu i będzie rysowana troszką inaczej niż nuta zwykła.
-			focusable = true;
+			note.isPartOfChord = true;
 			notes.Add(note);
 		}
 
@@ -59,8 +58,11 @@ namespace Nutadore
 				if (note.right > chordRight || note.right == -1)
 					chordRight = note.right;
 				// Rozszerz obszar akrodru o obszar nuty.
-				base.ExtendBounds(score, note.Bounds, 101);
+				base.ExtendBounds(score, note.bounds);
 			}
+
+			// Dodaj prostokąt do focusowania akordu.
+			base.AddFocusRectangle(score, 101);
 
 			this.left = chordLeft;
 			this.right = chordRight;

@@ -20,6 +20,8 @@ namespace Nutadore
 		/// </summary>
 		public bool showLegerLines = true;
 
+		public bool isPartOfChord = false;
+
 		public double left;
 		public double right; 
 
@@ -54,7 +56,6 @@ namespace Nutadore
 			this.letter = letter;
 			this.octave = octave;
 			this.staffPosition = ToStaffPosition(preferredStaffType);
-			focusable = true;
 		}
 
 		public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
@@ -85,16 +86,21 @@ namespace Nutadore
 					+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
 			letterTop -= 7 * score.Magnification;
 			double letterLeft = left + 3 * score.Magnification;
-			Label letterLabel = new Label
+			TextBlock letterTextBlock = new TextBlock
 			{
 				FontFamily = new FontFamily("Consolas"),
 				FontSize = 12 * score.Magnification,
-				Content = this.letter.ToString(),
+				//Content = this.letter.ToString(),
+				Text = this.letter.ToString(),
 				Foreground = Brushes.White,
 				Padding = new Thickness(0, 0, 0, 0),
 				Margin = new Thickness(letterLeft, letterTop, 0, 0)
 			};
-			base.AddElement(score, letterLabel, 2);
+			base.AddElement(score, letterTextBlock, 2);
+
+			// Dodajemy prostokąt reagujący na mysz.
+			if (!isPartOfChord)
+				base.AddFocusRectangle(score, 100);
 
 			// Czy znak zmieścił sie na pięcolinii?
 			if (right >= score.ActualWidth - Staff.marginLeft)

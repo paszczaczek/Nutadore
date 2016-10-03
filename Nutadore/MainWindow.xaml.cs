@@ -25,7 +25,7 @@ namespace Nutadore
 			InitializeComponent();
 
 			//AddAllTriads();
-			//AddAllNotes();
+			AddAllNotes();
 			AddTriad();
 			score.Add(new Note(Note.Letter.C, Note.Octave.OneLined));
 		}

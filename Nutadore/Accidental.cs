@@ -15,7 +15,6 @@ namespace Nutadore
 		public Accidental(StaffPosition statfPosition)
 		{
 			this.staffPosition = statfPosition;
-			focusable = true;
 		}
 
 		public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
