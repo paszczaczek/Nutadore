@@ -17,6 +17,7 @@ namespace Nutadore
 		public Scale scale = new Scale(Note.Letter.C, Scale.Type.Major);
 		private List<StaffGrand> staffGrands = new List<StaffGrand>();
 		public List<Sign> signs = new List<Sign>();
+		public Keyboard keyboard;
 
 		public Score()
 		{

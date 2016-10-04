@@ -35,17 +35,23 @@ namespace Nutadore
 			var trebleNotes = notes.FindAll(note => note.staffType == Staff.Type.Treble);
 			trebleNotes.Sort();
 			Note trebleHighestNote = trebleNotes.LastOrDefault();
+			Note trebleLowestNote = trebleNotes.FirstOrDefault();
 
 			// Wyszukaj najniższa nutę na pięciolinii basowej.
 			var bassNotes = notes.FindAll(note => note.staffType == Staff.Type.Bass);
 			bassNotes.Sort();
+			Note bassHighestNote = bassNotes.LastOrDefault();
 			Note bassLowestNote = bassNotes.FirstOrDefault();
 
 			// Narysuj wszystkie nuty akordu.
 			foreach (var note in notes)
 			{
 				// Linie dodane rysuj tylko dla najwyzszej i najniższej nuty.
-				note.showLegerLines = note == trebleHighestNote || note == bassLowestNote;
+				note.showLegerLines = 
+					note == trebleHighestNote || 
+					note == trebleLowestNote ||
+					note == bassHighestNote ||
+					note == bassLowestNote;
 				Staff staff
 					= note.staffType == Staff.Type.Treble
 					? trebleStaff
@@ -162,17 +168,35 @@ namespace Nutadore
 			}
 		}
 
-		public override void Bounds_MouseLeave(object sender, MouseEventArgs e)
+		public override void MouseLeave(object sender, MouseEventArgs e)
 		{
-			//if ((System.Windows.Input.Keyboard.GetKeyStates(System.Windows.Input.Key.LeftShift) & KeyStates.Down) == 0)
-			foreach (var note in notes)
-				note.Bounds_MouseLeave(sender, e);
+				foreach (var note in notes)
+					note.MouseLeave(sender, e);
 		}
 
-		public override void Bounds_MouseEnter(object sender, MouseEventArgs e)
+		public override void MouseEnter(object sender, MouseEventArgs e)
 		{
+			//KeyStates keyStates = System.Windows.Input.Keyboard.GetKeyStates(System.Windows.Input.Key.LeftShift);
+			//if ((keyStates & KeyStates.Down) == 0)
+			//{
+			//	// Nie wciśniety Shift - zaznaczamy cały akrod.
+			//	foreach (var note in notes)
+			//		note.MouseEnter(sender, e);
+			//}
+			//else
+			//{
+			//	// Wciśnięty Shift - zaznaczamy pojedyńczą nutę akrodu
+			//	Rectangle chordBounds = sender as Rectangle;
+			//	Score score = chordBounds.Parent as Score;
+			//	Point mousePoint = e.GetPosition(score);
+			//	foreach (var note in notes)
+			//		if (note.bounds.Contains(mousePoint))
+			//			note.MouseEnter(sender, e);
+			//}
+
+			// Podświetlam nuty akrordu.
 			foreach (var note in notes)
-				note.Bounds_MouseEnter(sender, e);
+				note.MouseEnter(sender, e);
 		}
 	}
 }

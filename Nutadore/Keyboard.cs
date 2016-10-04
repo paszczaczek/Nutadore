@@ -18,6 +18,8 @@ namespace Nutadore
 		private static readonly int numberOfBlackKeys = 36;
 		public static readonly int numberOfKeys = numberOfWhiteKeys + numberOfBlackKeys;
 
+		public Score score;
+
 		/// <summary>
 		/// Lista wszystkich klawiszy na klawiaturze.
 		/// </summary>
@@ -39,13 +41,39 @@ namespace Nutadore
 			base.Children.Clear();
 			foreach (Key key in keys)
 			{
-				key.Show(this);
+				key.Show(score, this);
 			}
 		}
 
 		private void Keyboard_SizeChanged(object sender, SizeChangedEventArgs e)
 		{
 			Show();
+		}
+
+		public void Press(Sign sign)
+		{
+			Note note = sign as Note;
+			if (note != null)
+			{
+				foreach (var key in keys)
+				{
+					if (key.note.Equals(note))
+						key.Press();
+				}
+			}
+		}
+
+		public void Release(Sign sign)
+		{
+			Note note = sign as Note;
+			if (note != null)
+			{
+				foreach (var key in keys)
+				{
+					if (key.note.Equals(note))
+						key.Release();
+				}
+			}
 		}
 	}
 }

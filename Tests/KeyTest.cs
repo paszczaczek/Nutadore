@@ -64,79 +64,79 @@ namespace Tests
 		{
 			// SubContra A
 			Key key = new Key(0);
-			Assert.AreEqual(key.octave, Note.Octave.SubContra);
-			Assert.AreEqual(key.letter, Note.Letter.A);
+			Assert.AreEqual(key.note.octave, Note.Octave.SubContra);
+			Assert.AreEqual(key.note.letter, Note.Letter.A);
 
 			// SubContra A#
 			key = new Key(1);
-			Assert.AreEqual(key.octave, Note.Octave.SubContra);
-			Assert.AreEqual(key.letter, Note.Letter.A);
+			Assert.AreEqual(key.note.octave, Note.Octave.SubContra);
+			Assert.AreEqual(key.note.letter, Note.Letter.A);
 
 			// SubContra H
 			key = new Key(2);
-			Assert.AreEqual(key.octave, Note.Octave.SubContra);
-			Assert.AreEqual(key.letter, Note.Letter.H);
+			Assert.AreEqual(key.note.octave, Note.Octave.SubContra);
+			Assert.AreEqual(key.note.letter, Note.Letter.H);
 
 
 			// Contra C
 			key = new Key(3);
-			Assert.AreEqual(key.octave, Note.Octave.Contra);
-			Assert.AreEqual(key.letter, Note.Letter.C);
+			Assert.AreEqual(key.note.octave, Note.Octave.Contra);
+			Assert.AreEqual(key.note.letter, Note.Letter.C);
 
 			// Contra C#
 			key = new Key(4);
-			Assert.AreEqual(key.octave, Note.Octave.Contra);
-			Assert.AreEqual(key.letter, Note.Letter.C);
+			Assert.AreEqual(key.note.octave, Note.Octave.Contra);
+			Assert.AreEqual(key.note.letter, Note.Letter.C);
 
 			// Contra D
 			key = new Key(5);
-			Assert.AreEqual(key.octave, Note.Octave.Contra);
-			Assert.AreEqual(key.letter, Note.Letter.D);
+			Assert.AreEqual(key.note.octave, Note.Octave.Contra);
+			Assert.AreEqual(key.note.letter, Note.Letter.D);
 
 			// Contra D#
 			key = new Key(6);
-			Assert.AreEqual(key.octave, Note.Octave.Contra);
-			Assert.AreEqual(key.letter, Note.Letter.D);
+			Assert.AreEqual(key.note.octave, Note.Octave.Contra);
+			Assert.AreEqual(key.note.letter, Note.Letter.D);
 
 			// Contra E
 			key = new Key(7);
-			Assert.AreEqual(key.octave, Note.Octave.Contra);
-			Assert.AreEqual(key.letter, Note.Letter.E);
+			Assert.AreEqual(key.note.octave, Note.Octave.Contra);
+			Assert.AreEqual(key.note.letter, Note.Letter.E);
 
 			// Contra F
 			key = new Key(8);
-			Assert.AreEqual(key.octave, Note.Octave.Contra);
-			Assert.AreEqual(key.letter, Note.Letter.F);
+			Assert.AreEqual(key.note.octave, Note.Octave.Contra);
+			Assert.AreEqual(key.note.letter, Note.Letter.F);
 
 			// Contra F#
 			key = new Key(9);
-			Assert.AreEqual(key.octave, Note.Octave.Contra);
-			Assert.AreEqual(key.letter, Note.Letter.F);
+			Assert.AreEqual(key.note.octave, Note.Octave.Contra);
+			Assert.AreEqual(key.note.letter, Note.Letter.F);
 
 			// Contra G
 			key = new Key(10);
-			Assert.AreEqual(key.octave, Note.Octave.Contra);
-			Assert.AreEqual(key.letter, Note.Letter.G);
+			Assert.AreEqual(key.note.octave, Note.Octave.Contra);
+			Assert.AreEqual(key.note.letter, Note.Letter.G);
 
 			// Contra G#
 			key = new Key(11);
-			Assert.AreEqual(key.octave, Note.Octave.Contra);
-			Assert.AreEqual(key.letter, Note.Letter.G);
+			Assert.AreEqual(key.note.octave, Note.Octave.Contra);
+			Assert.AreEqual(key.note.letter, Note.Letter.G);
 
 			// Contra A
 			key = new Key(12);
-			Assert.AreEqual(key.octave, Note.Octave.Contra);
-			Assert.AreEqual(key.letter, Note.Letter.A);
+			Assert.AreEqual(key.note.octave, Note.Octave.Contra);
+			Assert.AreEqual(key.note.letter, Note.Letter.A);
 
 			// Contra A#
 			key = new Key(13);
-			Assert.AreEqual(key.octave, Note.Octave.Contra);
-			Assert.AreEqual(key.letter, Note.Letter.A);
+			Assert.AreEqual(key.note.octave, Note.Octave.Contra);
+			Assert.AreEqual(key.note.letter, Note.Letter.A);
 
 			// Contra H
 			key = new Key(14);
-			Assert.AreEqual(key.octave, Note.Octave.Contra);
-			Assert.AreEqual(key.letter, Note.Letter.H);
+			Assert.AreEqual(key.note.octave, Note.Octave.Contra);
+			Assert.AreEqual(key.note.letter, Note.Letter.H);
 		}
 	}
 }

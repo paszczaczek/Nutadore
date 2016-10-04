@@ -12,12 +12,26 @@ namespace Nutadore
 {
 	public class Key
 	{
+		private static Brush whiteBrush = Brushes.LightGray;
+		private static Brush blackBrush = Brushes.Black;
+		private static Brush whitePressedBrush = Brushes.Yellow;
+		private static Brush blackPresseddBrush = Brushes.Yellow;
+
+		private readonly int keyNo;
+		private readonly int keyNoInOctave;
+
+		public readonly Note note;
+		public readonly bool isWhite;
+
+		private Rectangle keyRectangle;
+
 		public Key(int keyNo)
 		{
 			this.keyNo = keyNo;
 
 			// Wyznaczam oktawe i numer klawisza w oktawie dla klawisza.
 			const int keysInOctave = 12;
+			Note.Octave octave;
 			if (keyNo >= 0 && keyNo <= 2)
 			{
 				// Subcontra A, A#, H
@@ -43,20 +57,22 @@ namespace Nutadore
 			}
 
 			// Wyznaczam literę nuty dla klawisza.
+			Note.Letter letter;
+			Note.Accidental accidental = Note.Accidental.None;
 			switch (keyNoInOctave)
 			{
 				case 0:
 					letter = Note.Letter.C;
 					break;
 				case 1:
-					// TODO krzyżyk
+					accidental = Note.Accidental.Sharp;
 					letter = Note.Letter.C;
 					break;
 				case 2:
 					letter = Note.Letter.D;
 					break;
 				case 3:
-					// TODO krzyżyk
+					accidental = Note.Accidental.Sharp;
 					letter = Note.Letter.D;
 					break;
 				case 4:
@@ -66,21 +82,21 @@ namespace Nutadore
 					letter = Note.Letter.F;
 					break;
 				case 6:
-					// TODO krzyżyk
+					accidental = Note.Accidental.Sharp;
 					letter = Note.Letter.F;
 					break;
 				case 7:
 					letter = Note.Letter.G;
 					break;
 				case 8:
-					// TODO krzyżyk
+					accidental = Note.Accidental.Sharp;
 					letter = Note.Letter.G;
 					break;
 				case 9:
 					letter = Note.Letter.A;
 					break;
 				case 10:
-					// TODO krzyżyk
+					accidental = Note.Accidental.Sharp;
 					letter = Note.Letter.A;
 					break;
 				case 11:
@@ -89,6 +105,9 @@ namespace Nutadore
 				default:
 					throw new ArgumentOutOfRangeException("keyNoInOctave");
 			}
+
+			// Wyznaczam nute skojarzona z klawiszem.
+			note = new Note(letter, accidental, octave);
 
 			// Wyznaczam kolor klawisza.
 			isWhite =
@@ -101,14 +120,7 @@ namespace Nutadore
 				keyNoInOctave == 11;
 		}
 
-		private readonly int keyNo;
-		private readonly int keyNoInOctave;
-
-		public readonly Note.Letter letter;
-		public readonly Note.Octave octave;
-		public readonly bool isWhite;
-
-		public void Show(Keyboard keyboard)
+		public void Show(Score score, Keyboard keyboard)
 		{
 			// szerokość klawiszy białych i czarnych
 			double whiteWidth = keyboard.ActualWidth / Keyboard.numberOfWhiteKeys;
@@ -140,34 +152,75 @@ namespace Nutadore
 				case 11: left = whiteWidth * 6; break;
 			}
 			// przesunięcie wynikające z oktawy
-			left += (int)octave * whiteWidth * 7;
+			left += (int)note.octave * whiteWidth * 7;
 			// przesunięcie wynikające z tego że w oktawie SubContra są tylko klawisze A, A# i H
 			left -= whiteWidth * 5;
 
 			// Rysuje klawisz.
-			Rectangle rect = new Rectangle
+			keyRectangle = new Rectangle
 			{
 				Width = width,
 				Height = height,
 				Margin = new Thickness(left, 0, 0, 0),
-				Fill = isWhite ? Brushes.LightGray : Brushes.Black,
+				Fill = isWhite ? whiteBrush : blackBrush,
 				//Stroke = Brushes.Black,
 				//StrokeThickness = 1
 			};
-			Canvas.SetZIndex(rect, isWhite ? 0 : 1);
-			keyboard.Children.Add(rect);
+			Canvas.SetZIndex(keyRectangle, isWhite ? 0 : 2);
+			keyboard.Children.Add(keyRectangle);
 
+			// Podłączam obsluge myszy do klawisza.
+			keyRectangle.MouseEnter += MouseEnter;
+			keyRectangle.MouseLeave += MouseLeave;
+
+			// Rysuję linie oddzielające klawisze.
 			Line line = new Line
 			{
 				X1 = left,
 				Y1 = 0,
 				X2 = left,
 				Y2 = height,
-				Stroke = Brushes.Black,
-				StrokeThickness = letter == Note.Letter.C && isWhite ? 1.0 : 0.4
+				Stroke = note.letter == Note.Letter.C && isWhite ? Brushes.Red : Brushes.Black,
+				StrokeThickness = note.letter == Note.Letter.C && isWhite ? 1.0 : 0.4
 			};
-			Canvas.SetZIndex(line, 2);
+			Canvas.SetZIndex(line, 1);
 			keyboard.Children.Add(line);
+
+			if (note.letter == Note.Letter.C && isWhite)
+			{
+				TextBlock octaveNameTextBlock = new TextBlock
+				{
+					FontFamily = new FontFamily("Consolas"),
+					FontSize = 16,
+					Text = note.octave.ToString(),
+					Foreground = Brushes.Red,
+					//Padding = new Thickness(0, 0, 0, 0),
+					Margin = new Thickness(line.X1, line.Y2, 0, 0)
+				};
+				keyboard.Children.Add(octaveNameTextBlock);
+			}
+		}
+
+		public void Press()
+		{
+			keyRectangle.Fill = isWhite ? whitePressedBrush : blackPresseddBrush;
+		}
+
+		public void Release()
+		{
+			keyRectangle.Fill = isWhite ? whiteBrush : blackBrush;
+		}
+
+		private void MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+		{
+			Rectangle key = sender as Rectangle;
+			key.Fill = isWhite ? whitePressedBrush : blackPresseddBrush;
+		}
+
+		private void MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+		{
+			Rectangle key = sender as Rectangle;
+			key.Fill = isWhite ? whiteBrush : blackBrush;
 		}
 	}
 }

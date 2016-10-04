@@ -10,6 +10,9 @@ namespace Nutadore
 {
 	abstract public class Sign
 	{
+		private static Brush highlightBrush = Brushes.DarkGray;
+		private static Brush boundsBrush = Brushes.Blue;
+
 		private List<UIElement> elements = new List<UIElement>();
 		private List<UIElement> boundsElements = new List<UIElement>();
 		public Rect bounds { get; protected set; } = Rect.Empty;
@@ -91,15 +94,15 @@ namespace Nutadore
 				Width = bounds.Width,
 				Height = bounds.Height,
 				Margin = new Thickness(bounds.Left, bounds.Top, 0, 0),
-				Fill = Brushes.Transparent/*,
-				Stroke = zindex == 101 ? Brushes.Green : Brushes.Blue*/
+				Fill = Brushes.Transparent,
+				Stroke = boundsBrush
 			};
-			boundsRectangle.MouseEnter += Bounds_MouseEnter;
-			boundsRectangle.MouseLeave += Bounds_MouseLeave;
+			boundsRectangle.MouseEnter += MouseEnter;
+			boundsRectangle.MouseLeave += MouseLeave;
 			AddElement(score, boundsRectangle, zindex);
 		}
 
-		public virtual void Bounds_MouseLeave(object sender, MouseEventArgs e)
+		public virtual void MouseLeave(object sender, MouseEventArgs e)
 		{
 			foreach (var be in boundsElements)
 			{
@@ -108,12 +111,12 @@ namespace Nutadore
 			}
 		}
 
-		public virtual void Bounds_MouseEnter(object sender, MouseEventArgs e)
+		public virtual void MouseEnter(object sender, MouseEventArgs e)
 		{
 			foreach (UIElement be in boundsElements)
 			{
 				if (be is TextBlock)
-					(be as TextBlock).Foreground = Brushes.DarkGray;
+					(be as TextBlock).Foreground = highlightBrush;
 			}
 		}
 	}

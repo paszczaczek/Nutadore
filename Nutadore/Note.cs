@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
@@ -11,6 +12,7 @@ namespace Nutadore
 	{
 		public Letter letter;
 		public Octave octave;
+		public Accidental accidental;
 		public Perform.HowTo performHowTo;
 		public StaffPosition staffPosition = StaffPosition.ByLine(1);
 		public Staff.Type staffType;
@@ -25,8 +27,8 @@ namespace Nutadore
 		public double left;
 		public double right; 
 
-		public static readonly Note lowest = new Note(Letter.A, Octave.SubContra);
-		public static readonly Note highest = new Note(Letter.C, Octave.FiveLined);
+		public static readonly Note lowest = new Note(Letter.A, Accidental.None, Octave.SubContra);
+		public static readonly Note highest = new Note(Letter.C, Accidental.None, Octave.FiveLined);
 
 		public enum Letter {
 			C,
@@ -51,9 +53,18 @@ namespace Nutadore
 			FiveLined
 		}
 
-		public Note(Letter letter, Octave octave, Staff.Type? preferredStaffType = null)
+		public enum Accidental
+		{
+			None,
+			Flat,
+			Sharp,
+			Natural
+		}
+
+		public Note(Letter letter, Accidental accidental, Octave octave, Staff.Type? preferredStaffType = null)
 		{
 			this.letter = letter;
+			this.accidental = accidental;
 			this.octave = octave;
 			this.staffPosition = ToStaffPosition(preferredStaffType);
 		}
@@ -290,7 +301,7 @@ namespace Nutadore
 
 		public Note Copy()
 		{
-			return new Note(letter, octave, staffType);
+			return new Note(letter, accidental, octave, staffType);
 		}
 
 		/// <summary>
@@ -321,15 +332,22 @@ namespace Nutadore
 
 		public override bool Equals(object obj)
 		{
-			Note note = obj as Note;
+			Note other = obj as Note;
 
 			if (obj == null)
 				return false;
 
-			if (note == null)
+			if (other == null)
 				return false;
 
-			return letter == note.letter && octave == note.octave;
+			if (this.letter == other.letter &&
+				this.accidental == other.accidental &&
+				this.octave == other.octave)
+				return true;
+
+			// TODO porównywanie z krzyżykami i bemolami !
+
+			return false;
 		}
 
 		public override int GetHashCode()
@@ -351,6 +369,26 @@ namespace Nutadore
 				return 1;
 			else
 				return -1;
+		}
+
+		public override void MouseEnter(object sender, MouseEventArgs e)
+		{
+			base.MouseEnter(sender, e);
+
+			// Wciskam klawisz odpowiadający nucie na klawiaturze.
+			Rectangle noteBounds = sender as Rectangle;
+			Score score = noteBounds.Parent as Score;
+			score.keyboard.Press(this);
+		}
+
+		public override void MouseLeave(object sender, MouseEventArgs e)
+		{
+			base.MouseLeave(sender, e);
+
+			// Puszczam klawisz odpowiadający nucie na klawiaturze.
+			Rectangle noteBounds = sender as Rectangle;
+			Score score = noteBounds.Parent as Score;
+			score.keyboard.Release(this);
 		}
 	}
 }
