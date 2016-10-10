@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,12 +11,17 @@ namespace Nutadore
 {
 	abstract public class Sign
 	{
-		private static Brush highlightBrush = Brushes.DarkGray;
-		private static Brush boundsBrush = Brushes.Blue;
+		private static Brush currentBrush = Brushes.LightSeaGreen;
+		private static Brush highlightBrush = Brushes.Gray;
+		//private static Brush boundsBrush = Brushes.Gray;
 
 		private List<UIElement> elements = new List<UIElement>();
-		private List<UIElement> boundsElements = new List<UIElement>();
+		private List<UIElement> highlightElements = new List<UIElement>();
+		private Rectangle highlightRectangle;
 		public Rect bounds { get; protected set; } = Rect.Empty;
+
+		private bool isCurrent;
+		private bool isHighlighted;
 
 		public virtual double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
 		{
@@ -28,7 +34,7 @@ namespace Nutadore
 				score.Children.Remove(uiElement);
 			elements.Clear();
 
-			boundsElements.Clear();
+			highlightElements.Clear();
 			bounds = Rect.Empty;
 		}
 
@@ -76,7 +82,7 @@ namespace Nutadore
 				formattedText.Width,
 				formattedText.Extent);
 			ExtendBounds(score, boundsGlyph);
-			boundsElements.Add(uiElement);
+			highlightElements.Add(uiElement);
 
 			// Zwracamy nowe położenie kursora.
 			return glyphLeft + formattedText.Width;
@@ -87,36 +93,96 @@ namespace Nutadore
 			bounds = Rect.Union(bounds, extendBy);
 		}
 
-		public void AddFocusRectangle(Score score, int zindex)
+		public void AddHighlightRectangle(Score score, Staff trebleStaff, Staff bassStaff, int zindex)
 		{
-			Rectangle boundsRectangle = new Rectangle
+
+			double top = trebleStaff.StaffPositionToY(StaffPosition.ByLegerAbove(6));
+			double bottom = bassStaff.StaffPositionToY(StaffPosition.ByLegerBelow(4));
+			highlightRectangle = new Rectangle
 			{
 				Width = bounds.Width,
-				Height = bounds.Height,
-				Margin = new Thickness(bounds.Left, bounds.Top, 0, 0),
+				//Height = bounds.Height,
+				Height = bottom - top,
+				//Margin = new Thickness(bounds.Left, bounds.Top, 0, 0),
+				Margin = new Thickness(bounds.Left, top, 0, 0),
 				Fill = Brushes.Transparent,
-				Stroke = boundsBrush
+				//Fill = boundsBrush,
+				//Opacity = 0.1,
+				Stroke = Brushes.Transparent
 			};
-			boundsRectangle.MouseEnter += MouseEnter;
-			boundsRectangle.MouseLeave += MouseLeave;
-			AddElement(score, boundsRectangle, zindex);
-		}
-
-		public virtual void MouseLeave(object sender, MouseEventArgs e)
-		{
-			foreach (var be in boundsElements)
-			{
-				if (be is TextBlock)
-					(be as TextBlock).Foreground = Brushes.Black;
-			}
+			highlightRectangle.MouseEnter += MouseEnter;
+			highlightRectangle.MouseLeave += MouseLeave;
+			AddElement(score, highlightRectangle, zindex);
 		}
 
 		public virtual void MouseEnter(object sender, MouseEventArgs e)
 		{
-			foreach (UIElement be in boundsElements)
+			//foreach (UIElement he in highlightElements)
+			//{
+			//	if (he is TextBlock)
+			//		(he as TextBlock).Foreground = highlightBrush;
+			//}
+			//Rectangle highlightRectangle = sender as Rectangle;
+			isHighlighted = true;
+			SetColor();
+			//highlightRectangle.Fill = highlightBrush;
+			//highlightRectangle.Opacity = 0.3;
+		}
+
+		public virtual void MouseLeave(object sender, MouseEventArgs e)
+		{
+			//foreach (var he in highlightElements)
+			//{
+			//	if (he is TextBlock)
+			//		(he as TextBlock).Foreground = Brushes.Black;
+			//}
+			//Rectangle highlightRectangle = sender as Rectangle;
+			//highlightRectangle.Fill = highlightBrush;
+			//(sender as Rectangle).Opacity = 0.1;
+			isHighlighted = false;
+			SetColor();
+		}
+
+		public void MarkAsCurrent(bool isCurrent)
+		{
+			this.isCurrent = isCurrent;
+			SetColor();
+		}
+
+		public void MarkAsHighlighted(bool isHighlighted)
+		{
+			this.isHighlighted = isHighlighted;
+			SetColor();
+		}
+
+		private void SetColor()
+		{
+			if (highlightRectangle == null)
+				return;
+
+			if (isCurrent && isHighlighted)
 			{
-				if (be is TextBlock)
-					(be as TextBlock).Foreground = highlightBrush;
+				highlightRectangle.Fill = currentBrush;
+				highlightRectangle.Stroke = currentBrush;
+				highlightRectangle.Opacity = 0.3;
+			}
+			else if (isCurrent && !isHighlighted)
+			{
+				highlightRectangle.Fill = currentBrush;
+				highlightRectangle.Stroke = currentBrush;
+				highlightRectangle.Opacity = 0.2;
+
+			}
+			else if (!isCurrent && isHighlighted)
+			{
+				highlightRectangle.Fill = highlightBrush;
+				highlightRectangle.Stroke = highlightBrush;
+				highlightRectangle.Opacity = 0.1;
+			}
+			else if (!isCurrent && !isHighlighted)
+			{
+				highlightRectangle.Fill = Brushes.Transparent;
+				highlightRectangle.Stroke = Brushes.Transparent;
 			}
 		}
 	}

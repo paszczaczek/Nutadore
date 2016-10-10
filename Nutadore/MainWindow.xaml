@@ -5,10 +5,10 @@
         Title="MainWindow" Height="668.831" Width="1272.489">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="463*"/>
-            <RowDefinition Height="176*"/>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <local:Score x:Name="score" Grid.Row="0" Focusable="True" Margin="10" />
-        <local:Keyboard x:Name="keyboard" Grid.Row="1" Margin="10"/>
+        <local:Score x:Name="score" Grid.Row="0"  Margin="10" />
+        <local:Keyboard x:Name="keyboard" Grid.Row="1" Margin="10" VerticalAlignment="Bottom"/>
     </Grid>
 </Window>

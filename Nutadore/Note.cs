@@ -111,7 +111,7 @@ namespace Nutadore
 
 			// Dodajemy prostokąt reagujący na mysz.
 			if (!isPartOfChord)
-				base.AddFocusRectangle(score, 100);
+				base.AddHighlightRectangle(score, trebleStaff, bassStaff, 100);
 
 			// Czy znak zmieścił sie na pięcolinii?
 			if (right >= score.ActualWidth - Staff.marginLeft)
@@ -378,7 +378,8 @@ namespace Nutadore
 			// Wciskam klawisz odpowiadający nucie na klawiaturze.
 			Rectangle noteBounds = sender as Rectangle;
 			Score score = noteBounds.Parent as Score;
-			score.keyboard.Press(this);
+			if (score != null)
+				score.keyboard.PressKey(this);
 		}
 
 		public override void MouseLeave(object sender, MouseEventArgs e)
@@ -388,7 +389,9 @@ namespace Nutadore
 			// Puszczam klawisz odpowiadający nucie na klawiaturze.
 			Rectangle noteBounds = sender as Rectangle;
 			Score score = noteBounds.Parent as Score;
-			score.keyboard.Release(this);
+			// score może być nullowe, gdy podświetlimy nutę i zmienimy powiększenie
+			if (score != null)
+				score.keyboard.ReleaseKey(this);
 		}
 	}
 }

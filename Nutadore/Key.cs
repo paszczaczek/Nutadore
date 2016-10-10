@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,14 +13,18 @@ namespace Nutadore
 {
 	public class Key
 	{
-		private static Brush whiteBrush = Brushes.LightGray;
-		private static Brush blackBrush = Brushes.Black;
-		private static Brush whitePressedBrush = Brushes.Yellow;
-		private static Brush blackPresseddBrush = Brushes.Yellow;
+		private enum State
+		{
+			Up,
+			Down,
+			DownHit,
+			DownMissed
+		}
 
-		private readonly int keyNo;
+		private State state = State.Up;
+		private bool isHighlighted;
+
 		private readonly int keyNoInOctave;
-
 		public readonly Note note;
 		public readonly bool isWhite;
 
@@ -27,8 +32,6 @@ namespace Nutadore
 
 		public Key(int keyNo)
 		{
-			this.keyNo = keyNo;
-
 			// Wyznaczam oktawe i numer klawisza w oktawie dla klawisza.
 			const int keysInOctave = 12;
 			Note.Octave octave;
@@ -120,7 +123,7 @@ namespace Nutadore
 				keyNoInOctave == 11;
 		}
 
-		public void Show(Score score, Keyboard keyboard)
+		public double Show(Score score, Keyboard keyboard)
 		{
 			// szerokość klawiszy białych i czarnych
 			double whiteWidth = keyboard.ActualWidth / Keyboard.numberOfWhiteKeys;
@@ -162,18 +165,21 @@ namespace Nutadore
 				Width = width,
 				Height = height,
 				Margin = new Thickness(left, 0, 0, 0),
-				Fill = isWhite ? whiteBrush : blackBrush,
-				//Stroke = Brushes.Black,
-				//StrokeThickness = 1
+				//Fill = isWhite ? whiteKeyBrush.Clone() : blackKeyBrush.Clone(),
+				Fill = new SolidColorBrush(isWhite ? whiteKeyColor : blackKeyColor),
+				Stroke = Brushes.Black,
+				StrokeThickness = isWhite ? 0.2 : 0.8
 			};
 			Canvas.SetZIndex(keyRectangle, isWhite ? 0 : 2);
 			keyboard.Children.Add(keyRectangle);
 
 			// Podłączam obsluge myszy do klawisza.
-			keyRectangle.MouseEnter += MouseEnter;
-			keyRectangle.MouseLeave += MouseLeave;
+			keyRectangle.MouseEnter += KeyRectangle_MouseEnter;
+			keyRectangle.MouseLeave += KeyRectangle_MouseLeave;
+			keyRectangle.MouseDown += KeyRectangle_MouseDown;
+			keyRectangle.MouseUp += KeyRectangle_MouseUp;
 
-			// Rysuję linie oddzielające klawisze.
+			// Rysuję linie oddzielające klawisze i linie oddzielające oktawy.
 			Line line = new Line
 			{
 				X1 = left,
@@ -184,43 +190,110 @@ namespace Nutadore
 				StrokeThickness = note.letter == Note.Letter.C && isWhite ? 1.0 : 0.4
 			};
 			Canvas.SetZIndex(line, 1);
-			keyboard.Children.Add(line);
+			//keyboard.Children.Add(line);
 
+			// Rysuję nazwy oktaw.
+			double keyboardHeight = whiteHeight;
 			if (note.letter == Note.Letter.C && isWhite)
 			{
+				const string familyName = "Consolas";
+				double fontSize = 12;
 				TextBlock octaveNameTextBlock = new TextBlock
 				{
-					FontFamily = new FontFamily("Consolas"),
-					FontSize = 16,
+					FontFamily = new FontFamily(familyName),
+					FontSize = fontSize,
 					Text = note.octave.ToString(),
 					Foreground = Brushes.Red,
-					//Padding = new Thickness(0, 0, 0, 0),
 					Margin = new Thickness(line.X1, line.Y2, 0, 0)
 				};
+				// Wyznaczamy wysokość napisu.
+				FormattedText ft = new FormattedText(
+					octaveNameTextBlock.Text,
+					CultureInfo.GetCultureInfo("en-us"),
+					FlowDirection.LeftToRight,
+					new Typeface(familyName),
+					fontSize,
+					Brushes.Black);
+				keyboardHeight += ft.Height;
 				keyboard.Children.Add(octaveNameTextBlock);
 			}
+
+			return keyboardHeight;
 		}
 
 		public void Press()
 		{
-			keyRectangle.Fill = isWhite ? whitePressedBrush : blackPresseddBrush;
+			//keyRectangle.Fill = isWhite ? whiteHighlightedBrush : blackHighLightedBrush;
 		}
 
 		public void Release()
 		{
-			keyRectangle.Fill = isWhite ? whiteBrush : blackBrush;
+			//keyRectangle.Fill = isWhite ? whiteKeyBrush : blackKeyBrush;
 		}
 
-		private void MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+		private void KeyRectangle_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
 		{
 			Rectangle key = sender as Rectangle;
-			key.Fill = isWhite ? whitePressedBrush : blackPresseddBrush;
+			//key.Fill = isWhite ? whiteHighlightedBrush : blackHighLightedBrush;
+			isHighlighted = true;
+			SetColor();
 		}
 
-		private void MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+		private void KeyRectangle_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
 		{
 			Rectangle key = sender as Rectangle;
-			key.Fill = isWhite ? whiteBrush : blackBrush;
+			//key.Fill = isWhite ? whiteBrush : blackBrush;
+			isHighlighted = false;
+			SetColor();
+		}
+
+		private void KeyRectangle_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+		{
+			if (state == State.Up)
+				state = State.Down;
+			else if (state == State.Down)
+				state = State.Up;
+			SetColor();
+		}
+
+		private void KeyRectangle_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+		{
+		}
+
+		private static readonly Color whiteKeyColor = Colors.Snow;
+		private static readonly Color blackKeyColor = Colors.Black;
+		//private static Brush whiteHighlightedBrush = Brushes.LightGray;
+		//private static Brush blackHighLightedBrush = Brushes.LightGray;
+
+		private void SetColor()
+		{
+			SolidColorBrush brush = keyRectangle.Fill as SolidColorBrush;
+			switch (state)
+			{
+				case State.Up:
+				default:
+					brush.Color = isWhite ? whiteKeyColor : blackKeyColor;
+					break;
+				case State.Down:
+					brush.Color = Color.Add(
+						isWhite ? whiteKeyColor : blackKeyColor,
+						Colors.LightSeaGreen);
+					brush.Color = Colors.LightSeaGreen;
+					break;
+				case State.DownHit:
+					break;
+				case State.DownMissed:
+					break;
+			}
+
+			if (isHighlighted)
+			{
+				float co = isWhite ? 1.5f : 100f;
+				brush.Color = Color.FromRgb(
+					(byte)(brush.Color.R * co),
+					(byte)(brush.Color.G * co),
+					(byte)(brush.Color.B * co));
+			}
 		}
 	}
 }

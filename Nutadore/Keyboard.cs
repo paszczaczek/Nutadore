@@ -39,10 +39,15 @@ namespace Nutadore
 		public void Show()
 		{
 			base.Children.Clear();
+
+			double keyboardHeight = 0;
 			foreach (Key key in keys)
 			{
-				key.Show(score, this);
+				double height = key.Show(score, this);
+				keyboardHeight = Math.Max(height, keyboardHeight);
 			}
+
+			Height = keyboardHeight;
 		}
 
 		private void Keyboard_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -50,7 +55,7 @@ namespace Nutadore
 			Show();
 		}
 
-		public void Press(Sign sign)
+		public void PressKey(Sign sign)
 		{
 			Note note = sign as Note;
 			if (note != null)
@@ -63,7 +68,7 @@ namespace Nutadore
 			}
 		}
 
-		public void Release(Sign sign)
+		public void ReleaseKey(Sign sign)
 		{
 			Note note = sign as Note;
 			if (note != null)
@@ -74,6 +79,12 @@ namespace Nutadore
 						key.Release();
 				}
 			}
+		}
+
+		public void ReleaseAllKeys()
+		{
+			foreach (var key in keys)
+				key.Release();
 		}
 	}
 }

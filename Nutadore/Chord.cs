@@ -68,7 +68,7 @@ namespace Nutadore
 			}
 
 			// Dodaj prostokąt do focusowania akordu.
-			base.AddFocusRectangle(score, 101);
+			base.AddHighlightRectangle(score, trebleStaff, bassStaff, 101);
 
 			this.left = chordLeft;
 			this.right = chordRight;
@@ -170,8 +170,9 @@ namespace Nutadore
 
 		public override void MouseLeave(object sender, MouseEventArgs e)
 		{
-				foreach (var note in notes)
-					note.MouseLeave(sender, e);
+				//foreach (var note in notes)
+					//note.MouseLeave(sender, e);
+			MarkAsHighlighted(false);
 		}
 
 		public override void MouseEnter(object sender, MouseEventArgs e)
@@ -195,8 +196,9 @@ namespace Nutadore
 			//}
 
 			// Podświetlam nuty akrordu.
-			foreach (var note in notes)
-				note.MouseEnter(sender, e);
+			//foreach (var note in notes)
+			//note.MouseEnter(sender, e);
+			MarkAsHighlighted(true);
 		}
 	}
 }

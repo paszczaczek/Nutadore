@@ -19,22 +19,39 @@ namespace Nutadore
 		public List<Sign> signs = new List<Sign>();
 		public Keyboard keyboard;
 
+		private Sign _currentSign;
+		public Sign currentSign
+		{
+			get
+			{
+				return _currentSign;
+			}
+			set
+			{
+				if (_currentSign != null)
+					_currentSign.MarkAsCurrent(false);
+				_currentSign = value;
+				if (_currentSign != null)
+					_currentSign.MarkAsCurrent(true);
+			}
+		}
+
 		public Score()
 		{
 			ClipToBounds = true;
 			Magnification = Properties.Settings.Default.ScoreMagnification;
 
 			base.Background = Brushes.Transparent;
-			base.SizeChanged += _SizeChanged;
-			base.PreviewMouseWheel += _PreviewMouseWheel;
+			base.SizeChanged += Score_SizeChanged;
+			base.PreviewMouseWheel += Score_PreviewMouseWheel;
 		}
 
-		private void _SizeChanged(object sender, SizeChangedEventArgs e)
+		private void Score_SizeChanged(object sender, SizeChangedEventArgs e)
 		{
 			Show();
 		}
 
-		private void _PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+		private void Score_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
 		{
 			//base.OnPreviewMouseWheel(e);
 			//if (Keyboard.IsKeyDown(Key.LeftCtrl) ||
@@ -91,6 +108,8 @@ namespace Nutadore
 			{
 				magnification = value;
 				Show();
+				if (keyboard != null)
+					keyboard.ReleaseAllKeys();
 			}
 		}
 
@@ -115,7 +134,7 @@ namespace Nutadore
 				staffGrandTop = staffGrand.Show(fromSign, out nextSign);
 				if (nextSign == fromSign)
 				{
-					// Żadnej nuty nie udało się narysować (nie zmieścił się żaden takt).
+					// Żadnej nuty nie udało się narysować lub nie zmieścił się żaden takt lub więcej nut się nie zmieściło
 					// Za wąska partytura - przerywany rysowanie.
 					break;
 				}
@@ -124,10 +143,16 @@ namespace Nutadore
 				// Czy wszystkie znaki zmieściły się na nim?
 				allSignsIsShown = staffGrand.lastSign == signs.Last();
 			}
+
+			// Ustawiamy pierwszą nutę jak bieżącą.
+			currentSign = signs.FirstOrDefault();
 		}
 
 		public void Clear()
 		{
+			// Usuwamy bieżącą pozycję.
+			currentSign = null;
+
 			// usuwamy wszystkie nuty
 			signs.ForEach(sign => sign.Hide(this));
 
