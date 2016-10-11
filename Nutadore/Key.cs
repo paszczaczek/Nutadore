@@ -192,19 +192,6 @@ namespace Nutadore
 			highlightRectangle.MouseDown += HighlightRectangle_MouseDown;
 			highlightRectangle.MouseUp += HighlightRectangle_MouseUp;
 
-			// Rysuję linie oddzielające klawisze i linie oddzielające oktawy.
-			Line line = new Line
-			{
-				X1 = left,
-				Y1 = 0,
-				X2 = left,
-				Y2 = height,
-				Stroke = note.letter == Note.Letter.C && isWhite ? Brushes.Red : Brushes.Black,
-				StrokeThickness = note.letter == Note.Letter.C && isWhite ? 1.0 : 0.4
-			};
-			Canvas.SetZIndex(line, 0);
-			keyboard.Children.Add(line);
-
 			// Rysuję nazwy oktaw.
 			double keyboardHeight = whiteHeight;
 			if (note.letter == Note.Letter.C && isWhite)
@@ -217,7 +204,8 @@ namespace Nutadore
 					FontSize = fontSize,
 					Text = note.octave.ToString(),
 					Foreground = Brushes.Red,
-					Margin = new Thickness(line.X1, line.Y2, 0, 0)
+					//Margin = new Thickness(line.X1, line.Y2, 0, 0)
+					Margin = new Thickness(left + 3, height, 0, 0)
 				};
 				// Wyznaczamy wysokość napisu.
 				FormattedText ft = new FormattedText(
@@ -229,6 +217,23 @@ namespace Nutadore
 					Brushes.Black);
 				keyboardHeight += ft.Height;
 				keyboard.Children.Add(octaveNameTextBlock);
+			}
+
+			// Rysuję linie oddzielające klawisze i linie oddzielające oktawy.
+			if (isWhite)
+			{
+				Line line = new Line
+				{
+					X1 = left,
+					Y1 = 0,
+					X2 = left,
+					//Y2 = height,
+					Y2 = keyboardHeight,
+					Stroke = note.letter == Note.Letter.C && isWhite ? Brushes.Red : Brushes.Black,
+					StrokeThickness = note.letter == Note.Letter.C && isWhite ? 1.0 : 0.4
+				};
+				Canvas.SetZIndex(line, 0);
+				keyboard.Children.Add(line);
 			}
 
 			return keyboardHeight;

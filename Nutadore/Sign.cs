@@ -15,7 +15,7 @@ namespace Nutadore
 		private static Brush highlightBrush = Brushes.Gray;
 		//private static Brush boundsBrush = Brushes.Gray;
 
-		private List<UIElement> elements = new List<UIElement>();
+		protected List<UIElement> elements = new List<UIElement>();
 		private List<UIElement> highlightElements = new List<UIElement>();
 		private Rectangle highlightRectangle;
 		public Rect bounds { get; protected set; } = Rect.Empty;
@@ -129,9 +129,6 @@ namespace Nutadore
 			// Zaznacz znak jako bieżący.
 			Score score = (sender as Rectangle).Tag as Score;
 			score.currentSign = this;
-			// Wciśnij klawisze na kalwiaturze.
-			score.keyboard.Reset();
-			score.keyboard.MarkAs(this, Key.State.Down);
 		}
 
 		public void MarkAsCurrent(bool isCurrent)
@@ -144,6 +141,14 @@ namespace Nutadore
 		{
 			this.isHighlighted = isHighlighted;
 			SetColor();
+		}
+
+		public virtual void KeyDown(Key key)
+		{
+		}
+
+		public virtual void KeyUp(Key key)
+		{
 		}
 
 		private void SetColor()

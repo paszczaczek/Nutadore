@@ -49,12 +49,12 @@ namespace Nutadore
 
 			Height = keyboardHeight;
 
-			foreach (var key in keys.FindAll(key => key.note.octave == Note.Octave.Great))
-				key.MarkAs(Key.State.Down);
-			foreach (var key in keys.FindAll(key => key.note.octave == Note.Octave.Small))
-				key.MarkAs(Key.State.Hit);
-			foreach (var key in keys.FindAll(key => key.note.octave == Note.Octave.OneLined))
-				key.MarkAs(Key.State.Missed);
+			//foreach (var key in keys.FindAll(key => key.note.octave == Note.Octave.Great))
+			//	key.MarkAs(Key.State.Down);
+			//foreach (var key in keys.FindAll(key => key.note.octave == Note.Octave.Small))
+			//	key.MarkAs(Key.State.Hit);
+			//foreach (var key in keys.FindAll(key => key.note.octave == Note.Octave.OneLined))
+			//	key.MarkAs(Key.State.Missed);
 		}
 
 		private void Keyboard_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -62,14 +62,14 @@ namespace Nutadore
 			Show();
 		}
 
-		public bool Check(Note note)
+		public void Check(Note note)
 		{
 			Key key = keys.Find(k => k.note.Equals(note));
 			if (key.state == Key.State.Down)
 				key.MarkAs(Key.State.Hit);
 			else
 				key.MarkAs(Key.State.Missed);
-			return false;
+			score.currentSign.KeyDown(key);
 		}
 
 		public void MarkAs(Sign sign, Key.State state)

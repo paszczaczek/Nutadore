@@ -32,7 +32,11 @@ namespace Nutadore
 					_currentSign.MarkAsCurrent(false);
 				_currentSign = value;
 				if (_currentSign != null)
+				{
 					_currentSign.MarkAsCurrent(true);
+					keyboard.Reset();
+					keyboard.MarkAs(_currentSign, Key.State.Down);
+				}
 			}
 		}
 
@@ -84,7 +88,7 @@ namespace Nutadore
 				}
 			}
 		}
-
+		
 		public void Add(Sign sign)
 		{
 			signs.Add(sign);

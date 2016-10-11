@@ -167,6 +167,20 @@ namespace Nutadore
 				performHowToStaffBass = Perform.HowTo.OneOctaveLower;
 			}
 		}
-		
+
+		public override void KeyDown(Key key)
+		{
+			// dopiero zaczęte
+			foreach (var note in notes.FindAll(n => n.Equals(key.note)))
+				note.MarkAsHit();
+		}
+
+		public override void KeyUp(Key key)
+		{
+			// dopiero zaczęte
+			foreach (var note in notes.FindAll(n => n.Equals(key.note)))
+				note.MarkAsHit();
+		}
+
 	}
 }

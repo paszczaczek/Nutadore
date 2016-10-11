@@ -30,6 +30,8 @@ namespace Nutadore
 		public static readonly Note lowest = new Note(Letter.A, Accidental.None, Octave.SubContra);
 		public static readonly Note highest = new Note(Letter.C, Accidental.None, Octave.FiveLined);
 
+		private TextBlock head;
+
 		public enum Letter {
 			C,
 			D,
@@ -87,6 +89,7 @@ namespace Nutadore
 					 + (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
 			glyphTop -= 57.5 * score.Magnification;
 			right = base.AddFetaGlyph(score, left, glyphTop, glyphCode, 1);
+			head = base.elements.FindLast(e => true) as TextBlock;
 			// Rysujemy linie dodane górne i dolne - jeśli nuta nie jest częścią akordu.
 			if (showLegerLines)
 				ShowLegerLines(score, trebleStaff, bassStaff, left);
@@ -389,29 +392,14 @@ namespace Nutadore
 				return -1;
 		}
 
-		/*
-		public override void HighlightRectangle_MouseEnter(object sender, MouseEventArgs e)
+		public void MarkAsHit()
 		{
-			base.HighlightRectangle_MouseEnter(sender, e);
-
-			// Wciskam klawisz odpowiadający nucie na klawiaturze.
-			Rectangle noteBounds = sender as Rectangle;
-			Score score = noteBounds.Parent as Score;
-			if (score != null)
-				score.keyboard.MarkAs(this, Key.State.Down);
+			head.Foreground = Brushes.Green;
 		}
 
-		public override void HightlightRectangle_MouseLeave(object sender, MouseEventArgs e)
+		public void MarkAsMissed()
 		{
-			base.HightlightRectangle_MouseLeave(sender, e);
-
-			// Puszczam klawisz odpowiadający nucie na klawiaturze.
-			Rectangle noteBounds = sender as Rectangle;
-			Score score = noteBounds.Parent as Score;
-			// score może być nullowe, gdy podświetlimy nutę i zmienimy powiększenie
-			if (score != null)
-				score.keyboard.MarkAs(this, Key.State.Up);
+			head.Foreground = Brushes.PaleVioletRed;
 		}
-		*/
 	}
 }
