@@ -45,16 +45,16 @@ namespace Nutadore
 				accidental.Hide(score);
 		}
 
-		public override void MouseLeave(object sender, MouseEventArgs e)
+		public override void HightlightRectangle_MouseLeave(object sender, MouseEventArgs e)
 		{
 			foreach (Accidental accidental in accidentals)
-				accidental.MouseLeave(sender, e);
+				accidental.HightlightRectangle_MouseLeave(sender, e);
 		}
 
-		public override void MouseEnter(object sender, MouseEventArgs e)
+		public override void HighlightRectangle_MouseEnter(object sender, MouseEventArgs e)
 		{
 			foreach (Accidental accidental in accidentals)
-				accidental.MouseEnter(sender, e);
+				accidental.HighlightRectangle_MouseEnter(sender, e);
 		}
 
 		public Accidental[] Accidentals()

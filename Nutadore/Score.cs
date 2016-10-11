@@ -109,7 +109,7 @@ namespace Nutadore
 				magnification = value;
 				Show();
 				if (keyboard != null)
-					keyboard.ReleaseAllKeys();
+					keyboard.Reset();
 			}
 		}
 

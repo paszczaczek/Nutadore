@@ -330,6 +330,24 @@ namespace Nutadore
 			return this;
 		}
 
+		public bool InChord(Sign sign)
+		{
+			if (sign is Chord)
+			{
+				Chord chord = sign as Chord;
+				return chord.notes.Exists(note => note.Equals(this));
+			}
+			else if (sign is Note)
+			{
+				Note note = sign as Note;
+				return note.Equals(this);
+			}
+			else
+			{
+				return false;
+			}
+		}
+
 		public override bool Equals(object obj)
 		{
 			Note other = obj as Note;
@@ -371,27 +389,29 @@ namespace Nutadore
 				return -1;
 		}
 
-		public override void MouseEnter(object sender, MouseEventArgs e)
+		/*
+		public override void HighlightRectangle_MouseEnter(object sender, MouseEventArgs e)
 		{
-			base.MouseEnter(sender, e);
+			base.HighlightRectangle_MouseEnter(sender, e);
 
 			// Wciskam klawisz odpowiadający nucie na klawiaturze.
 			Rectangle noteBounds = sender as Rectangle;
 			Score score = noteBounds.Parent as Score;
 			if (score != null)
-				score.keyboard.PressKey(this);
+				score.keyboard.MarkAs(this, Key.State.Down);
 		}
 
-		public override void MouseLeave(object sender, MouseEventArgs e)
+		public override void HightlightRectangle_MouseLeave(object sender, MouseEventArgs e)
 		{
-			base.MouseLeave(sender, e);
+			base.HightlightRectangle_MouseLeave(sender, e);
 
 			// Puszczam klawisz odpowiadający nucie na klawiaturze.
 			Rectangle noteBounds = sender as Rectangle;
 			Score score = noteBounds.Parent as Score;
 			// score może być nullowe, gdy podświetlimy nutę i zmienimy powiększenie
 			if (score != null)
-				score.keyboard.ReleaseKey(this);
+				score.keyboard.MarkAs(this, Key.State.Up);
 		}
+		*/
 	}
 }

@@ -93,7 +93,7 @@ namespace Nutadore
 			bounds = Rect.Union(bounds, extendBy);
 		}
 
-		public void AddHighlightRectangle(Score score, Staff trebleStaff, Staff bassStaff, int zindex)
+		public Rectangle AddHighlightRectangle(Score score, Staff trebleStaff, Staff bassStaff, int zindex)
 		{
 
 			double top = trebleStaff.StaffPositionToY(StaffPosition.ByLegerAbove(6));
@@ -101,46 +101,37 @@ namespace Nutadore
 			highlightRectangle = new Rectangle
 			{
 				Width = bounds.Width,
-				//Height = bounds.Height,
 				Height = bottom - top,
-				//Margin = new Thickness(bounds.Left, bounds.Top, 0, 0),
 				Margin = new Thickness(bounds.Left, top, 0, 0),
 				Fill = Brushes.Transparent,
-				//Fill = boundsBrush,
-				//Opacity = 0.1,
-				Stroke = Brushes.Transparent
+				Stroke = Brushes.Transparent,
+				Tag = score // potrzebne w event handlerze
 			};
-			highlightRectangle.MouseEnter += MouseEnter;
-			highlightRectangle.MouseLeave += MouseLeave;
+			highlightRectangle.MouseEnter += HighlightRectangle_MouseEnter;
+			highlightRectangle.MouseLeave += HightlightRectangle_MouseLeave;
+			highlightRectangle.MouseDown += HighlightRectangle_MouseDown;
 			AddElement(score, highlightRectangle, zindex);
+			return highlightRectangle;
 		}
 
-		public virtual void MouseEnter(object sender, MouseEventArgs e)
+		public virtual void HighlightRectangle_MouseEnter(object sender, MouseEventArgs e)
 		{
-			//foreach (UIElement he in highlightElements)
-			//{
-			//	if (he is TextBlock)
-			//		(he as TextBlock).Foreground = highlightBrush;
-			//}
-			//Rectangle highlightRectangle = sender as Rectangle;
-			isHighlighted = true;
-			SetColor();
-			//highlightRectangle.Fill = highlightBrush;
-			//highlightRectangle.Opacity = 0.3;
+			MarkAsHighlighted(true);
 		}
 
-		public virtual void MouseLeave(object sender, MouseEventArgs e)
+		public virtual void HightlightRectangle_MouseLeave(object sender, MouseEventArgs e)
 		{
-			//foreach (var he in highlightElements)
-			//{
-			//	if (he is TextBlock)
-			//		(he as TextBlock).Foreground = Brushes.Black;
-			//}
-			//Rectangle highlightRectangle = sender as Rectangle;
-			//highlightRectangle.Fill = highlightBrush;
-			//(sender as Rectangle).Opacity = 0.1;
-			isHighlighted = false;
-			SetColor();
+			MarkAsHighlighted(false);
+		}
+
+		private void HighlightRectangle_MouseDown(object sender, MouseButtonEventArgs e)
+		{
+			// Zaznacz znak jako bieżący.
+			Score score = (sender as Rectangle).Tag as Score;
+			score.currentSign = this;
+			// Wciśnij klawisze na kalwiaturze.
+			score.keyboard.Reset();
+			score.keyboard.MarkAs(this, Key.State.Down);
 		}
 
 		public void MarkAsCurrent(bool isCurrent)

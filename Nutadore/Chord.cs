@@ -167,38 +167,6 @@ namespace Nutadore
 				performHowToStaffBass = Perform.HowTo.OneOctaveLower;
 			}
 		}
-
-		public override void MouseLeave(object sender, MouseEventArgs e)
-		{
-				//foreach (var note in notes)
-					//note.MouseLeave(sender, e);
-			MarkAsHighlighted(false);
-		}
-
-		public override void MouseEnter(object sender, MouseEventArgs e)
-		{
-			//KeyStates keyStates = System.Windows.Input.Keyboard.GetKeyStates(System.Windows.Input.Key.LeftShift);
-			//if ((keyStates & KeyStates.Down) == 0)
-			//{
-			//	// Nie wciśniety Shift - zaznaczamy cały akrod.
-			//	foreach (var note in notes)
-			//		note.MouseEnter(sender, e);
-			//}
-			//else
-			//{
-			//	// Wciśnięty Shift - zaznaczamy pojedyńczą nutę akrodu
-			//	Rectangle chordBounds = sender as Rectangle;
-			//	Score score = chordBounds.Parent as Score;
-			//	Point mousePoint = e.GetPosition(score);
-			//	foreach (var note in notes)
-			//		if (note.bounds.Contains(mousePoint))
-			//			note.MouseEnter(sender, e);
-			//}
-
-			// Podświetlam nuty akrordu.
-			//foreach (var note in notes)
-			//note.MouseEnter(sender, e);
-			MarkAsHighlighted(true);
-		}
+		
 	}
 }

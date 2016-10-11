@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
@@ -13,22 +14,24 @@ namespace Nutadore
 {
 	public class Key
 	{
-		private enum State
+		private static readonly Color whiteKeyColor = Colors.Snow;
+		private static readonly Color blackKeyColor = Colors.Black;
+
+		public enum State
 		{
 			Up,
 			Down,
-			DownHit,
-			DownMissed
+			Hit,
+			Missed
 		}
 
-		private State state = State.Up;
+		public State state = State.Up;
 		private bool isHighlighted;
+		private Rectangle highlightRectangle;
 
 		private readonly int keyNoInOctave;
 		public readonly Note note;
 		public readonly bool isWhite;
-
-		private Rectangle keyRectangle;
 
 		public Key(int keyNo)
 		{
@@ -160,12 +163,11 @@ namespace Nutadore
 			left -= whiteWidth * 5;
 
 			// Rysuje klawisz.
-			keyRectangle = new Rectangle
+			Rectangle keyRectangle = new Rectangle
 			{
 				Width = width,
 				Height = height,
 				Margin = new Thickness(left, 0, 0, 0),
-				//Fill = isWhite ? whiteKeyBrush.Clone() : blackKeyBrush.Clone(),
 				Fill = new SolidColorBrush(isWhite ? whiteKeyColor : blackKeyColor),
 				Stroke = Brushes.Black,
 				StrokeThickness = isWhite ? 0.2 : 0.8
@@ -173,11 +175,22 @@ namespace Nutadore
 			Canvas.SetZIndex(keyRectangle, isWhite ? 0 : 2);
 			keyboard.Children.Add(keyRectangle);
 
-			// Podłączam obsluge myszy do klawisza.
-			keyRectangle.MouseEnter += KeyRectangle_MouseEnter;
-			keyRectangle.MouseLeave += KeyRectangle_MouseLeave;
-			keyRectangle.MouseDown += KeyRectangle_MouseDown;
-			keyRectangle.MouseUp += KeyRectangle_MouseUp;
+			// Transparentny prostokąt modyfikujący kolor klawisza i reagujący na myszę.
+			highlightRectangle = new Rectangle
+			{
+				Width = width,
+				Height = height,
+				Margin = new Thickness(left, 0, 0, 0),
+				Fill = Brushes.Transparent,
+				Stroke = Brushes.Transparent,
+				Tag = keyboard
+			};
+			Canvas.SetZIndex(highlightRectangle, isWhite ? 1 : 3);
+			keyboard.Children.Add(highlightRectangle);
+			highlightRectangle.MouseEnter += HighlightRectangle_MouseEnter;
+			highlightRectangle.MouseLeave += HighlightRectangle_MouseLeave;
+			highlightRectangle.MouseDown += HighlightRectangle_MouseDown;
+			highlightRectangle.MouseUp += HighlightRectangle_MouseUp;
 
 			// Rysuję linie oddzielające klawisze i linie oddzielające oktawy.
 			Line line = new Line
@@ -189,8 +202,8 @@ namespace Nutadore
 				Stroke = note.letter == Note.Letter.C && isWhite ? Brushes.Red : Brushes.Black,
 				StrokeThickness = note.letter == Note.Letter.C && isWhite ? 1.0 : 0.4
 			};
-			Canvas.SetZIndex(line, 1);
-			//keyboard.Children.Add(line);
+			Canvas.SetZIndex(line, 0);
+			keyboard.Children.Add(line);
 
 			// Rysuję nazwy oktaw.
 			double keyboardHeight = whiteHeight;
@@ -221,78 +234,81 @@ namespace Nutadore
 			return keyboardHeight;
 		}
 
-		public void Press()
+		private void HighlightRectangle_MouseEnter(object sender, MouseEventArgs e)
 		{
-			//keyRectangle.Fill = isWhite ? whiteHighlightedBrush : blackHighLightedBrush;
+			MarkAsHighlighted(true);
 		}
 
-		public void Release()
+		private void HighlightRectangle_MouseLeave(object sender, MouseEventArgs e)
 		{
-			//keyRectangle.Fill = isWhite ? whiteKeyBrush : blackKeyBrush;
+			MarkAsHighlighted(false);
 		}
 
-		private void KeyRectangle_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+		private void HighlightRectangle_MouseDown(object sender, MouseButtonEventArgs e)
 		{
-			Rectangle key = sender as Rectangle;
-			//key.Fill = isWhite ? whiteHighlightedBrush : blackHighLightedBrush;
-			isHighlighted = true;
-			SetColor();
+			//if (state == State.Up)
+			//	state = State.Down;
+			//else if (state == State.Down)
+			//	state = State.Up;
+			//SetColor();
+			Keyboard keyboard = (sender as Rectangle).Tag as Keyboard;
+			keyboard.Check(this.note);
 		}
 
-		private void KeyRectangle_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+		private void HighlightRectangle_MouseUp(object sender, MouseButtonEventArgs e)
 		{
-			Rectangle key = sender as Rectangle;
-			//key.Fill = isWhite ? whiteBrush : blackBrush;
-			isHighlighted = false;
-			SetColor();
-		}
-
-		private void KeyRectangle_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-		{
-			if (state == State.Up)
+			if (state == State.Hit)
 				state = State.Down;
-			else if (state == State.Down)
+			else if (state == State.Missed)
 				state = State.Up;
 			SetColor();
 		}
 
-		private void KeyRectangle_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+		public void MarkAs(State state)
 		{
+			this.state = state;
+			SetColor();
 		}
 
-		private static readonly Color whiteKeyColor = Colors.Snow;
-		private static readonly Color blackKeyColor = Colors.Black;
-		//private static Brush whiteHighlightedBrush = Brushes.LightGray;
-		//private static Brush blackHighLightedBrush = Brushes.LightGray;
+		public void MarkAsHighlighted(bool isHighlighted)
+		{
+			this.isHighlighted = isHighlighted;
+			SetColor();
+		}
 
 		private void SetColor()
 		{
-			SolidColorBrush brush = keyRectangle.Fill as SolidColorBrush;
+			SolidColorBrush brush = highlightRectangle.Fill as SolidColorBrush;
 			switch (state)
 			{
 				case State.Up:
-				default:
-					brush.Color = isWhite ? whiteKeyColor : blackKeyColor;
+					highlightRectangle.Fill = Brushes.LightGray;
+					if (isHighlighted)
+						highlightRectangle.Opacity = 0.4;
+					else
+						highlightRectangle.Opacity = 0.0;
 					break;
 				case State.Down:
-					brush.Color = Color.Add(
-						isWhite ? whiteKeyColor : blackKeyColor,
-						Colors.LightSeaGreen);
-					brush.Color = Colors.LightSeaGreen;
+					highlightRectangle.Fill = Brushes.LightSeaGreen;
+					if (isHighlighted)
+						highlightRectangle.Opacity = 1.0;
+					else
+						highlightRectangle.Opacity = 0.7;
 					break;
-				case State.DownHit:
+				case State.Hit:
+					highlightRectangle.Fill = Brushes.LightGreen;
+					if (isHighlighted)
+						highlightRectangle.Opacity = 1.0;
+					else
+						highlightRectangle.Opacity = 0.7;
 					break;
-				case State.DownMissed:
+				case State.Missed:
+					highlightRectangle.Fill = Brushes.PaleVioletRed;
+					if (isHighlighted)
+						highlightRectangle.Opacity = 1.0;
+					else
+						highlightRectangle.Opacity = 0.7;
 					break;
-			}
-
-			if (isHighlighted)
-			{
-				float co = isWhite ? 1.5f : 100f;
-				brush.Color = Color.FromRgb(
-					(byte)(brush.Color.R * co),
-					(byte)(brush.Color.G * co),
-					(byte)(brush.Color.B * co));
 			}
 		}
 	}
