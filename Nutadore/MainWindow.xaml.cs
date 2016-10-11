@@ -27,10 +27,10 @@ namespace Nutadore
 			score.keyboard = keyboard;
 			keyboard.score = score;
 
-			AddAllTriads();
+			//AddAllTriads();
 			AddAllNotes();
-			AddTriad();
-			score.Add(new Note(Note.Letter.C, Note.Accidental.None, Note.Octave.OneLined));
+			//AddTriad();
+			//score.Add(new Note(Note.Letter.C, Note.Accidental.None, Note.Octave.OneLined));
 		}
 
 		private void AddTriad()
