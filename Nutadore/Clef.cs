@@ -14,7 +14,7 @@ namespace Nutadore
 		{
 		}
 
-		public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
 		{
 			double maxRightClef = left;
 			foreach (Staff staff in new[] { trebleStaff, bassStaff })

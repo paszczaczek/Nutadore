@@ -69,7 +69,7 @@ namespace Nutadore
 				key.MarkAs(Key.State.Hit);
 			else
 				key.MarkAs(Key.State.Missed);
-			score.currentSign.KeyDown(key);
+			//score.currentStep.KeyDown(key);
 		}
 
 		public void MarkAs(Sign sign, Key.State state)

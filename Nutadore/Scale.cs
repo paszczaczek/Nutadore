@@ -22,13 +22,13 @@ namespace Nutadore
 
 		public enum Type { Major, Minor }
 
-		public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
 		{
 			double signLeft = left;
 			foreach (Accidental accidental in accidentals)
 			{
 				signLeft
-					= accidental.Show(score, trebleStaff, bassStaff, signLeft)
+					= accidental.AddToScore(score, trebleStaff, bassStaff, signLeft)
 					+ Staff.spaceBetweenScaleSigns * score.Magnification;
 				base.ExtendBounds(score, accidental.bounds);
 			}
@@ -38,11 +38,11 @@ namespace Nutadore
 			return scaleRight;
 		}
 
-		public override void Hide(Score score)
+		public override void RemoveFromScore(Score score)
 		{
-			base.Hide(score);
+			base.RemoveFromScore(score);
 			foreach (Accidental accidental in accidentals)
-				accidental.Hide(score);
+				accidental.RemoveFromScore(score);
 		}
 
 		public override void HightlightRectangle_MouseLeave(object sender, MouseEventArgs e)

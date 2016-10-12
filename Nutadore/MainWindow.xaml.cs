@@ -27,54 +27,85 @@ namespace Nutadore
 			score.keyboard = keyboard;
 			keyboard.score = score;
 
+			//AddSteps();
 			AddAllTriads();
 			//AddAllNotes();
 			//AddTriad();
-			score.Add(new Note(Note.Letter.C, Note.Accidental.None, Note.Octave.OneLined));
+			//score.Add(new Note(Note.Letter.C, Note.Accidental.None, Note.Octave.OneLined));
 		}
 
-		private void AddTriad()
+		private void AddSteps()
 		{
-			Chord chord = new Chord();
+			Chord chord1 = new Chord();
+			chord1.Add(new Note(Note.Letter.C, Note.Accidental.None, Note.Octave.OneLined));
+			chord1.Add(new Note(Note.Letter.E, Note.Accidental.None, Note.Octave.OneLined));
+			chord1.Add(new Note(Note.Letter.G, Note.Accidental.None, Note.Octave.OneLined));
 
-			chord.Add(new Note(Note.Letter.C, Note.Accidental.None, Note.Octave.OneLined));
-			//chord.Add(new Note(Note.Letter.D, Note.Octave.OneLined));
-			chord.Add(new Note(Note.Letter.E, Note.Accidental.None, Note.Octave.OneLined));
-			//chord.Add(new Note(Note.Letter.F, Note.Octave.OneLined));
-			chord.Add(new Note(Note.Letter.G, Note.Accidental.None, Note.Octave.OneLined));
+			Note note1 = new Note(Note.Letter.E, Note.Accidental.None, Note.Octave.TwoLined);
 
-			score.Add(chord);
+			Chord chord2 = new Chord();
+			chord2.Add(new Note(Note.Letter.D, Note.Accidental.None, Note.Octave.Great));
+			chord2.Add(new Note(Note.Letter.F, Note.Accidental.None, Note.Octave.Great));
+			chord2.Add(new Note(Note.Letter.A, Note.Accidental.None, Note.Octave.Great));
+
+			Note note2 = new Note(Note.Letter.F, Note.Accidental.None, Note.Octave.Small);
+
+			Step step = new Step();
+			step.AddVoice(chord1);
+			step.AddVoice(note1);
+			step.AddVoice(chord2);
+			step.AddVoice(note2);
+
+			score.Add(step);
 		}
 
-		private void AddAllNotes()
-		{
-			List<Key> whiteKeys = keyboard.keys.FindAll(key => key.isWhite);
-			for (int k = 0; k < whiteKeys.Count; k++)
-			{
-				score.Add(new Note(
-					whiteKeys[k].note.letter,
-					whiteKeys[k].note.accidental,
-					whiteKeys[k].note.octave));
-			}
-		}
+		//private void AddTriad()
+		//{
+		//	Chord chord = new Chord();
+
+		//	chord.Add(new Note(Note.Letter.C, Note.Accidental.None, Note.Octave.OneLined));
+		//	//chord.Add(new Note(Note.Letter.D, Note.Octave.OneLined));
+		//	chord.Add(new Note(Note.Letter.E, Note.Accidental.None, Note.Octave.OneLined));
+		//	//chord.Add(new Note(Note.Letter.F, Note.Octave.OneLined));
+		//	chord.Add(new Note(Note.Letter.G, Note.Accidental.None, Note.Octave.OneLined));
+
+		//	score.Add(chord);
+		//}
+
+		//private void AddAllNotes()
+		//{
+		//	List<Key> whiteKeys = keyboard.keys.FindAll(key => key.isWhite);
+		//	for (int k = 0; k < whiteKeys.Count; k++)
+		//	{
+		//		score.Add(new Note(
+		//			whiteKeys[k].note.letter,
+		//			whiteKeys[k].note.accidental,
+		//			whiteKeys[k].note.octave));
+		//	}
+		//}
 
 		private void AddAllTriads()
 		{
 			List<Key> whiteKeys = keyboard.keys.FindAll(key => key.isWhite);
 			for (int k = 0; k < whiteKeys.Count - 4; k++)
 			{
-				Chord chord = new Chord();
+				Chord chord1 = new Chord();
 
-				chord.Add(new Note(whiteKeys[k + 0].note.letter, Note.Accidental.None, whiteKeys[k + 0].note.octave));
-				chord.Add(new Note(whiteKeys[k + 2].note.letter, Note.Accidental.None, whiteKeys[k + 2].note.octave));
-				chord.Add(new Note(whiteKeys[k + 4].note.letter, Note.Accidental.None, whiteKeys[k + 4].note.octave));
+				chord1.Add(new Note(whiteKeys[k + 0].note.letter, Note.Accidental.None, whiteKeys[k + 0].note.octave));
+				chord1.Add(new Note(whiteKeys[k + 2].note.letter, Note.Accidental.None, whiteKeys[k + 2].note.octave));
+				chord1.Add(new Note(whiteKeys[k + 4].note.letter, Note.Accidental.None, whiteKeys[k + 4].note.octave));
 
 				int u = whiteKeys.Count - 1 - 4 - k;
-				chord.Add(new Note(whiteKeys[u + 0].note.letter, Note.Accidental.None, whiteKeys[u + 0].note.octave));
-				chord.Add(new Note(whiteKeys[u + 2].note.letter, Note.Accidental.None, whiteKeys[u + 2].note.octave));
-				chord.Add(new Note(whiteKeys[u + 4].note.letter, Note.Accidental.None, whiteKeys[u + 4].note.octave));
+				Chord chord2 = new Chord();
+				chord2.Add(new Note(whiteKeys[u + 0].note.letter, Note.Accidental.None, whiteKeys[u + 0].note.octave));
+				chord2.Add(new Note(whiteKeys[u + 2].note.letter, Note.Accidental.None, whiteKeys[u + 2].note.octave));
+				chord2.Add(new Note(whiteKeys[u + 4].note.letter, Note.Accidental.None, whiteKeys[u + 4].note.octave));
 
-				score.Add(chord);
+				Step step = new Step();
+				step.AddVoice(chord1);
+				step.AddVoice(chord2);
+
+				score.Add(step);
 			}
 
 			AddBar();
@@ -82,7 +113,10 @@ namespace Nutadore
 
 		private void AddBar()
 		{
-			score.Add(new Bar());
+			Step step = new Step();
+			step.AddVoice(new Bar());
+
+			score.Add(step);
 		}
 	}
 }

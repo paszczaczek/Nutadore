@@ -10,7 +10,7 @@ namespace Nutadore
 		{
 		}
 
-		public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
 		{
 			foreach (Staff staff in new[] { trebleStaff, bassStaff })
 			{
@@ -35,7 +35,7 @@ namespace Nutadore
 			if (right >= score.ActualWidth - Staff.marginLeft)
 			{
 				// Nie zmieścił się - narysujemy ją na następnej pieciolinii.
-				Hide(score);
+				RemoveFromScore(score);
 
 				return -1;
 			}

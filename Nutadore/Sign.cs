@@ -23,12 +23,12 @@ namespace Nutadore
 		private bool isCurrent;
 		private bool isHighlighted;
 
-		public virtual double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		public virtual double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
 		{
 			return left;
 		}
 
-		public virtual void Hide(Score score)
+		public virtual void RemoveFromScore(Score score)
 		{
 			foreach (var uiElement in elements)
 				score.Children.Remove(uiElement);
@@ -95,7 +95,7 @@ namespace Nutadore
 
 		public Rectangle AddHighlightRectangle(Score score, Staff trebleStaff, Staff bassStaff, int zindex)
 		{
-
+			/* TODO wywalic
 			double top = trebleStaff.StaffPositionToY(StaffPosition.ByLegerAbove(6));
 			double bottom = bassStaff.StaffPositionToY(StaffPosition.ByLegerBelow(4));
 			highlightRectangle = new Rectangle
@@ -112,6 +112,8 @@ namespace Nutadore
 			highlightRectangle.MouseDown += HighlightRectangle_MouseDown;
 			AddElement(score, highlightRectangle, zindex);
 			return highlightRectangle;
+			*/
+			return null;
 		}
 
 		public virtual void HighlightRectangle_MouseEnter(object sender, MouseEventArgs e)
@@ -128,7 +130,7 @@ namespace Nutadore
 		{
 			// Zaznacz znak jako bieżący.
 			Score score = (sender as Rectangle).Tag as Score;
-			score.currentSign = this;
+			//score.currentStep = this;
 		}
 
 		public void MarkAsCurrent(bool isCurrent)

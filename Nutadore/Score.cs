@@ -16,33 +16,33 @@ namespace Nutadore
 	{
 		public Scale scale = new Scale(Note.Letter.C, Scale.Type.Major);
 		private List<StaffGrand> staffGrands = new List<StaffGrand>();
-		public List<Sign> signs = new List<Sign>();
+		public List<Step> steps = new List<Step>();
 		public Keyboard keyboard;
 
-		private Sign _currentSign;
-		public Sign currentSign
+		private Step currentStep;
+		public Step CurrentStep
 		{
 			get
 			{
-				return _currentSign;
+				return currentStep;
 			}
 			set
 			{
-				if (_currentSign != null)
-					_currentSign.MarkAsCurrent(false);
-				_currentSign = value;
-				if (_currentSign != null)
+				if (currentStep != null)
+					currentStep.IsCurrent = false;
+				currentStep = value;
+				if (currentStep != null)
 				{
-					_currentSign.MarkAsCurrent(true);
-					keyboard.Reset();
-					keyboard.MarkAs(_currentSign, Key.State.Down);
+					currentStep.IsCurrent = true;
+					//keyboard.Reset();
+					//keyboard.MarkAs(_currentStep, Key.State.Down);
 				}
 			}
 		}
 
 		public Score()
 		{
-			ClipToBounds = true;
+			base.ClipToBounds = true;
 			Magnification = Properties.Settings.Default.ScoreMagnification;
 
 			base.Background = Brushes.Transparent;
@@ -89,17 +89,9 @@ namespace Nutadore
 			}
 		}
 		
-		public void Add(Sign sign)
+		public void Add(Step step)
 		{
-			signs.Add(sign);
-		}
-
-		public Note FindNextNote(Sign sign)
-		{
-			int idx = signs.IndexOf(sign);
-			int idxNextNote = signs.FindIndex(idx, s => s is Note);
-
-			return signs[idxNextNote] as Note;
+			steps.Add(step);
 		}
 
 		private double magnification = 1.0;
@@ -125,51 +117,52 @@ namespace Nutadore
 			// Rysujemy tyle podwójnych pięciolinii, ile potrzeba
 			// aby zmieściły się na nich wszystkie znaki.
 			double staffGrandTop = 0;
-			bool allSignsIsShown = false;
-			Sign fromSign = signs.FirstOrDefault();
-			while (!allSignsIsShown)
+			bool allStepsIsShown = false;
+			Step fromStep = steps.FirstOrDefault();
+			while (!allStepsIsShown)
 			{
-				// Rysujemy nowy StaffGrand.
+				// Dodajemy nowy StaffGrand.
 				StaffGrand staffGrand = new StaffGrand(this, staffGrandTop);
 				staffGrands.Add(staffGrand);
 
-				// Wyświetlamy na nim znaki.
-				Sign nextSign;
-				staffGrandTop = staffGrand.Show(fromSign, out nextSign);
-				if (nextSign == fromSign)
+				// Dodajemy do niego stepy.
+				Step nextStep;
+				staffGrandTop = staffGrand.AddSteps(fromStep, out nextStep);
+				if (nextStep == fromStep)
 				{
 					// Żadnej nuty nie udało się narysować lub nie zmieścił się żaden takt lub więcej nut się nie zmieściło
 					// Za wąska partytura - przerywany rysowanie.
 					break;
 				}
-				fromSign = nextSign;
+				fromStep = nextStep;
 
 				// Czy wszystkie znaki zmieściły się na nim?
-				allSignsIsShown = staffGrand.lastSign == signs.Last();
+				allStepsIsShown = staffGrand.lastStep == steps.Last();
 			}
 
 			// Ustawiamy pierwszą nutę jak bieżącą.
-			currentSign = signs.FirstOrDefault();
+			CurrentStep = steps.FirstOrDefault();
 		}
 
 		public void Clear()
 		{
 			// Usuwamy bieżącą pozycję.
-			currentSign = null;
+			CurrentStep = null;
 
-			// usuwamy wszystkie nuty
-			signs.ForEach(sign => sign.Hide(this));
+			// usuwamy wszystkie kroki
+			foreach (Step step in steps)
+				step.RemoveFromScore(this);
 
 			// usuwamy znaki przykuczowe
-			scale.Hide(this);
+			scale.RemoveFromScore(this);
 
 			// usuwamy wszystkie podwójne pięciolinie
 			foreach (var staffGrand in staffGrands)
-				staffGrand.Hide();
+				staffGrand.RemoveFromScore();
 			staffGrands.Clear();
 
 			// usuwamy pozostałe elemetny (klucze, znaki przykluczowe, itd.)
-			Children.Clear();
+			base.Children.Clear();
 		}
 	}
 }

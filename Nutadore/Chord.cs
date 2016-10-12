@@ -14,8 +14,8 @@ namespace Nutadore
 
 		public double right;
 
-		public Perform.HowTo performHowToStaffTreble;
-		public Perform.HowTo performHowToStaffBass;
+		//public Perform.HowTo performHowToStaffTreble;
+		//public Perform.HowTo performHowToStaffBass;
 
 		public void Add(Note note)
 		{
@@ -23,9 +23,9 @@ namespace Nutadore
 			notes.Add(note);
 		}
 
-		public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
 		{
-			CalculateAndCorrectPerformHowTo();
+			//CalculateAndCorrectPerformHowTo();
 
 			double chordLeft = left;
 			double chordRight = left;
@@ -56,7 +56,7 @@ namespace Nutadore
 					= note.staffType == Staff.Type.Treble
 					? trebleStaff
 					: bassStaff;
-				double noteCursor = note.Show(score, trebleStaff, bassStaff, left);
+				double noteCursor = note.AddToScore(score, trebleStaff, bassStaff, left);
 				if (noteCursor == -1)
 					return -1;
 				if (noteCursor > cursor)
@@ -76,10 +76,10 @@ namespace Nutadore
 			return cursor;
 		}
 
-		public override void Hide(Score score)
+		public override void RemoveFromScore(Score score)
 		{
-			base.Hide(score);
-			notes.ForEach(note => note.Hide(score));
+			base.RemoveFromScore(score);
+			notes.ForEach(note => note.RemoveFromScore(score));
 		}
 
 		public override bool IsShown
@@ -94,6 +94,7 @@ namespace Nutadore
 		/// W akordzie nuty mogą być w różnych ottavach, a akord jako całość musi być w jednej.
 		/// Ta funcja koryguje ottavy poszczególnych nut żeby akord był w jednej ottavie.
 		/// </summary>
+		/*
 		public void CalculateAndCorrectPerformHowTo()
 		{
 			// Wyszukaj wszystkie nuty akordu leżące na pięcilinii wilonowej.
@@ -167,6 +168,7 @@ namespace Nutadore
 				performHowToStaffBass = Perform.HowTo.OneOctaveLower;
 			}
 		}
+		*/
 
 		public override void KeyDown(Key key)
 		{

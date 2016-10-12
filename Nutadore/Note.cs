@@ -71,7 +71,7 @@ namespace Nutadore
 			this.staffPosition = ToStaffPosition(preferredStaffType);
 		}
 
-		public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
 		{
 			// Left i right będą potrzebne do rysowania znaków ottavy
 			this.left = left;
@@ -120,7 +120,7 @@ namespace Nutadore
 			if (right >= score.ActualWidth - Staff.marginLeft)
 			{
 				// Nie zmieścił się - narysujemy ją na następnej pieciolinii.
-				base.Hide(score);
+				base.RemoveFromScore(score);
 
 				return -1;
 			}
@@ -187,9 +187,9 @@ namespace Nutadore
 			}
 		}
 
-		override public void Hide(Score score)
+		override public void RemoveFromScore(Score score)
 		{
-			base.Hide(score);
+			base.RemoveFromScore(score);
 		}
 
 		public StaffPosition ToStaffPosition(Staff.Type? preferredStaffType, bool withPerform = true)
