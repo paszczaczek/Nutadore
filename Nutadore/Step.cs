@@ -145,31 +145,7 @@ namespace Nutadore
 				}
 			}
 
-			// Wyznaczamy jak wykonywać pięciolinię wiolinową.
-			//List<Note> trebleNotes = stepNotes.FindAll(note => note.staffType == Staff.Type.Treble);
-			//if (trebleNotes.Count > 0)
-			//{
-			//	Note highestTrebleNote = trebleNotes.Max();
-			//	Note firstNoteIn15ma = new Note(Note.Letter.C, Note.Accidental.None, Note.Octave.FiveLined);
-			//	Note firstNoteIn8va = new Note(Note.Letter.C, Note.Accidental.None, Note.Octave.FourLined);
-			//	if (highestTrebleNote.CompareTo(firstNoteIn15ma) >= 0)
-			//		performHowToStaffTreble = Perform.HowTo.TwoOctaveHigher;
-			//	else if (highestTrebleNote.CompareTo(firstNoteIn8va) > 0)
-			//		performHowToStaffTreble = Perform.HowTo.OneOctaveHigher;
-			//}
-
-			// Wyznaczamy jak wykonywać pięciolinię basową.
-			//List<Note> bassNotes = stepNotes.FindAll(note => note.staffType == Staff.Type.Bass);
-			//if (bassNotes.Count > 0)
-			//{
-			//	Note lowestBassNote = bassNotes.Min();
-			//	Note firstNoteIn8vb = new Note(Note.Letter.E, Note.Accidental.None, Note.Octave.Contra);
-			//	if (lowestBassNote.CompareTo(firstNoteIn8vb) <= 0)
-			//		performHowToStaffBass = Perform.HowTo.OneOctaveLower;
-			//}
-
 			// Wyszukaj wszystkie nuty akordu leżące na pięcilinii wilonowej.
-			//var trebleNotes = notes.FindAll(note => note.staffType == Staff.Type.Treble);
 			List<Note> trebleNotes = stepNotes.FindAll(note => note.staffType == Staff.Type.Treble);
 
 			// Czy sa jakieś nuty wymagające zmiany wysokości wykonania na pieciolinii wiolinowej?
@@ -219,7 +195,6 @@ namespace Nutadore
 			}
 
 			// Wyszukaj wszystkie nuty akordu leżące na pięcilinii basowej.
-			//var bassNotes = notes.FindAll(note => note.staffType == Staff.Type.Bass);
 			List<Note> bassNotes = stepNotes.FindAll(note => note.staffType == Staff.Type.Bass);
 
 			// Czy sa jakieś nuty wymagające zmiany wysokości wykonania?
