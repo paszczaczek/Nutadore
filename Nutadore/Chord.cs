@@ -13,6 +13,13 @@ namespace Nutadore
 		//public double left;
 		//public double right;
 
+		public Step step {
+			set
+			{
+				notes.ForEach(note => note.step = value);
+			}
+		}
+
 		public void Add(Note note)
 		{
 			//note.isPartOfChord = true;
@@ -87,19 +94,19 @@ namespace Nutadore
 		//	}
 		//}
 
-		public override void KeyDown(Key key)
-		{
-			// dopiero zaczęte
-			foreach (var note in notes.FindAll(n => n.Equals(key.note)))
-				note.MarkAsHit();
-		}
+		//public override void KeyDown(Key key)
+		//{
+		//	// dopiero zaczęte
+		//	foreach (var note in notes.FindAll(n => n.Equals(key.note)))
+		//		note.MarkAsHit();
+		//}
 
-		public override void KeyUp(Key key)
-		{
-			// dopiero zaczęte
-			foreach (var note in notes.FindAll(n => n.Equals(key.note)))
-				note.MarkAsHit();
-		}
+		//public override void KeyUp(Key key)
+		//{
+		//	// dopiero zaczęte
+		//	foreach (var note in notes.FindAll(n => n.Equals(key.note)))
+		//		note.MarkAsHit();
+		//}
 
 	}
 }

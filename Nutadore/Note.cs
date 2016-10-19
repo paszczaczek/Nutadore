@@ -10,12 +10,16 @@ namespace Nutadore
 {
 	public class Note : Sign, IComparable<Note>
 	{
+		private static Brush currentBrush = Brushes.LightSeaGreen;
+		private static Brush highlightBrush = Brushes.DarkGray;
+
 		public Letter letter;
 		public Octave octave;
 		public Accidental accidental;
 		public Perform.HowTo performHowTo;
 		public StaffPosition staffPosition = StaffPosition.ByLine(1);
 		public Staff.Type staffType;
+		public Step step;
 
 		/// <summary>
 		/// Pozwala zablokowac rysowanie linii dodanych. Wykorzysytwane w rysowaniu akordów.
@@ -26,6 +30,9 @@ namespace Nutadore
 
 		//public double left;
 		public double right; 
+
+		private bool isHighlighted;
+		private Rectangle highlightRect;
 
 		public static readonly Note lowest = new Note(Letter.A, Accidental.None, Octave.SubContra);
 		public static readonly Note highest = new Note(Letter.C, Accidental.None, Octave.FiveLined);
@@ -113,8 +120,23 @@ namespace Nutadore
 			base.AddElement(score, letterTextBlock, 2);
 
 			// Dodajemy prostokąt reagujący na mysz.
-			//if (!isPartOfChord)
-				//base.AddHighlightRectangle(score, trebleStaff, bassStaff, 100);
+			double top = base.bounds.Top;
+			double bottom = base.bounds.Bottom;
+			highlightRect = new Rectangle
+			{
+				Width = right - left,
+				Height = bottom - top,
+				Margin = new Thickness(left, top, 0, 0),
+				Fill = Brushes.Transparent,
+				Stroke = Brushes.Transparent,
+				Tag = score // potrzebne w event handlerze
+			};
+			base.AddElement(score, highlightRect, 101);
+			highlightRect.MouseEnter += HighlightRect_MouseEnter;
+			highlightRect.MouseLeave += HightlightRect_MouseLeave;
+			highlightRect.MouseDown += HighlightRect_MouseDown;
+			//score.Children.Add(highlightRect);
+			//Canvas.SetZIndex(highlightRect, 100);
 
 			// Czy znak zmieścił sie na pięcolinii?
 			if (right >= score.ActualWidth - Staff.marginLeft)
@@ -162,7 +184,7 @@ namespace Nutadore
 					};
 					base.AddElement(score, legerLine);
 				}
-				right = legerRight;
+				//right = legerRight;
 			}
 			else if (this.staffPosition >= StaffPosition.ByLegerAbove(1))
 			{
@@ -183,7 +205,7 @@ namespace Nutadore
 					};
 					base.AddElement(score, legerLine);
 				}
-				right = legerRight;
+				//right = legerRight;
 			}
 		}
 
@@ -390,6 +412,49 @@ namespace Nutadore
 				return 1;
 			else
 				return -1;
+		}
+
+		private void HighlightRect_MouseEnter(object sender, MouseEventArgs e)
+		{
+			isHighlighted = true;
+			SetColor();
+			Score score = (sender as Rectangle).Tag as Score;
+			step.HighlightRect_MouseEnter(sender, e);
+		}
+
+		private void HightlightRect_MouseLeave(object sender, MouseEventArgs e)
+		{
+			isHighlighted = false;
+			SetColor();
+			step.HightlightRect_MouseLeave(sender, e);
+		}
+
+		private void HighlightRect_MouseDown(object sender, MouseButtonEventArgs e)
+		{
+			Score score = (sender as Rectangle).Tag as Score;
+			score.CurrentStep = step;
+			HighlightRect_MouseEnter(sender, e);
+		}
+
+		private void SetColor()
+		{
+			if (step.IsCurrent && isHighlighted)
+			{
+				head.Foreground = currentBrush;
+			}
+			else if (step.IsCurrent && !isHighlighted)
+			{
+				head.Foreground = Brushes.Black;
+
+			}
+			else if (!step.IsCurrent && isHighlighted)
+			{
+				head.Foreground = highlightBrush;
+			}
+			else if (!step.IsCurrent && !isHighlighted)
+			{
+				head.Foreground = Brushes.Black;
+			}
 		}
 
 		public void MarkAsHit()

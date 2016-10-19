@@ -27,9 +27,9 @@ namespace Nutadore
 			score.keyboard = keyboard;
 			keyboard.score = score;
 
-			//AddSteps();
-			//AddSteps();
-			AddAllTriads();
+			AddSteps();
+			AddSteps();
+			//AddAllTriads();
 			//AddAllNotes();
 			//AddTriad();
 			//score.Add(new Note(Note.Letter.C, Note.Accidental.None, Note.Octave.OneLined));

@@ -35,6 +35,16 @@ namespace Nutadore
 		public void AddVoice(Sign voice)
 		{
 			voices.Add(voice);
+			if (voice is Chord)
+			{
+				Chord chord = voice as Chord;
+				chord.step = this;
+			}
+			else if (voice is Note)
+			{
+				Note note = voice as Note;
+				note.step = this;
+			}
 		}
 
 		public bool IsBar
@@ -48,11 +58,13 @@ namespace Nutadore
 
 		public double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
 		{
+			// Wyliczamy i korygujemy ottave górną i dolną dla całego kroku.
 			CalculateAndCorrectPerformHowTo();
 
 			double cursor = left;
 			double right = left;
 
+			// Dodajemy do score poszczególne głosy.
 			foreach (Sign voice in voices)
 			{
 				double voiceCursor = voice.AddToScore(score, trebleStaff, bassStaff, left);
@@ -64,6 +76,7 @@ namespace Nutadore
 					right = voice.bounds.Right;
 			}
 
+			// Dodajemy prostokąt do reagujący na mysz.
 			double top = trebleStaff.StaffPositionToY(StaffPosition.ByLegerAbove(6));
 			double bottom = bassStaff.StaffPositionToY(StaffPosition.ByLegerBelow(4));
 			highlightRect = new Rectangle
@@ -213,13 +226,13 @@ namespace Nutadore
 			}
 		}
 
-		private void HighlightRect_MouseEnter(object sender, MouseEventArgs e)
+		public void HighlightRect_MouseEnter(object sender, MouseEventArgs e)
 		{
 			isHighlighted = true;
 			SetColor();
 		}
 
-		private void HightlightRect_MouseLeave(object sender, MouseEventArgs e)
+		public void HightlightRect_MouseLeave(object sender, MouseEventArgs e)
 		{
 			isHighlighted = false;
 			SetColor();
