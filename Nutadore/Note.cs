@@ -24,7 +24,7 @@ namespace Nutadore
 
 		public bool isPartOfChord = false;
 
-		public double left;
+		//public double left;
 		public double right; 
 
 		public static readonly Note lowest = new Note(Letter.A, Accidental.None, Octave.SubContra);
@@ -74,7 +74,7 @@ namespace Nutadore
 		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
 		{
 			// Left i right będą potrzebne do rysowania znaków ottavy
-			this.left = left;
+			//this.left = left;
 
 			// Na której pięciolinii ma być umieszczona nuta?
 			Staff staff
@@ -88,11 +88,11 @@ namespace Nutadore
 					= staff.top * score.Magnification
 					 + (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
 			glyphTop -= 57.5 * score.Magnification;
-			right = base.AddFetaGlyph(score, left, glyphTop, glyphCode, 1);
+			right = base.AddGlyph(score, left, glyphTop, glyphCode, 1);
 			head = base.elements.FindLast(e => true) as TextBlock;
 			// Rysujemy linie dodane górne i dolne - jeśli nuta nie jest częścią akordu.
 			if (showLegerLines)
-				ShowLegerLines(score, trebleStaff, bassStaff, left);
+				AddLegerLinesToScore(score, trebleStaff, bassStaff, left);
 
 			// Rysujemy pomocniczą nazwę nuty.
 			double letterTop
@@ -132,7 +132,7 @@ namespace Nutadore
 			}
 		}
 
-		public void ShowLegerLines(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		public void AddLegerLinesToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
 		{
 			// Na której pięciolinii ma być umieszczona nuta?
 			Staff staff
@@ -302,36 +302,36 @@ namespace Nutadore
 			return StaffPosition.ByNumber(lineNumber);
 		}
 
-		public Note Copy()
-		{
-			return new Note(letter, accidental, octave, staffType);
-		}
+		//public Note Copy()
+		//{
+		//	return new Note(letter, accidental, octave, staffType);
+		//}
 
 		/// <summary>
 		/// Zmienia wysokość nuty o zadaną liczbę półlinii.
 		/// </summary>
 		/// <param name="halfSpaceCount"></param>
 		/// <returns></returns>
-		public Note Transpose(int halfSpaceCount)
-		{
-			int newLetter = (int)letter + halfSpaceCount;
-			if (newLetter >= 0)
-			{
-				octave += newLetter / 7;
-				letter = (Letter)(newLetter % 7);
-			}
-			else
-			{
-				octave += newLetter / 7 - 1;
-				letter = (Letter)newLetter + 7;
-				while (letter < 0)
-					letter += 7;
-			}
+		//public Note Transpose(int halfSpaceCount)
+		//{
+		//	int newLetter = (int)letter + halfSpaceCount;
+		//	if (newLetter >= 0)
+		//	{
+		//		octave += newLetter / 7;
+		//		letter = (Letter)(newLetter % 7);
+		//	}
+		//	else
+		//	{
+		//		octave += newLetter / 7 - 1;
+		//		letter = (Letter)newLetter + 7;
+		//		while (letter < 0)
+		//			letter += 7;
+		//	}
 
-			staffPosition = ToStaffPosition(staffType);
+		//	staffPosition = ToStaffPosition(staffType);
 
-			return this;
-		}
+		//	return this;
+		//}
 
 		public bool InChord(Sign sign)
 		{

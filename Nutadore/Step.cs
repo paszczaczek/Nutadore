@@ -32,10 +32,6 @@ namespace Nutadore
 		private Rectangle highlightRect;
 		public Rect bounds { get; private set; } = Rect.Empty;
 
-		public Step()
-		{
-		}
-
 		public void AddVoice(Sign voice)
 		{
 			voices.Add(voice);

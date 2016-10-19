@@ -13,10 +13,9 @@ namespace Nutadore
 	{
 		private static Brush currentBrush = Brushes.LightSeaGreen;
 		private static Brush highlightBrush = Brushes.Gray;
-		//private static Brush boundsBrush = Brushes.Gray;
 
 		protected List<UIElement> elements = new List<UIElement>();
-		private List<UIElement> highlightElements = new List<UIElement>();
+		//private List<UIElement> highlightElements = new List<UIElement>();
 		private Rectangle highlightRectangle;
 		public Rect bounds { get; protected set; } = Rect.Empty;
 
@@ -34,14 +33,14 @@ namespace Nutadore
 				score.Children.Remove(uiElement);
 			elements.Clear();
 
-			highlightElements.Clear();
+			//highlightElements.Clear();
 			bounds = Rect.Empty;
 		}
 
-		public virtual bool IsShown
-		{
-			get { return elements.Count > 0; }
-		}
+		//public virtual bool IsShown
+		//{
+		//	get { return elements.Count > 0; }
+		//}
 
 		protected void AddElement(Score score, UIElement uiElement, int zindex = 0)
 		{
@@ -50,7 +49,7 @@ namespace Nutadore
 			elements.Add(uiElement);
 		}
 
-		protected double AddFetaGlyph(Score score, double glyphLeft, double glyphTop, string glyphCode, int zindex = 0)
+		protected double AddGlyph(Score score, double glyphLeft, double glyphTop, string glyphCode, int zindex = 0)
 		{
 			const string familyName = "feta26";
 			double fontSize = 42 * score.Magnification;
@@ -81,14 +80,14 @@ namespace Nutadore
 				glyphTop + formattedText.Height + formattedText.OverhangAfter - formattedText.Extent,
 				formattedText.Width,
 				formattedText.Extent);
-			ExtendBounds(score, boundsGlyph);
-			highlightElements.Add(uiElement);
+			ExtendBounds(boundsGlyph);
+			//highlightElements.Add(uiElement);
 
 			// Zwracamy nowe położenie kursora.
 			return glyphLeft + formattedText.Width;
 		}
 
-		protected void ExtendBounds(Score score, Rect extendBy)
+		protected void ExtendBounds(Rect extendBy)
 		{
 			bounds = Rect.Union(bounds, extendBy);
 		}

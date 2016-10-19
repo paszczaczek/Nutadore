@@ -27,7 +27,8 @@ namespace Nutadore
 			score.keyboard = keyboard;
 			keyboard.score = score;
 
-			//AddSteps();
+			AddSteps();
+			AddSteps();
 			AddAllTriads();
 			//AddAllNotes();
 			//AddTriad();
@@ -72,17 +73,22 @@ namespace Nutadore
 		//	score.Add(chord);
 		//}
 
-		//private void AddAllNotes()
-		//{
-		//	List<Key> whiteKeys = keyboard.keys.FindAll(key => key.isWhite);
-		//	for (int k = 0; k < whiteKeys.Count; k++)
-		//	{
-		//		score.Add(new Note(
-		//			whiteKeys[k].note.letter,
-		//			whiteKeys[k].note.accidental,
-		//			whiteKeys[k].note.octave));
-		//	}
-		//}
+		private void AddAllNotes()
+		{
+			List<Key> whiteKeys = keyboard.keys.FindAll(key => key.isWhite);
+			for (int k = 0; k < whiteKeys.Count; k++)
+			{
+				Note note = new Note(
+					whiteKeys[k].note.letter,
+					whiteKeys[k].note.accidental,
+					whiteKeys[k].note.octave);
+
+				Step step = new Step();
+				step.AddVoice(note);
+
+				score.Add(step);
+			}
+		}
 
 		private void AddAllTriads()
 		{

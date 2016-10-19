@@ -32,7 +32,7 @@ namespace Nutadore
 						glyphTop -= 77.5 * score.Magnification;
 						break;
 				}
-				double rightClef = base.AddFetaGlyph(score, left, glyphTop, glyphCode);
+				double rightClef = base.AddGlyph(score, left, glyphTop, glyphCode);
 				//Rect boundaryClef = base.AddFetaGlyph(score, left, glyphTop, glyphCode);
 				//double rightClef = boundaryClef.Left + boundaryClef.Width;
 				if (rightClef > maxRightClef)

@@ -27,7 +27,7 @@ namespace Nutadore
 				double glyphTop = staff.StaffPositionToY(staffPosition);
 
 				glyphTop -= 57 * score.Magnification;
-				right = base.AddFetaGlyph(score, left, glyphTop, glyphCode);
+				right = base.AddGlyph(score, left, glyphTop, glyphCode);
 			}
 
 			return right;

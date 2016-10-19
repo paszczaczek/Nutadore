@@ -30,7 +30,7 @@ namespace Nutadore
 				signLeft
 					= accidental.AddToScore(score, trebleStaff, bassStaff, signLeft)
 					+ Staff.spaceBetweenScaleSigns * score.Magnification;
-				base.ExtendBounds(score, accidental.bounds);
+				base.ExtendBounds(accidental.bounds);
 			}
 
 			double scaleRight = signLeft + Staff.spaceBetweenSigns;
