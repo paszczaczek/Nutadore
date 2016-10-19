@@ -22,10 +22,10 @@ namespace Nutadore
 		private bool isCurrent;
 		private bool isHighlighted;
 
-		public virtual double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
-		{
-			return left;
-		}
+		public abstract double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, double left);
+		//{
+		//	return left;
+		//}
 
 		public virtual void RemoveFromScore(Score score)
 		{
@@ -42,11 +42,11 @@ namespace Nutadore
 		//	get { return elements.Count > 0; }
 		//}
 
-		protected void AddElement(Score score, UIElement uiElement, int zindex = 0)
+		protected void AddElement(Score score, UIElement element, int zindex = 0)
 		{
-			score.Children.Add(uiElement);
-			Canvas.SetZIndex(uiElement, zindex);
-			elements.Add(uiElement);
+			score.Children.Add(element);
+			Canvas.SetZIndex(element, zindex);
+			elements.Add(element);
 		}
 
 		protected double AddGlyph(Score score, double glyphLeft, double glyphTop, string glyphCode, int zindex = 0)
@@ -92,9 +92,9 @@ namespace Nutadore
 			bounds = Rect.Union(bounds, extendBy);
 		}
 
+		/* TODO wywalic
 		public Rectangle AddHighlightRectangle(Score score, Staff trebleStaff, Staff bassStaff, int zindex)
 		{
-			/* TODO wywalic
 			double top = trebleStaff.StaffPositionToY(StaffPosition.ByLegerAbove(6));
 			double bottom = bassStaff.StaffPositionToY(StaffPosition.ByLegerBelow(4));
 			highlightRectangle = new Rectangle
@@ -111,9 +111,9 @@ namespace Nutadore
 			highlightRectangle.MouseDown += HighlightRectangle_MouseDown;
 			AddElement(score, highlightRectangle, zindex);
 			return highlightRectangle;
-			*/
 			return null;
 		}
+		*/
 
 		public virtual void HighlightRectangle_MouseEnter(object sender, MouseEventArgs e)
 		{

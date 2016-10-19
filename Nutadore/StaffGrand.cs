@@ -185,7 +185,7 @@ namespace Nutadore
 					// TODO: konstruktor+show() ?
 					Perform perform = new Perform(performHowTo, performLeft, performRight);
 					performs.Add(perform);
-					perform.Show(score, trebleStaff, bassStaff);
+					perform.AddToScore(score, trebleStaff, bassStaff, 0);
 					performHowTo = Perform.HowTo.AtPlace;
 				}
 				if (performNew)
@@ -204,7 +204,7 @@ namespace Nutadore
 				// TODO: konstruktor+show() ?
 				Perform perform = new Perform(performHowTo, performLeft, performRight);
 				performs.Add(perform);
-				perform.Show(score, trebleStaff, bassStaff);
+				perform.AddToScore(score, trebleStaff, bassStaff, 0);
 				performHowTo = Perform.HowTo.AtPlace;
 			}
 		}

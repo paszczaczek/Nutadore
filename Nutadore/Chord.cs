@@ -15,7 +15,7 @@ namespace Nutadore
 
 		public void Add(Note note)
 		{
-			note.isPartOfChord = true;
+			//note.isPartOfChord = true;
 			notes.Add(note);
 		}
 
@@ -25,17 +25,17 @@ namespace Nutadore
 			double chordRight = left;
 			double cursor = left;
 
-			// Wyszukaj najwyższą nutę na pięciolinii wiolinowej.
+			// Wyszukaj najwyższą i najwyższą nutę na pięciolinii wiolinowej z liniami dodanymi.
 			var trebleNotes = notes.FindAll(note => note.staffType == Staff.Type.Treble);
 			trebleNotes.Sort();
-			Note trebleHighestNote = trebleNotes.LastOrDefault();
-			Note trebleLowestNote = trebleNotes.FirstOrDefault();
+			Note trebleHighestNote = trebleNotes.LastOrDefault(note => note.staffPosition >= StaffPosition.ByLegerAbove(1));
+			Note trebleLowestNote = trebleNotes.FirstOrDefault(note => note.staffPosition <= StaffPosition.ByLegerBelow(1));
 
-			// Wyszukaj najniższa nutę na pięciolinii basowej.
+			// Wyszukaj najniższa i najwyższą nutę na pięciolinii basowej z liniami dodanymi.
 			var bassNotes = notes.FindAll(note => note.staffType == Staff.Type.Bass);
 			bassNotes.Sort();
-			Note bassHighestNote = bassNotes.LastOrDefault();
-			Note bassLowestNote = bassNotes.FirstOrDefault();
+			Note bassHighestNote = bassNotes.LastOrDefault(note => note.staffPosition >= StaffPosition.ByLegerAbove(1));
+			Note bassLowestNote = bassNotes.FirstOrDefault(note => note.staffPosition <= StaffPosition.ByLegerBelow(1));
 
 			// Narysuj wszystkie nuty akordu.
 			foreach (var note in notes)
@@ -62,7 +62,7 @@ namespace Nutadore
 			}
 
 			// Dodaj prostokąt do focusowania akordu.
-			base.AddHighlightRectangle(score, trebleStaff, bassStaff, 101);
+			//base.AddHighlightRectangle(score, trebleStaff, bassStaff, 101);
 
 			//this.left = chordLeft;
 			//this.right = chordRight;

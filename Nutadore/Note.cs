@@ -22,7 +22,7 @@ namespace Nutadore
 		/// </summary>
 		public bool showLegerLines = true;
 
-		public bool isPartOfChord = false;
+		//public bool isPartOfChord = false;
 
 		//public double left;
 		public double right; 
@@ -113,8 +113,8 @@ namespace Nutadore
 			base.AddElement(score, letterTextBlock, 2);
 
 			// Dodajemy prostokąt reagujący na mysz.
-			if (!isPartOfChord)
-				base.AddHighlightRectangle(score, trebleStaff, bassStaff, 100);
+			//if (!isPartOfChord)
+				//base.AddHighlightRectangle(score, trebleStaff, bassStaff, 100);
 
 			// Czy znak zmieścił sie na pięcolinii?
 			if (right >= score.ActualWidth - Staff.marginLeft)
