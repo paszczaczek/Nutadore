@@ -517,7 +517,7 @@ namespace Nutadore
 			}
 			else
 			{
-				// Ustaw krok na bieżący.
+				// Ustaw krok na bieżący i pokoloruj krok.
 				step.HighlightRect_MouseDown(sender, e);
 			}
 		}
