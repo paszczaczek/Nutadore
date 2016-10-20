@@ -19,7 +19,6 @@ namespace Nutadore
 
 		public void Add(Note note)
 		{
-			//note.isPartOfChord = true;
 			notes.Add(note);
 		}
 

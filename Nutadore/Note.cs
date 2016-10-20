@@ -138,10 +138,10 @@ namespace Nutadore
 				Tag = score // potrzebne w event handlerze
 			};
 			base.AddElement(score, highlightRect, 101);
-			highlightRect.MouseEnter += HighlightRect_MouseEnter;
-			highlightRect.MouseLeave += HightlightRect_MouseLeave;
-			highlightRect.MouseDown += HighlightRect_MouseDown;
-			highlightRect.MouseUp += HighlightRect_MouseUp;
+			highlightRect.MouseEnter += MouseEnter;
+			highlightRect.MouseLeave += MouseLeave;
+			highlightRect.MouseDown += MouseDown;
+			highlightRect.MouseUp += MouseUp;
 
 			// Czy znak zmieścił sie na pięcolinii?
 			if (right >= score.ActualWidth - Staff.marginLeft)
@@ -464,7 +464,7 @@ namespace Nutadore
 				return -1;
 		}
 
-		private void HighlightRect_MouseEnter(object sender, MouseEventArgs e)
+		private void MouseEnter(object sender, MouseEventArgs e)
 		{
 			if (HighlightIsActive)
 			{
@@ -472,39 +472,39 @@ namespace Nutadore
 				isHighlighted = true;
 				SetColor();
 				// Pokoloruj krok.
-				step.HighlightRect_MouseEnter(sender, e);
+				step.Highlight(true);
 				// Wygeneruj zdarzenie o najechaniu na nutę.
 				Score score = (sender as Rectangle).Tag as Score;
 				score.FireEvent(this, ScoreEventArgs.EventType.Enter);
 			}
 			else
 			{
-				// Pokoloruj krok i wygeneruj zdarzenie o najechaniu na krok.
-				step.HighlightRect_MouseEnter(sender, e);
+				// Przekaż zdarzenie do kroku.
+				step.MouseEnter(sender, e);
 			}
 		}
 
-		private void HightlightRect_MouseLeave(object sender, MouseEventArgs e)
+		private void MouseLeave(object sender, MouseEventArgs e)
 		{
+			// Pokoloruj nutę.
+			isHighlighted = false;
+			SetColor();
 			if (HighlightIsActive)
 			{
-				// Pokoloruj nutę.
-				isHighlighted = false;
-				SetColor();
 				// Pokoloruj krok.
-				step.HighlightRect_MouseLeave(sender, e);
+				step.Highlight(false);
 				// Wygeneruj zdarzenie o zjechaniu z nuty.
 				Score score = (sender as Rectangle).Tag as Score;
 				score.FireEvent(this, ScoreEventArgs.EventType.Leave);
 			}
 			else
 			{
-				// Pokoloruj krok i wygeneruj zdarzenie o zjechaniu z kroku.
-				step.HighlightRect_MouseLeave(sender, e);
+				// Przekaż zdarzenie do kroku.
+				step.MouseLeave(sender, e);
 			}
 		}
 
-		private void HighlightRect_MouseDown(object sender, MouseButtonEventArgs e)
+		private void MouseDown(object sender, MouseButtonEventArgs e)
 		{
 			if (HighlightIsActive)
 			{
@@ -512,29 +512,28 @@ namespace Nutadore
 				Score score = (sender as Rectangle).Tag as Score;
 				score.CurrentStep = step;
 				// Wygeneruj zdarzenie o naciśnięciu nuty.
-				HighlightRect_MouseEnter(sender, e);
+				MouseEnter(sender, e);
 				score.FireEvent(this, ScoreEventArgs.EventType.Down);
 			}
 			else
 			{
-				// Ustaw krok na bieżący i pokoloruj krok.
-				step.HighlightRect_MouseDown(sender, e);
+				// Przekaż zdarzenie do kroku.
+				step.MouseDown(sender, e);
 			}
 		}
 
-		private void HighlightRect_MouseUp(object sender, MouseButtonEventArgs e)
+		private void MouseUp(object sender, MouseButtonEventArgs e)
 		{
+			Score score = (sender as Rectangle).Tag as Score;
 			if (HighlightIsActive)
 			{
 				// Wygeneruj zdarzenie o puszczeniu nuty.
-				Score score = (sender as Rectangle).Tag as Score;
 				score.FireEvent(this, ScoreEventArgs.EventType.Up);
 			}
 			else
 			{
-				Score score = (sender as Rectangle).Tag as Score;
-				score.CurrentStep = step;
-				step.HighlightRect_MouseUp(sender, e);
+				// Przekaż zdarzenie do kroku.
+				step.MouseUp(sender, e);
 			}
 		}
 
