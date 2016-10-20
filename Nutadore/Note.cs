@@ -26,13 +26,19 @@ namespace Nutadore
 		/// </summary>
 		public bool showLegerLines = true;
 
-		//public bool isPartOfChord = false;
-
-		//public double left;
 		public double right; 
 
 		private bool isHighlighted;
 		private Rectangle highlightRect;
+		private bool HighlightIsActive
+		{
+			get
+			{
+				return
+					System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftShift) ||
+					System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.RightShift);
+			}
+		}
 
 		public static readonly Note lowest = new Note(Letter.A, Accidental.None, Octave.SubContra);
 		public static readonly Note highest = new Note(Letter.C, Accidental.None, Octave.FiveLined);
@@ -135,8 +141,7 @@ namespace Nutadore
 			highlightRect.MouseEnter += HighlightRect_MouseEnter;
 			highlightRect.MouseLeave += HightlightRect_MouseLeave;
 			highlightRect.MouseDown += HighlightRect_MouseDown;
-			//score.Children.Add(highlightRect);
-			//Canvas.SetZIndex(highlightRect, 100);
+			highlightRect.MouseUp += HighlightRect_MouseUp;
 
 			// Czy znak zmieścił sie na pięcolinii?
 			if (right >= score.ActualWidth - Staff.marginLeft)
@@ -152,6 +157,11 @@ namespace Nutadore
 				//right += Staff.spaceBetweenSigns * score.Magnification;
 				return right + Staff.spaceBetweenSigns * score.Magnification;
 			}
+		}
+	
+		override public void RemoveFromScore(Score score)
+		{
+			base.RemoveFromScore(score);
 		}
 
 		public void AddLegerLinesToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
@@ -207,11 +217,6 @@ namespace Nutadore
 				}
 				//right = legerRight;
 			}
-		}
-
-		override public void RemoveFromScore(Score score)
-		{
-			base.RemoveFromScore(score);
 		}
 
 		public StaffPosition ToStaffPosition(Staff.Type? preferredStaffType, bool withPerform = true)
@@ -324,11 +329,6 @@ namespace Nutadore
 			return StaffPosition.ByNumber(lineNumber);
 		}
 
-		//public Note Copy()
-		//{
-		//	return new Note(letter, accidental, octave, staffType);
-		//}
-
 		/// <summary>
 		/// Zmienia wysokość nuty o zadaną liczbę półlinii.
 		/// </summary>
@@ -371,6 +371,56 @@ namespace Nutadore
 			{
 				return false;
 			}
+		}
+
+		public override string ToString()
+		{
+			string index = "";
+			bool upper = false;
+			switch (octave)
+			{
+				case Octave.SubContra:
+					index = "=";
+					upper = true;
+					break;
+				case Octave.Contra:
+					index = "-";
+					upper = true;
+					break;
+				case Octave.Great:
+					index = "";
+					upper = true;
+					break;
+				case Octave.Small:
+					index = "";
+					upper = false;
+					break;
+				case Octave.OneLined:
+					index = "1";
+					upper = false;
+					break;
+				case Octave.TwoLined:
+					index = "2";
+					upper = false;
+					break;
+				case Octave.ThreeLined:
+					index = "3";
+					upper = false;
+					break;
+				case Octave.FourLined:
+					index = "4";
+					upper = false;
+					break;
+				case Octave.FiveLined:
+					index = "5";
+					upper = false;
+					break;
+			}
+			return string.Format(
+				"{0}{1}",
+				upper ? letter.ToString().ToUpper() : letter.ToString().ToLower(),
+				index);
+				
 		}
 
 		public override bool Equals(object obj)
@@ -416,24 +466,76 @@ namespace Nutadore
 
 		private void HighlightRect_MouseEnter(object sender, MouseEventArgs e)
 		{
-			isHighlighted = true;
-			SetColor();
-			Score score = (sender as Rectangle).Tag as Score;
-			step.HighlightRect_MouseEnter(sender, e);
+			if (HighlightIsActive)
+			{
+				// Pokoloruj nutę.
+				isHighlighted = true;
+				SetColor();
+				// Pokoloruj krok.
+				step.HighlightRect_MouseEnter(sender, e);
+				// Wygeneruj zdarzenie o najechaniu na nutę.
+				Score score = (sender as Rectangle).Tag as Score;
+				score.FireEvent(this, ScoreEventArgs.EventType.Enter);
+			}
+			else
+			{
+				// Pokoloruj krok i wygeneruj zdarzenie o najechaniu na krok.
+				step.HighlightRect_MouseEnter(sender, e);
+			}
 		}
 
 		private void HightlightRect_MouseLeave(object sender, MouseEventArgs e)
 		{
-			isHighlighted = false;
-			SetColor();
-			step.HightlightRect_MouseLeave(sender, e);
+			if (HighlightIsActive)
+			{
+				// Pokoloruj nutę.
+				isHighlighted = false;
+				SetColor();
+				// Pokoloruj krok.
+				step.HighlightRect_MouseLeave(sender, e);
+				// Wygeneruj zdarzenie o zjechaniu z nuty.
+				Score score = (sender as Rectangle).Tag as Score;
+				score.FireEvent(this, ScoreEventArgs.EventType.Leave);
+			}
+			else
+			{
+				// Pokoloruj krok i wygeneruj zdarzenie o zjechaniu z kroku.
+				step.HighlightRect_MouseLeave(sender, e);
+			}
 		}
 
 		private void HighlightRect_MouseDown(object sender, MouseButtonEventArgs e)
 		{
-			Score score = (sender as Rectangle).Tag as Score;
-			score.CurrentStep = step;
-			HighlightRect_MouseEnter(sender, e);
+			if (HighlightIsActive)
+			{
+				// Ustaw krok na bieżący.
+				Score score = (sender as Rectangle).Tag as Score;
+				score.CurrentStep = step;
+				// Wygeneruj zdarzenie o naciśnięciu nuty.
+				HighlightRect_MouseEnter(sender, e);
+				score.FireEvent(this, ScoreEventArgs.EventType.Down);
+			}
+			else
+			{
+				// Ustaw krok na bieżący.
+				step.HighlightRect_MouseDown(sender, e);
+			}
+		}
+
+		private void HighlightRect_MouseUp(object sender, MouseButtonEventArgs e)
+		{
+			if (HighlightIsActive)
+			{
+				// Wygeneruj zdarzenie o puszczeniu nuty.
+				Score score = (sender as Rectangle).Tag as Score;
+				score.FireEvent(this, ScoreEventArgs.EventType.Up);
+			}
+			else
+			{
+				Score score = (sender as Rectangle).Tag as Score;
+				score.CurrentStep = step;
+				step.HighlightRect_MouseUp(sender, e);
+			}
 		}
 
 		private void SetColor()
@@ -455,16 +557,6 @@ namespace Nutadore
 			{
 				head.Foreground = Brushes.Black;
 			}
-		}
-
-		public void MarkAsHit()
-		{
-			head.Foreground = Brushes.Green;
-		}
-
-		public void MarkAsMissed()
-		{
-			head.Foreground = Brushes.PaleVioletRed;
 		}
 	}
 }

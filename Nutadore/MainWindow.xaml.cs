@@ -24,8 +24,7 @@ namespace Nutadore
 		{
 			InitializeComponent();
 
-			score.keyboard = keyboard;
-			keyboard.score = score;
+			keyboard.SubscribeScoreEvents(score);
 
 			AddSteps();
 			AddSteps();

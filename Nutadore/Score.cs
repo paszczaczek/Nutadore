@@ -17,7 +17,6 @@ namespace Nutadore
 		public Scale scale = new Scale(Note.Letter.C, Scale.Type.Major);
 		private List<StaffGrand> staffGrands = new List<StaffGrand>();
 		public List<Step> steps = new List<Step>();
-		public Keyboard keyboard;
 
 		private Step currentStep;
 		public Step CurrentStep
@@ -40,6 +39,8 @@ namespace Nutadore
 			}
 		}
 
+		public event EventHandler<ScoreEventArgs> Event;
+
 		public Score()
 		{
 			base.ClipToBounds = true;
@@ -48,6 +49,18 @@ namespace Nutadore
 			base.Background = Brushes.Transparent;
 			base.SizeChanged += Score_SizeChanged;
 			base.PreviewMouseWheel += Score_PreviewMouseWheel;
+		}
+
+		public void FireEvent(List<Note> notes, ScoreEventArgs.EventType eventType)
+		{
+			ScoreEventArgs e = new ScoreEventArgs(notes, eventType);
+			Event?.Invoke(this, e);
+		}
+
+		public void FireEvent(Note note, ScoreEventArgs.EventType eventType)
+		{
+			ScoreEventArgs e = new ScoreEventArgs(note, eventType);
+			Event?.Invoke(this, e);
 		}
 
 		private void Score_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -104,8 +117,8 @@ namespace Nutadore
 			{
 				magnification = value;
 				Show();
-				if (keyboard != null)
-					keyboard.Reset();
+				//if (keyboard != null)
+					//keyboard.Reset();
 			}
 		}
 

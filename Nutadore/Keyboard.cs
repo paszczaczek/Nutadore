@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace Nutadore
 		private static readonly int numberOfBlackKeys = 36;
 		public static readonly int numberOfKeys = numberOfWhiteKeys + numberOfBlackKeys;
 
-		public Score score;
+		//public Score score;
 
 		/// <summary>
 		/// Lista wszystkich klawiszy na klawiaturze.
@@ -43,7 +44,7 @@ namespace Nutadore
 			double keyboardHeight = 0;
 			foreach (Key key in keys)
 			{
-				double height = key.Show(score, this);
+				double height = key.Show(/*score, */this);
 				keyboardHeight = Math.Max(height, keyboardHeight);
 			}
 
@@ -55,6 +56,21 @@ namespace Nutadore
 			//	key.MarkAs(Key.State.Hit);
 			//foreach (var key in keys.FindAll(key => key.note.octave == Note.Octave.OneLined))
 			//	key.MarkAs(Key.State.Missed);
+		}
+
+		public void SubscribeScoreEvents(Score score)
+		{
+			score.Event += Score_Event;
+		}
+
+		private void Score_Event(object sender, ScoreEventArgs e)
+		{
+			Debug.Write(string.Format("{0}: ", e.eventType));
+			foreach (Note note in e.notes)
+			{
+				Debug.Write(string.Format("{0} ", note.ToString()));
+			}
+			Debug.WriteLine("");
 		}
 
 		private void Keyboard_SizeChanged(object sender, SizeChangedEventArgs e)

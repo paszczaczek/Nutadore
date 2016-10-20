@@ -89,8 +89,9 @@ namespace Nutadore
 				Tag = score // potrzebne w event handlerze
 			};
 			highlightRect.MouseEnter += HighlightRect_MouseEnter;
-			highlightRect.MouseLeave += HightlightRect_MouseLeave;
+			highlightRect.MouseLeave += HighlightRect_MouseLeave;
 			highlightRect.MouseDown += HighlightRect_MouseDown;
+			highlightRect.MouseUp += HighlightRect_MouseUp;
 			score.Children.Add(highlightRect);
 			Canvas.SetZIndex(highlightRect, 100);
 
@@ -226,22 +227,56 @@ namespace Nutadore
 			}
 		}
 
+		private List<Note> FindAllNotes()
+		{
+			List<Note> notes = new List<Note>();
+			foreach (Sign voice in voices)
+			{
+				if (voice is Chord)
+				{
+					Chord chord = voice as Chord;
+					notes.AddRange(chord.notes);
+				}
+				else if (voice is Note)
+				{
+					Note note = voice as Note;
+					notes.Add(note);
+				}
+			}
+
+			return notes;
+		}
+
 		public void HighlightRect_MouseEnter(object sender, MouseEventArgs e)
 		{
 			isHighlighted = true;
 			SetColor();
+
+			Score score = (sender as Rectangle).Tag as Score;
+			score.FireEvent(FindAllNotes(), ScoreEventArgs.EventType.Enter);
 		}
 
-		public void HightlightRect_MouseLeave(object sender, MouseEventArgs e)
+		public void HighlightRect_MouseLeave(object sender, MouseEventArgs e)
 		{
 			isHighlighted = false;
 			SetColor();
+
+			Score score = (sender as Rectangle).Tag as Score;
+			score.FireEvent(FindAllNotes(), ScoreEventArgs.EventType.Leave);
 		}
 
-		private void HighlightRect_MouseDown(object sender, MouseButtonEventArgs e)
+		public void HighlightRect_MouseDown(object sender, MouseButtonEventArgs e)
 		{
 			Score score = (sender as Rectangle).Tag as Score;
 			score.CurrentStep = this;
+
+			score.FireEvent(FindAllNotes(), ScoreEventArgs.EventType.Down);
+		}
+
+		public void HighlightRect_MouseUp(object sender, MouseButtonEventArgs e)
+		{
+			Score score = (sender as Rectangle).Tag as Score;
+			score.FireEvent(FindAllNotes(), ScoreEventArgs.EventType.Up);
 		}
 
 	}

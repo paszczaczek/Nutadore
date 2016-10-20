@@ -64,6 +64,7 @@
     <Compile Include="Score.cs" />
     <Compile Include="Bar.cs" />
     <Compile Include="Accidental.cs" />
+    <Compile Include="ScoreEventArgs.cs" />
     <Compile Include="StaffPosition.cs" />
     <Compile Include="StaffGrand.cs" />
     <Compile Include="Sign.cs" />

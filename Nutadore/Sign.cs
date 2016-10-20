@@ -11,21 +11,10 @@ namespace Nutadore
 {
 	abstract public class Sign
 	{
-		//private static Brush currentBrush = Brushes.LightSeaGreen;
-		//private static Brush highlightBrush = Brushes.Gray;
-
 		protected List<UIElement> elements = new List<UIElement>();
-		//private List<UIElement> highlightElements = new List<UIElement>();
-		//private Rectangle highlightRectangle;
 		public Rect bounds { get; protected set; } = Rect.Empty;
 
-		//private bool isCurrent;
-		//private bool isHighlighted;
-
 		public abstract double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, double left);
-		//{
-		//	return left;
-		//}
 
 		public virtual void RemoveFromScore(Score score)
 		{
@@ -36,11 +25,6 @@ namespace Nutadore
 			//highlightElements.Clear();
 			bounds = Rect.Empty;
 		}
-
-		//public virtual bool IsShown
-		//{
-		//	get { return elements.Count > 0; }
-		//}
 
 		protected void AddElement(Score score, UIElement element, int zindex = 0)
 		{
@@ -91,96 +75,5 @@ namespace Nutadore
 		{
 			bounds = Rect.Union(bounds, extendBy);
 		}
-
-		/* TODO wywalic
-		public Rectangle AddHighlightRectangle(Score score, Staff trebleStaff, Staff bassStaff, int zindex)
-		{
-			double top = trebleStaff.StaffPositionToY(StaffPosition.ByLegerAbove(6));
-			double bottom = bassStaff.StaffPositionToY(StaffPosition.ByLegerBelow(4));
-			highlightRectangle = new Rectangle
-			{
-				Width = bounds.Width,
-				Height = bottom - top,
-				Margin = new Thickness(bounds.Left, top, 0, 0),
-				Fill = Brushes.Transparent,
-				Stroke = Brushes.Transparent,
-				Tag = score // potrzebne w event handlerze
-			};
-			highlightRectangle.MouseEnter += HighlightRectangle_MouseEnter;
-			highlightRectangle.MouseLeave += HightlightRectangle_MouseLeave;
-			highlightRectangle.MouseDown += HighlightRectangle_MouseDown;
-			AddElement(score, highlightRectangle, zindex);
-			return highlightRectangle;
-			return null;
-		}
-		*/
-
-		////public virtual void HighlightRectangle_MouseEnter(object sender, MouseEventArgs e)
-		////{
-		////	MarkAsHighlighted(true);
-		////}
-
-		//public virtual void HightlightRectangle_MouseLeave(object sender, MouseEventArgs e)
-		//{
-		//	MarkAsHighlighted(false);
-		//}
-
-		//private void HighlightRectangle_MouseDown(object sender, MouseButtonEventArgs e)
-		//{
-		//	// Zaznacz znak jako bieżący.
-		//	Score score = (sender as Rectangle).Tag as Score;
-		//	//score.currentStep = this;
-		//}
-
-		//public void MarkAsCurrent(bool isCurrent)
-		//{
-		//	this.isCurrent = isCurrent;
-		//	SetColor();
-		//}
-
-		//public void MarkAsHighlighted(bool isHighlighted)
-		//{
-		//	this.isHighlighted = isHighlighted;
-		//	SetColor();
-		//}
-
-		//public virtual void KeyDown(Key key)
-		//{
-		//}
-
-		//public virtual void KeyUp(Key key)
-		//{
-		//}
-
-		//private void SetColor()
-		//{
-		//	if (highlightRectangle == null)
-		//		return;
-
-		//	if (isCurrent && isHighlighted)
-		//	{
-		//		highlightRectangle.Fill = currentBrush;
-		//		highlightRectangle.Stroke = currentBrush;
-		//		highlightRectangle.Opacity = 0.3;
-		//	}
-		//	else if (isCurrent && !isHighlighted)
-		//	{
-		//		highlightRectangle.Fill = currentBrush;
-		//		highlightRectangle.Stroke = currentBrush;
-		//		highlightRectangle.Opacity = 0.2;
-
-		//	}
-		//	else if (!isCurrent && isHighlighted)
-		//	{
-		//		highlightRectangle.Fill = highlightBrush;
-		//		highlightRectangle.Stroke = highlightBrush;
-		//		highlightRectangle.Opacity = 0.1;
-		//	}
-		//	else if (!isCurrent && !isHighlighted)
-		//	{
-		//		highlightRectangle.Fill = Brushes.Transparent;
-		//		highlightRectangle.Stroke = Brushes.Transparent;
-		//	}
-		//}
 	}
 }

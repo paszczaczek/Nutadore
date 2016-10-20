@@ -126,7 +126,7 @@ namespace Nutadore
 				keyNoInOctave == 11;
 		}
 
-		public double Show(Score score, Keyboard keyboard)
+		public double Show(/*Score score, */Keyboard keyboard)
 		{
 			// szerokość klawiszy białych i czarnych
 			double whiteWidth = keyboard.ActualWidth / Keyboard.numberOfWhiteKeys;
