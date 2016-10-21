@@ -259,7 +259,7 @@ namespace Nutadore
 			SetColor();
 
 			Score score = (sender as Rectangle).Tag as Score;
-			score.FireEvent(FindAllNotes(), ScoreEventArgs.EventType.Enter);
+			score.FireEvent(FindAllNotes(), ScoreEventArgs.EventType.MouseEnter);
 		}
 
 		public void MouseLeave(object sender, MouseEventArgs e)
@@ -268,7 +268,7 @@ namespace Nutadore
 			SetColor();
 
 			Score score = (sender as Rectangle).Tag as Score;
-			score.FireEvent(FindAllNotes(), ScoreEventArgs.EventType.Leave);
+			score.FireEvent(FindAllNotes(), ScoreEventArgs.EventType.MouseLeave);
 		}
 
 		public void MouseDown(object sender, MouseButtonEventArgs e)
@@ -276,13 +276,13 @@ namespace Nutadore
 			Score score = (sender as Rectangle).Tag as Score;
 			score.CurrentStep = this;
 
-			score.FireEvent(FindAllNotes(), ScoreEventArgs.EventType.Down);
+			score.FireEvent(FindAllNotes(), ScoreEventArgs.EventType.MouseDown);
 		}
 
 		public void MouseUp(object sender, MouseButtonEventArgs e)
 		{
 			Score score = (sender as Rectangle).Tag as Score;
-			score.FireEvent(FindAllNotes(), ScoreEventArgs.EventType.Up);
+			score.FireEvent(FindAllNotes(), ScoreEventArgs.EventType.MouseUp);
 		}
 
 	}

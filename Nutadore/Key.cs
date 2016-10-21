@@ -14,19 +14,69 @@ namespace Nutadore
 {
 	public class Key
 	{
-		private static readonly Color whiteKeyColor = Colors.Snow;
-		private static readonly Color blackKeyColor = Colors.Black;
+		private static readonly SolidColorBrush whiteKeyUpBrush = Brushes.Snow;
+		private static readonly SolidColorBrush blackKeyUpBrush = Brushes.Black;
+
+		// Możliwe stany:
+		// Up (biały/czarny)
+		// Up Guess (żółty jasny/ciemnu)
+		// Down (mocno szary jasny/ciemny)
+		// Down Hit (zielony jasny/ciemny)
+		// Down !Hit (czerwony jasny/ciemny)
+		// Dodatkowo podświetlenie rozjaśniające kolory
+
+		private bool _highlighted;
+		public bool Highlighted
+		{
+			get { return _highlighted; }
+			set { _highlighted = value; SetColor(); }
+		}
+
+		private bool _guess;
+		public bool Guess
+		{
+			get { return _guess; }
+			set { _guess = value;  SetColor(); }
+		}
+
+		private bool? _hit;
+		public bool? Hit
+		{
+			get { return _hit; }
+			set {
+				_hit = value;
+				if (_hit != null)
+					_down = true;
+				SetColor(); }
+		}
+
+		private bool _down;
+		public bool Down
+		{
+			get { return _down; }
+			set { _down = value;  SetColor(); }
+		}
 
 		public enum State
 		{
 			Up,
+			UpGuess,
 			Down,
-			Hit,
-			Missed
+			DownGuess,
+			DownGuessHit,
+			DownGuessMissed
 		}
 
+		//public enum State
+		//{
+		//	Up,
+		//	Down,
+		//	Hit,
+		//	Missed
+		//}
+
 		public State state = State.Up;
-		private bool isHighlighted;
+		//private bool isHighlighted;
 		private Rectangle highlightRectangle;
 
 		private readonly int keyNoInOctave;
@@ -126,7 +176,7 @@ namespace Nutadore
 				keyNoInOctave == 11;
 		}
 
-		public double Show(/*Score score, */Keyboard keyboard)
+		public double AddToCanvas(/*Score score, */Keyboard keyboard)
 		{
 			// szerokość klawiszy białych i czarnych
 			double whiteWidth = keyboard.ActualWidth / Keyboard.numberOfWhiteKeys;
@@ -168,7 +218,7 @@ namespace Nutadore
 				Width = width,
 				Height = height,
 				Margin = new Thickness(left, 0, 0, 0),
-				Fill = new SolidColorBrush(isWhite ? whiteKeyColor : blackKeyColor),
+				Fill = isWhite ? whiteKeyUpBrush : blackKeyUpBrush,
 				Stroke = Brushes.Black,
 				StrokeThickness = isWhite ? 0.2 : 0.8
 			};
@@ -187,10 +237,10 @@ namespace Nutadore
 			};
 			Canvas.SetZIndex(highlightRectangle, isWhite ? 1 : 3);
 			keyboard.Children.Add(highlightRectangle);
-			highlightRectangle.MouseEnter += HighlightRectangle_MouseEnter;
-			highlightRectangle.MouseLeave += HighlightRectangle_MouseLeave;
-			highlightRectangle.MouseDown += HighlightRectangle_MouseDown;
-			highlightRectangle.MouseUp += HighlightRectangle_MouseUp;
+			highlightRectangle.MouseEnter += MouseEnter;
+			highlightRectangle.MouseLeave += MouseLeave;
+			highlightRectangle.MouseDown += MouseDown;
+			highlightRectangle.MouseUp += MouseUp;
 
 			// Rysuję nazwy oktaw.
 			double keyboardHeight = whiteHeight;
@@ -236,20 +286,22 @@ namespace Nutadore
 				keyboard.Children.Add(line);
 			}
 
+			SetColor();
+
 			return keyboardHeight;
 		}
 
-		private void HighlightRectangle_MouseEnter(object sender, MouseEventArgs e)
+		private void MouseEnter(object sender, MouseEventArgs e)
 		{
 			MarkAsHighlighted(true);
 		}
 
-		private void HighlightRectangle_MouseLeave(object sender, MouseEventArgs e)
+		private void MouseLeave(object sender, MouseEventArgs e)
 		{
 			MarkAsHighlighted(false);
 		}
 
-		private void HighlightRectangle_MouseDown(object sender, MouseButtonEventArgs e)
+		private void MouseDown(object sender, MouseButtonEventArgs e)
 		{
 			//if (state == State.Up)
 			//	state = State.Down;
@@ -257,64 +309,75 @@ namespace Nutadore
 			//	state = State.Up;
 			//SetColor();
 			Keyboard keyboard = (sender as Rectangle).Tag as Keyboard;
-			keyboard.Check(this.note);
+			//keyboard.Check(this.note);
 		}
 
-		private void HighlightRectangle_MouseUp(object sender, MouseButtonEventArgs e)
+		private void MouseUp(object sender, MouseButtonEventArgs e)
 		{
-			if (state == State.Hit)
-				state = State.Down;
-			else if (state == State.Missed)
-				state = State.Up;
-			SetColor();
+			//if (state == State.Hit)
+			//	state = State.Down;
+			//else if (state == State.Missed)
+			//	state = State.Up;
+			//SetColor();
 		}
 
 		public void MarkAs(State state)
 		{
-			this.state = state;
-			SetColor();
+			//this.state = state;
+			//SetColor();
 		}
 
 		public void MarkAsHighlighted(bool isHighlighted)
 		{
-			this.isHighlighted = isHighlighted;
-			SetColor();
+			//this.isHighlighted = isHighlighted;
+			//SetColor();
 		}
 
 		private void SetColor()
 		{
-			SolidColorBrush brush = highlightRectangle.Fill as SolidColorBrush;
-			switch (state)
+			SolidColorBrush brush = Brushes.Black.Clone();
+			brush.Opacity = 1;
+
+
+			if (Guess)
 			{
-				case State.Up:
-					highlightRectangle.Fill = Brushes.LightGray;
-					if (isHighlighted)
-						highlightRectangle.Opacity = 0.4;
-					else
-						highlightRectangle.Opacity = 0.0;
-					break;
-				case State.Down:
-					highlightRectangle.Fill = Brushes.LightSeaGreen;
-					if (isHighlighted)
-						highlightRectangle.Opacity = 1.0;
-					else
-						highlightRectangle.Opacity = 0.7;
-					break;
-				case State.Hit:
-					highlightRectangle.Fill = Brushes.LightGreen;
-					if (isHighlighted)
-						highlightRectangle.Opacity = 1.0;
-					else
-						highlightRectangle.Opacity = 0.7;
-					break;
-				case State.Missed:
-					highlightRectangle.Fill = Brushes.PaleVioletRed;
-					if (isHighlighted)
-						highlightRectangle.Opacity = 1.0;
-					else
-						highlightRectangle.Opacity = 0.7;
-					break;
+				brush.Color = isWhite ? Colors.Yellow: Colors.Gold;
 			}
+
+			if (Down)
+			{
+				if (Hit == true)
+				{
+					brush.Color = isWhite ? Colors.LightGreen : Colors.Green;
+				}
+				else if (Hit == false)
+				{
+					brush.Color = isWhite ? Colors.Red : Colors.DarkRed;
+				}
+				else if (Hit == null)
+				{
+					brush.Color = Color.Add(brush.Color, isWhite ? Colors.DarkGray : Colors.Gray);
+				}
+			}
+
+			if (Highlighted)
+			{
+				if (brush.Color == Colors.Black)
+				{
+					brush.Color = isWhite ? Colors.LightGray : Colors.Gray;
+				}
+				else
+				{
+					brush.Color = Color.Add(brush.Color, isWhite ? Colors.DarkGray : Colors.DarkGray);
+				}
+			}
+
+			if (brush.Color == Colors.Black)
+			{
+				brush.Opacity = 0;
+			}
+
+			highlightRectangle.Fill = brush;
 		}
 	}
 }

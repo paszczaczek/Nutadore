@@ -26,10 +26,10 @@ namespace Nutadore
 
 			keyboard.SubscribeScoreEvents(score);
 
-			AddSteps();
-			AddSteps();
+			//AddSteps();
+			//AddSteps();
 			//AddAllTriads();
-			//AddAllNotes();
+			AddAllNotes();
 			//AddTriad();
 			//score.Add(new Note(Note.Letter.C, Note.Accidental.None, Note.Octave.OneLined));
 		}
@@ -82,8 +82,14 @@ namespace Nutadore
 					whiteKeys[k].note.accidental,
 					whiteKeys[k].note.octave);
 
+				Note note2 = new Note(
+					whiteKeys[k].note.letter,
+					Note.Accidental.Sharp,
+					whiteKeys[k].note.octave);
+
 				Step step = new Step();
 				step.AddVoice(note);
+				step.AddVoice(note2);
 
 				score.Add(step);
 			}

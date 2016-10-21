@@ -10,7 +10,7 @@ namespace Nutadore
 {
 	public class Note : Sign, IComparable<Note>
 	{
-		private static Brush currentBrush = Brushes.LightSeaGreen;
+		private static Brush currentBrush = Brushes.DarkGray; // LightSeaGreen;
 		private static Brush highlightBrush = Brushes.DarkGray;
 
 		public Letter letter;
@@ -475,7 +475,7 @@ namespace Nutadore
 				step.Highlight(true);
 				// Wygeneruj zdarzenie o najechaniu na nutę.
 				Score score = (sender as Rectangle).Tag as Score;
-				score.FireEvent(this, ScoreEventArgs.EventType.Enter);
+				score.FireEvent(this, ScoreEventArgs.EventType.MouseEnter);
 			}
 			else
 			{
@@ -495,7 +495,7 @@ namespace Nutadore
 				step.Highlight(false);
 				// Wygeneruj zdarzenie o zjechaniu z nuty.
 				Score score = (sender as Rectangle).Tag as Score;
-				score.FireEvent(this, ScoreEventArgs.EventType.Leave);
+				score.FireEvent(this, ScoreEventArgs.EventType.MouseLeave);
 			}
 			else
 			{
@@ -513,7 +513,7 @@ namespace Nutadore
 				score.CurrentStep = step;
 				// Wygeneruj zdarzenie o naciśnięciu nuty.
 				MouseEnter(sender, e);
-				score.FireEvent(this, ScoreEventArgs.EventType.Down);
+				score.FireEvent(this, ScoreEventArgs.EventType.MouseDown);
 			}
 			else
 			{
@@ -528,7 +528,7 @@ namespace Nutadore
 			if (HighlightIsActive)
 			{
 				// Wygeneruj zdarzenie o puszczeniu nuty.
-				score.FireEvent(this, ScoreEventArgs.EventType.Up);
+				score.FireEvent(this, ScoreEventArgs.EventType.MouseUp);
 			}
 			else
 			{
