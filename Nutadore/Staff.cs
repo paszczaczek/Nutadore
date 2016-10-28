@@ -69,7 +69,7 @@ namespace Nutadore
 		{
 			for (var octave = Note.Octave.Great; octave <= Note.Octave.ThreeLined; octave++)
 			{
-				var note = new Note(Note.Letter.C, Note.Accidental.None, octave);
+				var note = new Note(Note.Letter.C, Accidental.Type.None, octave);
 				var staffPosition = note.ToStaffPosition(type, false);
 				if (note.staffType != type)
 					continue;

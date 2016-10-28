@@ -15,6 +15,12 @@ namespace Nutadore
 	{
 		public List<Sign> voices = new List<Sign>();
 
+		private List<Note> notGuessedNotes = new List<Note>();
+		private Score score;
+		private Staff trebleStaff;
+		private Staff bassStaff;
+		private double left;
+		
 		private static Brush currentBrush = Brushes.LightSeaGreen;
 		private static Brush highlightBrush = Brushes.Gray;
 
@@ -22,7 +28,7 @@ namespace Nutadore
 		public bool IsCurrent
 		{
 			get { return isCurrent; }
-			set { isCurrent = value;  SetColor(); }
+			set { isCurrent = value; SetColor(); }
 		}
 
 		public Perform.HowTo performHowToStaffTreble;
@@ -58,6 +64,12 @@ namespace Nutadore
 
 		public double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
 		{
+			// Zapamietujemy, to bo będziemy chcieli dodawać nietrafione nuty.
+			this.score = score;
+			this.trebleStaff = trebleStaff;
+			this.bassStaff = bassStaff;
+			this.left = left;
+
 			// Wyliczamy i korygujemy ottave górną i dolną dla całego kroku.
 			CalculateAndCorrectPerformHowTo();
 
@@ -76,6 +88,18 @@ namespace Nutadore
 					right = voice.bounds.Right;
 			}
 
+			// Dodajemy do score błędnie wciśnięte nuty.
+			foreach (Note notGuessedNote in notGuessedNotes)
+			{
+				double noteCursor = notGuessedNote.AddToScore(score, trebleStaff, bassStaff, left);
+				if (noteCursor == -1)
+					return -1;
+				if (noteCursor > cursor)
+					cursor = noteCursor;
+				if (notGuessedNote.bounds.Right > right || notGuessedNote.bounds.Right == -1)
+					right = notGuessedNote.bounds.Right;
+			}
+
 			// Dodajemy prostokąt do reagujący na mysz.
 			double top = trebleStaff.StaffPositionToY(StaffPosition.ByLegerAbove(6));
 			double bottom = bassStaff.StaffPositionToY(StaffPosition.ByLegerBelow(4));
@@ -91,7 +115,6 @@ namespace Nutadore
 			highlightRect.MouseEnter += MouseEnter;
 			highlightRect.MouseLeave += MouseLeave;
 			highlightRect.MouseDown += MouseDown;
-			highlightRect.MouseUp += MouseUp;
 			score.Children.Add(highlightRect);
 			Canvas.SetZIndex(highlightRect, 100);
 
@@ -104,6 +127,9 @@ namespace Nutadore
 		{
 			foreach (Sign sign in voices)
 				sign.RemoveFromScore(score);
+
+			foreach (Note notGuessedNote in notGuessedNotes)
+				notGuessedNote.RemoveFromScore(score);
 
 			score.Children.Remove(highlightRect);
 			highlightRect = null;
@@ -140,20 +166,10 @@ namespace Nutadore
 		private void CalculateAndCorrectPerformHowTo()
 		{
 			// Wyszukujemy wszystkie nuty w kroku.
-			List<Note> stepNotes = new List<Note>();
-			foreach (Sign voice in voices)
-			{
-				if (voice is Chord)
-				{
-					Chord chord = voice as Chord;
-					stepNotes.AddRange(chord.notes);
-				}
-				else if (voice is Note)
-				{
-					Note note = voice as Note;
-					stepNotes.Add(note);
-				}
-			}
+			List<Note> stepNotes = FindNotes();
+
+			// Dodajemy również nuty błędnie wciśniętych klawiszy.
+			stepNotes.AddRange(notGuessedNotes);
 
 			// Wyszukaj wszystkie nuty akordu leżące na pięcilinii wilonowej.
 			List<Note> trebleNotes = stepNotes.FindAll(note => note.staffType == Staff.Type.Treble);
@@ -227,7 +243,7 @@ namespace Nutadore
 			}
 		}
 
-		private List<Note> FindAllNotes()
+		public List<Note> SelectNotes()
 		{
 			List<Note> notes = new List<Note>();
 			foreach (Sign voice in voices)
@@ -259,7 +275,7 @@ namespace Nutadore
 			SetColor();
 
 			Score score = (sender as Rectangle).Tag as Score;
-			score.FireEvent(FindAllNotes(), ScoreEventArgs.EventType.MouseEnter);
+			score.FireEvent(SelectNotes(), ScoreEventArgs.EventType.HighlightedOn);
 		}
 
 		public void MouseLeave(object sender, MouseEventArgs e)
@@ -268,7 +284,7 @@ namespace Nutadore
 			SetColor();
 
 			Score score = (sender as Rectangle).Tag as Score;
-			score.FireEvent(FindAllNotes(), ScoreEventArgs.EventType.MouseLeave);
+			score.FireEvent(SelectNotes(), ScoreEventArgs.EventType.HighlightedOff);
 		}
 
 		public void MouseDown(object sender, MouseButtonEventArgs e)
@@ -276,13 +292,71 @@ namespace Nutadore
 			Score score = (sender as Rectangle).Tag as Score;
 			score.CurrentStep = this;
 
-			score.FireEvent(FindAllNotes(), ScoreEventArgs.EventType.MouseDown);
+			score.FireEvent(SelectNotes(), ScoreEventArgs.EventType.Selected);
 		}
 
-		public void MouseUp(object sender, MouseButtonEventArgs e)
+		private List<Note> FindNotes()
 		{
-			Score score = (sender as Rectangle).Tag as Score;
-			score.FireEvent(FindAllNotes(), ScoreEventArgs.EventType.MouseUp);
+			List<Note> notes = new List<Note>();
+
+			foreach (Sign voice in voices)
+			{
+				if (voice is Chord)
+				{
+					Chord chord = voice as Chord;
+					notes.AddRange(chord.notes);
+				}
+				else if (voice is Note)
+				{
+					Note note = voice as Note;
+					notes.Add(note);
+				}
+			}
+
+			return notes;
+		}
+
+		public void KeyDown(Note noteDown)
+		{
+			Note foundNote = FindNotes().Find(note => note.Equals(noteDown));
+			if (foundNote != null)
+			{
+				foundNote.Guessed = true;
+			}
+			else
+			{
+				Note notGuessedNote = new Note(noteDown.letter, noteDown.accidentalType, noteDown.octave);
+				notGuessedNote.step = this;
+				notGuessedNotes.Add(notGuessedNote);
+				RemoveFromScore(score);
+				AddToScore(score, trebleStaff, bassStaff, left);
+				notGuessedNote.Guessed = false;
+				//notGuessedNote.AddToScore(score, trebleStaff, bassStaff, left);
+				//notGuessedNote.step = this;
+				//notGuessedNote.Guessed = false;
+
+				//notGuessedNotes.Add(notGuessedNote);
+				//CalculateAndCorrectPerformHowTo();
+			}
+		}
+
+		public void KeyUp(Note noteDown)
+		{
+			Note foundNote = FindNotes().Find(n => n.Equals(noteDown));
+			if (foundNote != null)
+			{
+				foundNote.Guessed = null;
+			}
+			else
+			{
+				Note notGuessedNote = notGuessedNotes.Find(note => note.Equals(noteDown));
+				if (notGuessedNote == null)
+					return;
+
+				notGuessedNote.RemoveFromScore(score);
+				notGuessedNotes.Remove(notGuessedNote);
+				CalculateAndCorrectPerformHowTo();
+			}
 		}
 
 	}

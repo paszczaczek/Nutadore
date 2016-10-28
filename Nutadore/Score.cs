@@ -18,28 +18,25 @@ namespace Nutadore
 		private List<StaffGrand> staffGrands = new List<StaffGrand>();
 		public List<Step> steps = new List<Step>();
 
-		private Step currentStep;
+		private Step _currentStep;
 		public Step CurrentStep
 		{
 			get
 			{
-				return currentStep;
+				return _currentStep;
 			}
 			set
 			{
-				if (currentStep != null)
-					currentStep.IsCurrent = false;
-				currentStep = value;
-				if (currentStep != null)
+				if (_currentStep != null)
+					_currentStep.IsCurrent = false;
+				_currentStep = value;
+				if (_currentStep != null)
 				{
-					currentStep.IsCurrent = true;
-					//keyboard.Reset();
-					//keyboard.MarkAs(_currentStep, Key.State.Down);
+					_currentStep.IsCurrent = true;
+					FireEvent(_currentStep.SelectNotes(), ScoreEventArgs.EventType.Selected);
 				}
 			}
 		}
-
-		public event EventHandler<ScoreEventArgs> Event;
 
 		public Score()
 		{
@@ -51,16 +48,36 @@ namespace Nutadore
 			base.PreviewMouseWheel += Score_PreviewMouseWheel;
 		}
 
+		public event EventHandler<ScoreEventArgs> EventHandler;
+
 		public void FireEvent(List<Note> notes, ScoreEventArgs.EventType eventType)
 		{
 			ScoreEventArgs e = new ScoreEventArgs(notes, eventType);
-			Event?.Invoke(this, e);
+			EventHandler?.Invoke(this, e);
 		}
 
 		public void FireEvent(Note note, ScoreEventArgs.EventType eventType)
 		{
 			ScoreEventArgs e = new ScoreEventArgs(note, eventType);
-			Event?.Invoke(this, e);
+			EventHandler?.Invoke(this, e);
+		}
+
+		public void ConnectKeyboard(Keyboard keyboard)
+		{
+			keyboard.EventHandler += Keyboard_Event;
+		}
+
+		private void Keyboard_Event(object sender, KeyboardEventArgs e)
+		{
+			switch (e.eventType)
+			{
+				case KeyboardEventArgs.EventType.KeyDown:
+					CurrentStep.KeyDown(e.note);
+					break;
+				case KeyboardEventArgs.EventType.KeyUp:
+					CurrentStep.KeyUp(e.note);
+					break;
+			}
 		}
 
 		private void Score_SizeChanged(object sender, SizeChangedEventArgs e)

@@ -10,6 +10,14 @@ namespace Nutadore
 {
 	public class Accidental : Sign
 	{
+		public enum Type
+		{
+			None,
+			Flat,
+			Sharp,
+			Natural
+		}
+
 		public StaffPosition staffPosition;
 
 		public Accidental(StaffPosition statfPosition)

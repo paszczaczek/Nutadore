@@ -7,14 +7,13 @@ using System.Windows.Input;
 
 namespace Nutadore
 {
-	public class ScoreEventArgs
+	public class ScoreEventArgs : EventArgs
 	{
 		public enum EventType
 		{
-			MouseEnter,
-			MouseLeave,
-			MouseDown,
-			MouseUp
+			HighlightedOn,
+			HighlightedOff,
+			Selected
 		};
 
 		public List<Note> notes = new List<Note>();

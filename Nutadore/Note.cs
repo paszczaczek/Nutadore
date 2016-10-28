@@ -15,11 +15,22 @@ namespace Nutadore
 
 		public Letter letter;
 		public Octave octave;
-		public Accidental accidental;
+		public Accidental.Type accidentalType;
 		public Perform.HowTo performHowTo;
 		public StaffPosition staffPosition = StaffPosition.ByLine(1);
 		public Staff.Type staffType;
 		public Step step;
+
+		private bool? _guessed;
+		public bool? Guessed
+		{
+			get { return _guessed; }
+			set
+			{
+				_guessed = value;
+				SetColor();
+			}
+		}
 
 		/// <summary>
 		/// Pozwala zablokowac rysowanie linii dodanych. Wykorzysytwane w rysowaniu akordów.
@@ -40,8 +51,8 @@ namespace Nutadore
 			}
 		}
 
-		public static readonly Note lowest = new Note(Letter.A, Accidental.None, Octave.SubContra);
-		public static readonly Note highest = new Note(Letter.C, Accidental.None, Octave.FiveLined);
+		public static readonly Note lowest = new Note(Letter.A, Accidental.Type.None, Octave.SubContra);
+		public static readonly Note highest = new Note(Letter.C, Accidental.Type.None, Octave.FiveLined);
 
 		private TextBlock head;
 
@@ -68,18 +79,10 @@ namespace Nutadore
 			FiveLined
 		}
 
-		public enum Accidental
-		{
-			None,
-			Flat,
-			Sharp,
-			Natural
-		}
-
-		public Note(Letter letter, Accidental accidental, Octave octave, Staff.Type? preferredStaffType = null)
+		public Note(Letter letter, Accidental.Type accidentalType, Octave octave, Staff.Type? preferredStaffType = null)
 		{
 			this.letter = letter;
-			this.accidental = accidental;
+			this.accidentalType = accidentalType;
 			this.octave = octave;
 			this.staffPosition = ToStaffPosition(preferredStaffType);
 		}
@@ -375,51 +378,69 @@ namespace Nutadore
 
 		public override string ToString()
 		{
-			string index = "";
-			bool upper = false;
+			string octaveIndex = "";
+			bool letterUpper = false;
 			switch (octave)
 			{
 				case Octave.SubContra:
-					index = "=";
-					upper = true;
+					octaveIndex = "=";
+					letterUpper = true;
 					break;
 				case Octave.Contra:
-					index = "-";
-					upper = true;
+					octaveIndex = "-";
+					letterUpper = true;
 					break;
 				case Octave.Great:
-					index = "";
-					upper = true;
+					octaveIndex = "";
+					letterUpper = true;
 					break;
 				case Octave.Small:
-					index = "";
-					upper = false;
+					octaveIndex = "";
+					letterUpper = false;
 					break;
 				case Octave.OneLined:
-					index = "1";
-					upper = false;
+					octaveIndex = "1";
+					letterUpper = false;
 					break;
 				case Octave.TwoLined:
-					index = "2";
-					upper = false;
+					octaveIndex = "2";
+					letterUpper = false;
 					break;
 				case Octave.ThreeLined:
-					index = "3";
-					upper = false;
+					octaveIndex = "3";
+					letterUpper = false;
 					break;
 				case Octave.FourLined:
-					index = "4";
-					upper = false;
+					octaveIndex = "4";
+					letterUpper = false;
 					break;
 				case Octave.FiveLined:
-					index = "5";
-					upper = false;
+					octaveIndex = "5";
+					letterUpper = false;
+					break;
+			}
+			string accidental;
+			switch (accidentalType)
+			{
+				case Accidental.Type.None:
+				default:
+					accidental = "";
+					break;
+				case Accidental.Type.Flat:
+					accidental = "b";
+					break;
+				case Accidental.Type.Sharp:
+					accidental = "#";
+					break;
+				case Accidental.Type.Natural:
+					accidental = "N";
 					break;
 			}
 			return string.Format(
-				"{0}{1}",
-				upper ? letter.ToString().ToUpper() : letter.ToString().ToLower(),
-				index);
+				"{0}{1}{2}",
+				letterUpper ? letter.ToString().ToUpper() : letter.ToString().ToLower(),
+				accidental,
+				octaveIndex);
 				
 		}
 
@@ -434,7 +455,7 @@ namespace Nutadore
 				return false;
 
 			if (this.letter == other.letter &&
-				this.accidental == other.accidental &&
+				this.accidentalType == other.accidentalType &&
 				this.octave == other.octave)
 				return true;
 
@@ -475,7 +496,7 @@ namespace Nutadore
 				step.Highlight(true);
 				// Wygeneruj zdarzenie o najechaniu na nutę.
 				Score score = (sender as Rectangle).Tag as Score;
-				score.FireEvent(this, ScoreEventArgs.EventType.MouseEnter);
+				score.FireEvent(this, ScoreEventArgs.EventType.HighlightedOn);
 			}
 			else
 			{
@@ -495,7 +516,7 @@ namespace Nutadore
 				step.Highlight(false);
 				// Wygeneruj zdarzenie o zjechaniu z nuty.
 				Score score = (sender as Rectangle).Tag as Score;
-				score.FireEvent(this, ScoreEventArgs.EventType.MouseLeave);
+				score.FireEvent(this, ScoreEventArgs.EventType.HighlightedOff);
 			}
 			else
 			{
@@ -513,7 +534,7 @@ namespace Nutadore
 				score.CurrentStep = step;
 				// Wygeneruj zdarzenie o naciśnięciu nuty.
 				MouseEnter(sender, e);
-				score.FireEvent(this, ScoreEventArgs.EventType.MouseDown);
+				score.FireEvent(this, ScoreEventArgs.EventType.Selected);
 			}
 			else
 			{
@@ -528,12 +549,12 @@ namespace Nutadore
 			if (HighlightIsActive)
 			{
 				// Wygeneruj zdarzenie o puszczeniu nuty.
-				score.FireEvent(this, ScoreEventArgs.EventType.MouseUp);
+				//score.FireEvent(this, ScoreEventArgs.EventType.MouseUp);
 			}
 			else
 			{
 				// Przekaż zdarzenie do kroku.
-				step.MouseUp(sender, e);
+				//step.MouseUp(sender, e);
 			}
 		}
 
@@ -555,6 +576,15 @@ namespace Nutadore
 			else if (!step.IsCurrent && !isHighlighted)
 			{
 				head.Foreground = Brushes.Black;
+			}
+
+			if (Guessed == true)
+			{
+				head.Foreground = Brushes.Green;
+			}
+			else if (Guessed == false)
+			{
+				head.Foreground = Brushes.Red;
 			}
 		}
 	}
