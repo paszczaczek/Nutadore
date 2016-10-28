@@ -331,6 +331,7 @@ namespace Nutadore
 				RemoveFromScore(score);
 				AddToScore(score, trebleStaff, bassStaff, left);
 				notGuessedNote.Guessed = false;
+				Highlight(true);
 				//notGuessedNote.AddToScore(score, trebleStaff, bassStaff, left);
 				//notGuessedNote.step = this;
 				//notGuessedNote.Guessed = false;
@@ -353,9 +354,13 @@ namespace Nutadore
 				if (notGuessedNote == null)
 					return;
 
-				notGuessedNote.RemoveFromScore(score);
 				notGuessedNotes.Remove(notGuessedNote);
-				CalculateAndCorrectPerformHowTo();
+				notGuessedNote.RemoveFromScore(score);
+
+				RemoveFromScore(score);
+				FindNotes().ForEach(note => note.staffPosition = note.ToStaffPosition(null));
+				AddToScore(score, trebleStaff, bassStaff, left);
+				Highlight(true);
 			}
 		}
 
