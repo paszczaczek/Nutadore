@@ -19,26 +19,18 @@ namespace Nutadore
 		public Perform.HowTo performHowTo;
 		public StaffPosition staffPosition = StaffPosition.ByLine(1);
 		public Staff.Type staffType;
+
 		private Step step;
 
 		private bool? _guessed;
 		public bool? Guessed
 		{
 			get { return _guessed; }
-			set
-			{
-				_guessed = value;
-				SetColor();
-			}
+			set { _guessed = value; SetColor(); }
 		}
-
-		public bool showLegerLines = true;
-
-		public double right; 
-
-		private bool isHighlighted;
+		private bool highlighted;
 		private Rectangle highlightRect;
-		private bool HighlightIsActive
+		private bool HighlightingIsActive
 		{
 			get
 			{
@@ -47,6 +39,9 @@ namespace Nutadore
 					System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.RightShift);
 			}
 		}
+
+		public bool showLegerLines = true;
+		public double right { get; private set; } 
 
 		public static readonly Note lowest = new Note(Letter.A, Accidental.Type.None, Octave.SubContra);
 		public static readonly Note highest = new Note(Letter.C, Accidental.Type.None, Octave.FiveLined);
@@ -102,7 +97,7 @@ namespace Nutadore
 					= staff.top * score.Magnification
 					 + (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
 			glyphTop -= 57.5 * score.Magnification;
-			right = base.AddGlyph(score, left, glyphTop, glyphCode, 1);
+			right = base.AddGlyphToScore(score, left, glyphTop, glyphCode, 1);
 			head = base.elements.FindLast(e => true) as TextBlock;
 			// Rysujemy linie dodane górne i dolne - jeśli nuta nie jest częścią akordu.
 			if (showLegerLines)
@@ -124,7 +119,7 @@ namespace Nutadore
 				Padding = new Thickness(0, 0, 0, 0),
 				Margin = new Thickness(letterLeft, letterTop, 0, 0)
 			};
-			base.AddElement(score, letterTextBlock, 2);
+			base.AddElementToScore(score, letterTextBlock, 2);
 
 			// Dodajemy prostokąt reagujący na mysz.
 			double top = base.bounds.Top;
@@ -138,7 +133,7 @@ namespace Nutadore
 				Stroke = Brushes.Transparent,
 				Tag = score // potrzebne w event handlerze
 			};
-			base.AddElement(score, highlightRect, 101);
+			base.AddElementToScore(score, highlightRect, 101);
 			highlightRect.MouseEnter += MouseEnter;
 			highlightRect.MouseLeave += MouseLeave;
 			highlightRect.MouseDown += MouseDown;
@@ -160,12 +155,12 @@ namespace Nutadore
 			}
 		}
 	
-		override public void RemoveFromScore(Score score)
+		public override void RemoveFromScore(Score score)
 		{
 			base.RemoveFromScore(score);
 		}
 
-		public void AddLegerLinesToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		private void AddLegerLinesToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
 		{
 			// Na której pięciolinii ma być umieszczona nuta?
 			Staff staff
@@ -193,9 +188,8 @@ namespace Nutadore
 						Stroke = Brushes.Black,
 						StrokeThickness = 0.5
 					};
-					base.AddElement(score, legerLine);
+					base.AddElementToScore(score, legerLine);
 				}
-				//right = legerRight;
 			}
 			else if (this.staffPosition >= StaffPosition.ByLegerAbove(1))
 			{
@@ -214,9 +208,8 @@ namespace Nutadore
 						Stroke = Brushes.Black,
 						StrokeThickness = 0.5
 					};
-					base.AddElement(score, legerLine);
+					base.AddElementToScore(score, legerLine);
 				}
-				//right = legerRight;
 			}
 		}
 
@@ -356,24 +349,6 @@ namespace Nutadore
 		//	return this;
 		//}
 
-		public bool InChord(Sign sign)
-		{
-			if (sign is Chord)
-			{
-				Chord chord = sign as Chord;
-				return chord.notes.Exists(note => note.Equals(this));
-			}
-			else if (sign is Note)
-			{
-				Note note = sign as Note;
-				return note.Equals(this);
-			}
-			else
-			{
-				return false;
-			}
-		}
-
 		public override string ToString()
 		{
 			string octaveIndex = "";
@@ -485,10 +460,10 @@ namespace Nutadore
 
 		private void MouseEnter(object sender, MouseEventArgs e)
 		{
-			if (HighlightIsActive)
+			if (HighlightingIsActive)
 			{
 				// Pokoloruj nutę.
-				isHighlighted = true;
+				highlighted = true;
 				SetColor();
 				// Pokoloruj krok.
 				step.Highlight(true);
@@ -506,9 +481,9 @@ namespace Nutadore
 		private void MouseLeave(object sender, MouseEventArgs e)
 		{
 			// Pokoloruj nutę.
-			isHighlighted = false;
+			highlighted = false;
 			SetColor();
-			if (HighlightIsActive)
+			if (HighlightingIsActive)
 			{
 				// Pokoloruj krok.
 				step.Highlight(false);
@@ -525,7 +500,7 @@ namespace Nutadore
 
 		private void MouseDown(object sender, MouseButtonEventArgs e)
 		{
-			if (HighlightIsActive)
+			if (HighlightingIsActive)
 			{
 				// Ustaw krok na bieżący.
 				Score score = (sender as Rectangle).Tag as Score;
@@ -544,7 +519,7 @@ namespace Nutadore
 		private void MouseUp(object sender, MouseButtonEventArgs e)
 		{
 			Score score = (sender as Rectangle).Tag as Score;
-			if (HighlightIsActive)
+			if (HighlightingIsActive)
 			{
 				// Wygeneruj zdarzenie o puszczeniu nuty.
 				//score.FireEvent(this, ScoreEventArgs.EventType.MouseUp);
@@ -558,20 +533,20 @@ namespace Nutadore
 
 		private void SetColor()
 		{
-			if (step.IsCurrent && isHighlighted)
+			if (step.IsCurrent && highlighted)
 			{
 				head.Foreground = currentBrush;
 			}
-			else if (step.IsCurrent && !isHighlighted)
+			else if (step.IsCurrent && !highlighted)
 			{
 				head.Foreground = Brushes.Black;
 
 			}
-			else if (!step.IsCurrent && isHighlighted)
+			else if (!step.IsCurrent && highlighted)
 			{
 				head.Foreground = highlightBrush;
 			}
-			else if (!step.IsCurrent && !isHighlighted)
+			else if (!step.IsCurrent && !highlighted)
 			{
 				head.Foreground = Brushes.Black;
 			}

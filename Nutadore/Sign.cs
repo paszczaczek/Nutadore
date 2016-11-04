@@ -18,22 +18,20 @@ namespace Nutadore
 
 		public virtual void RemoveFromScore(Score score)
 		{
-			foreach (var uiElement in elements)
-				score.Children.Remove(uiElement);
+			foreach (var element in elements)
+				score.Children.Remove(element);
 			elements.Clear();
-
-			//highlightElements.Clear();
 			bounds = Rect.Empty;
 		}
 
-		protected void AddElement(Score score, UIElement element, int zindex = 0)
+		protected void AddElementToScore(Score score, UIElement element, int zindex = 0)
 		{
 			score.Children.Add(element);
 			Canvas.SetZIndex(element, zindex);
 			elements.Add(element);
 		}
 
-		protected double AddGlyph(Score score, double glyphLeft, double glyphTop, string glyphCode, int zindex = 0)
+		protected double AddGlyphToScore(Score score, double glyphLeft, double glyphTop, string glyphCode, int zindex = 0)
 		{
 			const string familyName = "feta26";
 			double fontSize = 42 * score.Magnification;
@@ -47,7 +45,7 @@ namespace Nutadore
 				Padding = new Thickness(0, 0, 0, 0),
 				Margin = new Thickness(glyphLeft, glyphTop, 0, 0)
 			};
-			AddElement(score, uiElement, zindex);
+			AddElementToScore(score, uiElement, zindex);
 
 			// Wyznaczamy wymiary symbolu.
 			FormattedText formattedText = new FormattedText(

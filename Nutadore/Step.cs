@@ -166,7 +166,7 @@ namespace Nutadore
 		private void CalculateAndCorrectPerformHowTo()
 		{
 			// Wyszukujemy wszystkie nuty w kroku.
-			List<Note> stepNotes = FindNotes();
+			List<Note> stepNotes = SelectNotes();
 
 			// Dodajemy również nuty błędnie wciśniętych klawiszy.
 			stepNotes.AddRange(notGuessedNotes);
@@ -295,72 +295,42 @@ namespace Nutadore
 			score.FireEvent(SelectNotes(), ScoreEventArgs.EventType.Selected);
 		}
 
-		private List<Note> FindNotes()
-		{
-			List<Note> notes = new List<Note>();
-
-			foreach (Sign voice in voices)
-			{
-				if (voice is Chord)
-				{
-					Chord chord = voice as Chord;
-					notes.AddRange(chord.notes);
-				}
-				else if (voice is Note)
-				{
-					Note note = voice as Note;
-					notes.Add(note);
-				}
-			}
-
-			return notes;
-		}
-
 		public void KeyDown(Note noteDown)
 		{
-			Note foundNote = FindNotes().Find(note => note.Equals(noteDown));
-			if (foundNote != null)
+			// Czy trafiono wciśnięto właściwy klawisz?
+			Note note = SelectNotes().Find(n => n.Equals(noteDown));
+			if (note != null)
 			{
-				foundNote.Guessed = true;
+				// Tak, zaznaczmy nutę na zielono.
+				note.Guessed = true;
 			}
 			else
 			{
-				Note notGuessedNote = new Note(noteDown.letter, noteDown.accidentalType, noteDown.octave);
-				//notGuessedNote.step = this;
-				notGuessedNotes.Add(notGuessedNote);
-				RemoveFromScore(score);
-				AddToScore(score, trebleStaff, bassStaff, left);
-				notGuessedNote.Guessed = false;
-				Highlight(true);
-				//notGuessedNote.AddToScore(score, trebleStaff, bassStaff, left);
-				//notGuessedNote.step = this;
-				//notGuessedNote.Guessed = false;
-
-				//notGuessedNotes.Add(notGuessedNote);
-				//CalculateAndCorrectPerformHowTo();
+				// Nie, dodajemy czerwoną nutę.
+				note = new Note(noteDown.letter, noteDown.accidentalType, noteDown.octave);
+				note.AddToScore(score, trebleStaff, bassStaff, this, left);
+				note.Guessed = false;
+				notGuessedNotes.Add(note);
 			}
 		}
 
 		public void KeyUp(Note noteDown)
 		{
-			Note foundNote = FindNotes().Find(n => n.Equals(noteDown));
-			if (foundNote != null)
+			// Czy trafiono we właściwy klawisz?
+			Note note = SelectNotes().Find(n => n.Equals(noteDown));
+			if (note != null)
 			{
-				foundNote.Guessed = null;
+				// Tak, zmieniamy zielony kolor na czarny.
+				note.Guessed = null;
 			}
 			else
 			{
-				Note notGuessedNote = notGuessedNotes.Find(note => note.Equals(noteDown));
-				if (notGuessedNote == null)
+				// Nie, usuwamy czerwoną nutę.
+				note = notGuessedNotes.Find(n => n.Equals(noteDown));
+				if (note == null)
 					return;
-
-				notGuessedNotes.Remove(notGuessedNote);
-				notGuessedNote.RemoveFromScore(score);
-
-				RemoveFromScore(score);
-				FindNotes().ForEach(note => note.staffPosition = note.ToStaffPosition(null));
-				AddToScore(score, trebleStaff, bassStaff, left);
-				Highlight(true);
+				note.RemoveFromScore(score);
+				notGuessedNotes.Remove(note);
 			}
 		}
 

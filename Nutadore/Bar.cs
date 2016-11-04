@@ -24,7 +24,7 @@ namespace Nutadore
 					Stroke = Brushes.Black,
 					StrokeThickness = 1
 				};
-				base.AddElement(score, barLine);
+				base.AddElementToScore(score, barLine);
 				//score.Children.Add(barLine);
 				//base.elements.Add(barLine);
 			}

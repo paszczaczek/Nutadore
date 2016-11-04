@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
@@ -278,17 +279,17 @@ namespace Nutadore
 			return keyboardHeight;
 		}
 
-		private void MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+		private void MouseEnter(object sender, MouseEventArgs e)
 		{
 			Highlighted = true;
 		}
 
-		private void MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+		private void MouseLeave(object sender, MouseEventArgs e)
 		{
 			Highlighted = false;
 		}
 
-		private void MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+		private void MouseDown(object sender, MouseButtonEventArgs e)
 		{
 			Down = true;
 			Guessed = Guess;

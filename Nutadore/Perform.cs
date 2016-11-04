@@ -89,7 +89,7 @@ namespace Nutadore
 				StrokeDashArray = new DoubleCollection { 7, 7 },
 				StrokeThickness = 0.5
 			};
-			base.AddElement(score, horizontalLine);
+			base.AddElementToScore(score, horizontalLine);
 
 			// Rysuję linię pionową.
 			Line verticalLine = new Line
@@ -101,7 +101,7 @@ namespace Nutadore
 				Stroke = Brushes.Black,
 				StrokeThickness = 0.5
 			};
-			base.AddElement(score, verticalLine);
+			base.AddElementToScore(score, verticalLine);
 
 			// Rysuję oznaczenie 8va, 8vb lub 15ma
 			Label name = new Label
@@ -112,7 +112,7 @@ namespace Nutadore
 				Padding = new Thickness(0, 0, 0, 0),
 				Margin = new Thickness(this.left - delta, textTop, 0, 0)
 			};
-			base.AddElement(score, name);
+			base.AddElementToScore(score, name);
 
 			return 0;
 		}
