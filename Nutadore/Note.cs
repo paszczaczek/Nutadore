@@ -19,7 +19,7 @@ namespace Nutadore
 		public Perform.HowTo performHowTo;
 		public StaffPosition staffPosition = StaffPosition.ByLine(1);
 		public Staff.Type staffType;
-		public Step step;
+		private Step step;
 
 		private bool? _guessed;
 		public bool? Guessed
@@ -32,9 +32,6 @@ namespace Nutadore
 			}
 		}
 
-		/// <summary>
-		/// Pozwala zablokowac rysowanie linii dodanych. Wykorzysytwane w rysowaniu akordów.
-		/// </summary>
 		public bool showLegerLines = true;
 
 		public double right; 
@@ -87,10 +84,11 @@ namespace Nutadore
 			this.staffPosition = ToStaffPosition(preferredStaffType);
 		}
 
-		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left)
 		{
 			// Left i right będą potrzebne do rysowania znaków ottavy
 			//this.left = left;
+			this.step = step;
 
 			// Na której pięciolinii ma być umieszczona nuta?
 			Staff staff

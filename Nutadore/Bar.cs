@@ -10,7 +10,7 @@ namespace Nutadore
 		{
 		}
 
-		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left)
 		{
 			foreach (Staff staff in new[] { trebleStaff, bassStaff })
 			{

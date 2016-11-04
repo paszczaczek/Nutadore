@@ -21,10 +21,7 @@ namespace Nutadore
 		private Step _currentStep;
 		public Step CurrentStep
 		{
-			get
-			{
-				return _currentStep;
-			}
+			get { return _currentStep; }
 			set
 			{
 				if (_currentStep != null)

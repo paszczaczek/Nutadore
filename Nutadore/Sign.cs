@@ -14,7 +14,7 @@ namespace Nutadore
 		protected List<UIElement> elements = new List<UIElement>();
 		public Rect bounds { get; protected set; } = Rect.Empty;
 
-		public abstract double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, double left);
+		public abstract double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left);
 
 		public virtual void RemoveFromScore(Score score)
 		{

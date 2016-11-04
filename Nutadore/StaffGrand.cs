@@ -101,10 +101,10 @@ namespace Nutadore
 
 			// Rysuję klucz wiolinowy i basowy.
 			clef = new Clef();
-			cursor = clef.AddToScore(score, trebleStaff, bassStaff, left);
+			cursor = clef.AddToScore(score, trebleStaff, bassStaff, null, left);
 
 			// Rysuję znaki przykluczowe wynikające z tonacji.
-			cursor = score.scale.AddToScore(score, trebleStaff, bassStaff, cursor);
+			cursor = score.scale.AddToScore(score, trebleStaff, bassStaff, null, cursor);
 
 			// Wyznaczam dolną krawędź StaffGrand i zwracam ją.
 			double bottom
@@ -185,7 +185,7 @@ namespace Nutadore
 					// TODO: konstruktor+show() ?
 					Perform perform = new Perform(performHowTo, performLeft, performRight);
 					performs.Add(perform);
-					perform.AddToScore(score, trebleStaff, bassStaff, 0);
+					perform.AddToScore(score, trebleStaff, bassStaff, null, 0);
 					performHowTo = Perform.HowTo.AtPlace;
 				}
 				if (performNew)
@@ -204,7 +204,7 @@ namespace Nutadore
 				// TODO: konstruktor+show() ?
 				Perform perform = new Perform(performHowTo, performLeft, performRight);
 				performs.Add(perform);
-				perform.AddToScore(score, trebleStaff, bassStaff, 0);
+				perform.AddToScore(score, trebleStaff, bassStaff, null, 0);
 				performHowTo = Perform.HowTo.AtPlace;
 			}
 		}

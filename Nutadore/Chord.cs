@@ -10,19 +10,19 @@ namespace Nutadore
 	{
 		public List<Note> notes = new List<Note>();
 
-		public Step step {
-			set
-			{
-				notes.ForEach(note => note.step = value);
-			}
-		}
+		//public Step step {
+		//	set
+		//	{
+		//		notes.ForEach(note => note.step = value);
+		//	}
+		//}
 
 		public void Add(Note note)
 		{
 			notes.Add(note);
 		}
 
-		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left)
 		{
 			double chordLeft = left;
 			double chordRight = left;
@@ -53,7 +53,7 @@ namespace Nutadore
 					= note.staffType == Staff.Type.Treble
 					? trebleStaff
 					: bassStaff;
-				double noteCursor = note.AddToScore(score, trebleStaff, bassStaff, left);
+				double noteCursor = note.AddToScore(score, trebleStaff, bassStaff, step, left);
 				if (noteCursor == -1)
 					return -1;
 				if (noteCursor > cursor)

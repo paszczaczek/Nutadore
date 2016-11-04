@@ -41,16 +41,16 @@ namespace Nutadore
 		public void AddVoice(Sign voice)
 		{
 			voices.Add(voice);
-			if (voice is Chord)
-			{
-				Chord chord = voice as Chord;
-				chord.step = this;
-			}
-			else if (voice is Note)
-			{
-				Note note = voice as Note;
-				note.step = this;
-			}
+			//if (voice is Chord)
+			//{
+			//	Chord chord = voice as Chord;
+			//	chord.step = this;
+			//}
+			//else if (voice is Note)
+			//{
+			//	Note note = voice as Note;
+			//	note.step = this;
+			//}
 		}
 
 		public bool IsBar
@@ -79,7 +79,7 @@ namespace Nutadore
 			// Dodajemy do score poszczególne głosy.
 			foreach (Sign voice in voices)
 			{
-				double voiceCursor = voice.AddToScore(score, trebleStaff, bassStaff, left);
+				double voiceCursor = voice.AddToScore(score, trebleStaff, bassStaff, this, left);
 				if (voiceCursor == -1)
 					return -1;
 				if (voiceCursor > cursor)
@@ -91,7 +91,7 @@ namespace Nutadore
 			// Dodajemy do score błędnie wciśnięte nuty.
 			foreach (Note notGuessedNote in notGuessedNotes)
 			{
-				double noteCursor = notGuessedNote.AddToScore(score, trebleStaff, bassStaff, left);
+				double noteCursor = notGuessedNote.AddToScore(score, trebleStaff, bassStaff, this, left);
 				if (noteCursor == -1)
 					return -1;
 				if (noteCursor > cursor)
@@ -326,7 +326,7 @@ namespace Nutadore
 			else
 			{
 				Note notGuessedNote = new Note(noteDown.letter, noteDown.accidentalType, noteDown.octave);
-				notGuessedNote.step = this;
+				//notGuessedNote.step = this;
 				notGuessedNotes.Add(notGuessedNote);
 				RemoveFromScore(score);
 				AddToScore(score, trebleStaff, bassStaff, left);

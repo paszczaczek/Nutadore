@@ -22,13 +22,13 @@ namespace Nutadore
 
 		public enum Type { Major, Minor }
 
-		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left)
 		{
 			double signLeft = left;
 			foreach (Accidental accidental in accidentals)
 			{
 				signLeft
-					= accidental.AddToScore(score, trebleStaff, bassStaff, signLeft)
+					= accidental.AddToScore(score, trebleStaff, bassStaff, step, signLeft)
 					+ Staff.spaceBetweenScaleSigns * score.Magnification;
 				base.ExtendBounds(accidental.bounds);
 			}

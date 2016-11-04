@@ -25,7 +25,7 @@ namespace Nutadore
 			this.staffPosition = statfPosition;
 		}
 
-		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left)
 		{
 			double right = left;
 

@@ -36,7 +36,7 @@ namespace Nutadore
 			this.right = right;
 		}
 
-		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left)
 		{
 			const double height = 7;
 
