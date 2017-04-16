@@ -35,6 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.mshtml, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -128,6 +131,10 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Misc\Readme.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Misc\bach-air-in-d-major.ly" />
+    <Content Include="Misc\bach-air-in-d-major.mid" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

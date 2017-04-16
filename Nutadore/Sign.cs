@@ -43,7 +43,7 @@ namespace Nutadore
 				FontSize = fontSize,
 				Text = glyphCode,
 				Padding = new Thickness(0, 0, 0, 0),
-				Margin = new Thickness(glyphLeft, glyphTop, 0, 0)
+				Margin = new Thickness(glyphLeft, glyphTop, 0, 0),
 			};
 			AddElementToScore(score, uiElement, zindex);
 

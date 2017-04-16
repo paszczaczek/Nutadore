@@ -18,19 +18,46 @@ namespace Nutadore
 			Natural
 		}
 
+		public Type type;
 		public StaffPosition staffPosition;
+		public Staff.Type? staffType;
 
-		public Accidental(StaffPosition statfPosition)
+		public Accidental(Type type, StaffPosition statfPosition, Staff.Type? staffType = null)
 		{
+			this.type = type;
 			this.staffPosition = statfPosition;
+			this.staffType = staffType;
 		}
 
 		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left)
 		{
 			double right = left;
 
-			string glyphCode = "\x002e";
-			foreach (Staff staff in new[] { trebleStaff, bassStaff })
+			string glyphCode;
+			switch (type)
+			{
+				case Type.None:
+					return left;
+				case Type.Flat:
+					throw new NotImplementedException();
+				case Type.Sharp:
+					glyphCode = "\x002e";
+					break;
+				case Type.Natural:
+					throw new NotImplementedException();
+				default:
+					throw new NotImplementedException();
+			};
+
+			Staff[] staffs;
+			if (staffType == null)
+				staffs = new[] { trebleStaff, bassStaff };
+			else if (staffType == Staff.Type.Treble)
+				staffs = new[] { trebleStaff };
+			else
+				staffs = new[] { bassStaff };
+
+			foreach (Staff staff in staffs)
 			{
 				double glyphTop = staff.StaffPositionToY(staffPosition);
 

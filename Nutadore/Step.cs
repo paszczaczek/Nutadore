@@ -38,9 +38,11 @@ namespace Nutadore
 		private Rectangle highlightRect;
 		public Rect bounds { get; private set; } = Rect.Empty;
 
-		public void AddVoice(Sign voice)
+		public Step AddVoice(Sign voice)
 		{
 			voices.Add(voice);
+
+			return this;
 			//if (voice is Chord)
 			//{
 			//	Chord chord = voice as Chord;
@@ -311,6 +313,7 @@ namespace Nutadore
 				note.AddToScore(score, trebleStaff, bassStaff, this, left);
 				note.Guessed = false;
 				notGuessedNotes.Add(note);
+				// TODO: dodana czerwona nuta może wymagać zmiany Perform.HowTo
 			}
 		}
 

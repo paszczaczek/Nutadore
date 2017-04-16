@@ -116,9 +116,11 @@ namespace Nutadore
 			}
 		}
 		
-		public void Add(Step step)
+		public Score Add(Step step)
 		{
 			steps.Add(step);
+
+			return this;
 		}
 
 		private double magnification = 1.0;

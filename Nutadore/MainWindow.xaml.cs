@@ -1,4 +1,5 @@
-﻿using System;
+﻿using mshtml;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,12 +28,84 @@ namespace Nutadore
 			score.ConnectKeyboard(keyboard);
 			keyboard.ConnectScore(score);
 
+			BachAirInDMajor();
 			//AddSteps();
 			//AddSteps();
-			AddAllTriads();
+			//AddAllTriads();
 			//AddAllNotes();
 			//AddTriad();
 			//score.Add(new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.OneLined));
+		}
+
+		private void BachAirInDMajor()
+		{
+			score.scale = new Scale(Note.Letter.D, Scale.Type.Major);
+
+			score
+				// measure 1
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.Small)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.OneLined, Staff.Type.Bass)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.OneLined, Staff.Type.Bass)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.Small)))
+				// measure 2
+				.Add(new Step()
+					.AddVoice(new Bar()))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.H, Accidental.Type.None, Note.Octave.Great)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.H, Accidental.Type.None, Note.Octave.Small)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.A, Accidental.Type.Sharp, Note.Octave.Small)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.A, Accidental.Type.None, Note.Octave.Great)))
+				// measure 3
+				.Add(new Step()
+					.AddVoice(new Bar()))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.Great)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.H, Accidental.Type.None, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.Small)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.TwoLined)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.E, Accidental.Type.None, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.H, Accidental.Type.None, Note.Octave.OneLined))
+					.AddVoice(new Note(Note.Letter.G, Accidental.Type.Sharp, Note.Octave.Small)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.TwoLined)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.G, Accidental.Type.Sharp, Note.Octave.Great)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.TwoLined)))
+				// measure 4
+				.Add(new Step()
+					.AddVoice(new Bar()))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.A, Accidental.Type.None, Note.Octave.OneLined))
+					.AddVoice(new Note(Note.Letter.A, Accidental.Type.None, Note.Octave.Great)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.A, Accidental.Type.None, Note.Octave.Small)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.H, Accidental.Type.None, Note.Octave.OneLined))
+					.AddVoice(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.Small)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.A, Accidental.Type.None, Note.Octave.OneLined)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.Great)))
+				;
 		}
 
 		private void AddSteps()
@@ -130,5 +203,16 @@ namespace Nutadore
 
 			score.Add(step);
 		}
+
+		//private void WebBrowser_Navigating(object sender, NavigatingCancelEventArgs e)
+		//{
+		//	//e.Cancel = true;
+		//	mshtml.IHTMLDocument2 htmlDoc = webBrowser.Document as mshtml.IHTMLDocument2;
+		//	if (htmlDoc != null)
+		//	{
+		//		IHTMLElementCollection all = htmlDoc.all;
+		//		var t = all.item(0).tagName;
+		//	}
+		//}
 	}
 }

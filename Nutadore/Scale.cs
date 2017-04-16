@@ -17,7 +17,7 @@ namespace Nutadore
 		{
 			this.based = based;
 			this.type = type;
-			accidentals = Accidentals();
+			accidentals = CreateAccidentals();
 		}
 
 		public enum Type { Major, Minor }
@@ -57,17 +57,46 @@ namespace Nutadore
 		//		accidental.HighlightRectangle_MouseEnter(sender, e);
 		//}
 
-		public Accidental[] Accidentals()
+		private Accidental[] CreateAccidentals()
 		{
-			return new Accidental[] {
-				new Accidental(StaffPosition.ByLine(5)),
-				new Accidental(StaffPosition.ByLine(3, true)),
-				new Accidental(StaffPosition.ByLine(5, true)),
-				new Accidental(StaffPosition.ByLine(4)),
-				new Accidental(StaffPosition.ByLine(2, true)),
-				new Accidental(StaffPosition.ByLine(4, true)),
-				new Accidental(StaffPosition.ByLine(3))
-			};
+			switch (type)
+			{
+				case Type.Major:
+					switch (based)
+					{
+						case Note.Letter.C:
+							return new Accidental[] { };
+						case Note.Letter.D:
+							return new Accidental[]
+							{
+								new Accidental(Accidental.Type.Sharp, StaffPosition.ByLine(5)),
+								new Accidental(Accidental.Type.Sharp, StaffPosition.ByLine(3, true))
+							};
+						case Note.Letter.E:
+							throw new System.NotImplementedException();
+						case Note.Letter.F:
+							throw new System.NotImplementedException();
+						case Note.Letter.G:
+							throw new System.NotImplementedException();
+						case Note.Letter.A:
+							throw new System.NotImplementedException();
+						case Note.Letter.H:
+							throw new System.NotImplementedException();
+					}
+					break;
+				case Type.Minor:
+					throw new System.NotImplementedException();
+			}
+			throw new System.NotImplementedException();
+			//return new Accidental[] {
+			//	new Accidental(StaffPosition.ByLine(5)),
+			//	new Accidental(StaffPosition.ByLine(3, true)),
+			//	new Accidental(StaffPosition.ByLine(5, true)),
+			//	new Accidental(StaffPosition.ByLine(4)),
+			//	new Accidental(StaffPosition.ByLine(2, true)),
+			//	new Accidental(StaffPosition.ByLine(4, true)),
+			//	new Accidental(StaffPosition.ByLine(3))
+			//};
 		}
 	}
 }

@@ -11,7 +11,7 @@ namespace Nutadore
 		static public readonly double marginLeft = 10;
 		static public readonly double spaceBetweenLines = 10;
 		static public readonly double spaceBetweenScaleSigns = 1;
-		static public readonly double spaceBetweenSigns = 15;
+		static public readonly double spaceBetweenSigns = 8;//15;
 
 		static private readonly Brush helperLineBrush = Brushes.Red;
 
@@ -89,7 +89,8 @@ namespace Nutadore
 				const string familyName = "Consolas";
 				double fontSize = 9 * score.Magnification;
 				FormattedText formattedText = new FormattedText(
-					octave.ToString(),
+					//octave.ToString(),
+					Note.OctaveToString(octave),
 					CultureInfo.GetCultureInfo("en-us"),
 					FlowDirection.LeftToRight,
 					new Typeface(familyName),
@@ -99,13 +100,14 @@ namespace Nutadore
 				{
 					FontFamily = new FontFamily(familyName),
 					FontSize = fontSize,
-					Text = octave.ToString(),
+					//Text = octave.ToString(),
+					Text = Note.OctaveToString(octave),
 					Foreground = helperLineBrush,
 					Padding = new Thickness(0, 0, 0, 0),
 					Margin = new Thickness(helperLine.X1, helperLine.Y1 - formattedText.Height/* + formattedText.OverhangAfter - formattedText.Extent*/, 0, 0)
 				};
 				score.Children.Add(octaveNameTextBlock);
-				//Canvas.SetZIndex(octaveNameTextBlock, 1);
+				Canvas.SetZIndex(octaveNameTextBlock, 1);
 			}
 		}
 

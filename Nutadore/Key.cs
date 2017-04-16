@@ -240,9 +240,9 @@ namespace Nutadore
 				{
 					FontFamily = new FontFamily(familyName),
 					FontSize = fontSize,
-					Text = note.octave.ToString(),
+					//Text = note.octave.ToString(),
+					Text = Note.OctaveToString(note.octave),
 					Foreground = Brushes.Red,
-					//Margin = new Thickness(line.X1, line.Y2, 0, 0)
 					Margin = new Thickness(left + 3, height, 0, 0)
 				};
 				// Wyznaczamy wysokość napisu.
