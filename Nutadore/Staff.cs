@@ -11,7 +11,7 @@ namespace Nutadore
 		static public readonly double marginLeft = 10;
 		static public readonly double spaceBetweenLines = 10;
 		static public readonly double spaceBetweenScaleSigns = 1;
-		static public readonly double spaceBetweenSigns = 8;//15;
+		static public readonly double spaceBetweenSigns = 5;//15;
 
 		static private readonly Brush helperLineBrush = Brushes.Red;
 

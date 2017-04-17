@@ -107,6 +107,15 @@ namespace Nutadore
 					.AddVoice(new Note(Note.Letter.A, Accidental.Type.None, Note.Octave.OneLined)))
 				.Add(new Step()
 					.AddVoice(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.Great)))
+				// measure 5
+				.Add(new Step()
+					.AddVoice(new Bar()))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.A, Accidental.Type.None, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.Great)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.C, Accidental.Type.Natural, Note.Octave.TwoLined)))
+					// tu skonczylem, kasownik rysuje sie jako #
 				;
 		}
 
