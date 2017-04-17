@@ -48,6 +48,7 @@ namespace Nutadore
 
 		private Accidental accidental;
 		private TextBlock head;
+		public double headShift;
 
 		public enum Letter {
 			C,
@@ -93,33 +94,32 @@ namespace Nutadore
 				: bassStaff;
 
 			// Rysujemy znak chromatyczny.
-			//* TODO: skonczyc
 			if (accidentalType != Accidental.Type.None)
 			{
 				accidental = new Accidental(Accidental.Type.Sharp, staffPosition, staffType);
 				base.ExtendBounds(accidental.bounds);
 				right = accidental.AddToScore(score, trebleStaff, bassStaff, step, left);
+				headShift = right - left;
 			}
-			//*/
 
 			// Rysujemy główkę nuty.
-			double noteLeft = right;
+			//double noteLeft = right;
 			string glyphCode = "\x0056";
 			double glyphTop
 					= staff.top * score.Magnification
 					 + (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
 			glyphTop -= 57.5 * score.Magnification;
-			right = base.AddGlyphToScore(score, /*left*/right, glyphTop, glyphCode, 1);
+			right = base.AddGlyphToScore(score, left + headShift, glyphTop, glyphCode, 1);
 			head = base.elements.FindLast(e => true) as TextBlock;
 			// Rysujemy linie dodane górne i dolne - jeśli nuta nie jest częścią akordu.
 			if (showLegerLines)
-				AddLegerLinesToScore(score, trebleStaff, bassStaff, /*left*/right);
+				AddLegerLinesToScore(score, trebleStaff, bassStaff, left + headShift);
 
 			// Rysujemy pomocniczą nazwę nuty - literę.
 			double letterTop
 					= staff.top * score.Magnification
 					+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
-			double letterLeft = /*left*/noteLeft;
+			double letterLeft = left + headShift;
 			double letterScale = 1;
 			string noteString = ToString();
 			if (noteString.Length == 3) {

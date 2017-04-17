@@ -78,20 +78,47 @@ namespace Nutadore
 			double cursor = left;
 			double right = left;
 
-			// Dodajemy do score poszczególne głosy.
-			foreach (Sign voice in voices)
+			// Jeśli nuta w jednym głosie ma przypadkowy znak chromatyczny, nuty w pozostałych 
+			// głosach trzeba przesunąć w prawo, by ich główki były w jednej linii.
+			double noteHeadShift = .0;
+			for (int phase = 0; phase <= 1; phase++)
 			{
-				double voiceCursor = voice.AddToScore(score, trebleStaff, bassStaff, this, left);
-				if (voiceCursor == -1)
+				// Dodajemy do score poszczególne głosy.
+				foreach (Sign voice in voices)
 				{
-					// Jeden z głosów nie zmieścił się - wycofujemy pozostałe.
-					RemoveFromScore(score);
-					return -1;
+					Note note = voice as Note;
+					if (note != null)
+						note.headShift = phase == 0 ? .0 : noteHeadShift;
+					double voiceCursor = voice.AddToScore(score, trebleStaff, bassStaff, this, left);
+					if (note != null)
+						noteHeadShift = Math.Max(note.headShift, noteHeadShift);
+					if (voiceCursor == -1)
+					{
+						// Jeden z głosów nie zmieścił się - wycofujemy pozostałe.
+						RemoveFromScore(score);
+						return -1;
+					}
+					if (voiceCursor > cursor)
+						cursor = voiceCursor;
+					if (voice.bounds.Right > right || voice.bounds.Right == -1)
+						right = voice.bounds.Right;
 				}
-				if (voiceCursor > cursor)
-					cursor = voiceCursor;
-				if (voice.bounds.Right > right || voice.bounds.Right == -1)
-					right = voice.bounds.Right;
+				if (phase == 0) {
+					// Czy jakaś nuta w jakimś głosie miała przypadkowy znak chromatyczny?
+					if (noteHeadShift > 0)
+					{
+						// Tak - wycofujemy wszystkie głosy i narysujemy je jeszcze raz z przesunięciem.
+						foreach (Sign voice in voices)
+							voice.RemoveFromScore(score);
+						cursor = left;
+						right = left;
+					}
+					else
+					{
+						// Nie.
+						break;
+					}
+				}
 			}
 
 			// Dodajemy do score błędnie wciśnięte nuty.
