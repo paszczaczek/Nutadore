@@ -97,6 +97,7 @@ namespace Nutadore
 			if (accidentalType != Accidental.Type.None)
 			{
 				accidental = new Accidental(Accidental.Type.Sharp, staffPosition, staffType);
+				accidental.isKeySignatureHint = score.scale.AccidentalForLetter(letter) != Accidental.Type.None;
 				base.ExtendBounds(accidental.bounds);
 				right = accidental.AddToScore(score, trebleStaff, bassStaff, step, left);
 				headShift = right - left;

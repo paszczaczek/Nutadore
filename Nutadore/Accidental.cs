@@ -5,11 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Nutadore
 {
 	public class Accidental : Sign
 	{
+		readonly SolidColorBrush keySignatureHintColor = Brushes.LightGray;
+
 		public enum Type
 		{
 			None,
@@ -21,6 +24,7 @@ namespace Nutadore
 		public Type type;
 		public StaffPosition staffPosition;
 		public Staff.Type? staffType;
+		public bool isKeySignatureHint;
 
 		public Accidental(Type type, StaffPosition statfPosition, Staff.Type? staffType = null)
 		{
@@ -63,6 +67,12 @@ namespace Nutadore
 
 				glyphTop -= 57 * score.Magnification;
 				right = base.AddGlyphToScore(score, left, glyphTop, glyphCode);
+
+				if (isKeySignatureHint)
+				{
+					TextBlock glyph = base.elements.FindLast(e => true) as TextBlock;
+					glyph.Foreground = keySignatureHintColor;
+				}
 			}
 
 			return right;

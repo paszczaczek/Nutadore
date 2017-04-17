@@ -9,6 +9,8 @@ namespace Nutadore
 {
 	public class Scale : Sign
 	{
+		public enum Type { Major, Minor }
+
 		private Note.Letter based;
 		private Type type;
 		Accidental[] accidentals;
@@ -19,8 +21,6 @@ namespace Nutadore
 			this.type = type;
 			accidentals = CreateAccidentals();
 		}
-
-		public enum Type { Major, Minor }
 
 		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left)
 		{
@@ -43,6 +43,42 @@ namespace Nutadore
 			base.RemoveFromScore(score);
 			foreach (Accidental accidental in accidentals)
 				accidental.RemoveFromScore(score);
+		}
+
+		public Accidental.Type AccidentalForLetter(Note.Letter letter)
+		{
+			foreach (Accidental accidental in accidentals)
+			{
+				StaffPosition staffPosition = StaffPosition.ByLine(1);
+				switch (letter)
+				{
+					case Note.Letter.C:
+						staffPosition = StaffPosition.ByLine(3, true);
+						break;
+					case Note.Letter.D:
+						staffPosition = StaffPosition.ByLine(4);
+						break;
+					case Note.Letter.E:
+						staffPosition = StaffPosition.ByLine(4, true);
+						break;
+					case Note.Letter.F:
+						staffPosition = StaffPosition.ByLine(5);
+						break;
+					case Note.Letter.G:
+						staffPosition = StaffPosition.ByLine(5, true);
+						break;
+					case Note.Letter.A:
+						staffPosition = StaffPosition.ByLine(2, true);
+						break;
+					case Note.Letter.H:
+						staffPosition = StaffPosition.ByLine(3);
+						break;
+				}
+				if (accidental.staffPosition.CompareTo(staffPosition) == 0)
+					return accidental.type;
+			}
+
+			return Accidental.Type.None;
 		}
 
 		//public override void HightlightRectangle_MouseLeave(object sender, MouseEventArgs e)
