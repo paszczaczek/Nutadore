@@ -14,7 +14,7 @@ namespace Nutadore
 		{
 		}
 
-		public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left)
 		{
 			double maxRightClef = left;
 			foreach (Staff staff in new[] { trebleStaff, bassStaff })
@@ -32,7 +32,7 @@ namespace Nutadore
 						glyphTop -= 77.5 * score.Magnification;
 						break;
 				}
-				double rightClef = base.AddFetaGlyph(score, left, glyphTop, glyphCode);
+				double rightClef = base.AddGlyphToScore(score, left, glyphTop, glyphCode);
 				//Rect boundaryClef = base.AddFetaGlyph(score, left, glyphTop, glyphCode);
 				//double rightClef = boundaryClef.Left + boundaryClef.Width;
 				if (rightClef > maxRightClef)

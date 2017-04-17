@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,14 +17,20 @@ namespace Nutadore
 	{
 		public static readonly int numberOfWhiteKeys = 52;
 		private static readonly int numberOfBlackKeys = 36;
-		public static readonly int numberOfKeys = numberOfWhiteKeys + numberOfBlackKeys;
-
-		public Score score;
+		private static readonly int numberOfKeys = numberOfWhiteKeys + numberOfBlackKeys;
 
 		/// <summary>
 		/// Lista wszystkich klawiszy na klawiaturze.
 		/// </summary>
 		public readonly List<Key> keys = new List<Key>();
+
+		public event EventHandler<KeyboardEventArgs> EventHandler;
+
+		public void FireEvent(Note note, KeyboardEventArgs.EventType eventType)
+		{
+			KeyboardEventArgs e = new KeyboardEventArgs(note, eventType);
+			EventHandler?.Invoke(this, e);
+		}
 
 		public Keyboard()
 		{
@@ -43,18 +50,74 @@ namespace Nutadore
 			double keyboardHeight = 0;
 			foreach (Key key in keys)
 			{
-				double height = key.Show(score, this);
+				double height = key.AddToCanvas(/*score, */this);
 				keyboardHeight = Math.Max(height, keyboardHeight);
 			}
 
 			Height = keyboardHeight;
 
+			//foreach (var key in keys.FindAll(key => key.note.octave == Note.Octave.Contra))
+			//	key.Guess = true;
 			//foreach (var key in keys.FindAll(key => key.note.octave == Note.Octave.Great))
-			//	key.MarkAs(Key.State.Down);
+			//	key.Hit = true;
 			//foreach (var key in keys.FindAll(key => key.note.octave == Note.Octave.Small))
-			//	key.MarkAs(Key.State.Hit);
+			//	key.Hit = false;
 			//foreach (var key in keys.FindAll(key => key.note.octave == Note.Octave.OneLined))
-			//	key.MarkAs(Key.State.Missed);
+			//	key.Down = true;
+		}
+
+		public void ConnectScore(Score score)
+		{
+			score.EventHandler += Score_Event;
+		}
+
+		private void Score_Event(object sender, ScoreEventArgs e)
+		{
+			Debug.Write(string.Format("{0}: ", e.eventType));
+			foreach (Note note in e.notes)
+			{
+				Debug.Write(string.Format("{0} ", note.ToString()));
+			}
+			Debug.WriteLine("");
+
+			List<Key> keys = FindKeys(e.notes);
+			switch (e.eventType)
+			{
+				case ScoreEventArgs.EventType.HighlightedOn:
+					keys.ForEach(key => key.Highlighted = true);
+					break;
+				case ScoreEventArgs.EventType.HighlightedOff:
+					keys.ForEach(key => key.Highlighted = false);
+					break;
+				case ScoreEventArgs.EventType.Selected:
+					Reset();
+					keys.ForEach(key => key.Guess = true);
+					break;
+				//case ScoreEventArgs.EventType.MouseUp:
+					//break;
+			}
+		}
+		
+		public new void KeyDown(Note note)
+		{
+			FireEvent(note, KeyboardEventArgs.EventType.KeyDown);
+		}
+		
+		public new void KeyUp(Note note)
+		{
+			FireEvent(note, KeyboardEventArgs.EventType.KeyUp);
+		}
+
+		private List<Key> FindKeys(List<Note> notes)
+		{
+			return notes
+				.Select(note => FindKey(note))
+				.ToList();
+		}
+
+		private Key FindKey(Note note)
+		{
+			return keys.Find(key => key.note.Equals(note));
 		}
 
 		private void Keyboard_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -62,31 +125,11 @@ namespace Nutadore
 			Show();
 		}
 
-		public void Check(Note note)
-		{
-			Key key = keys.Find(k => k.note.Equals(note));
-			if (key.state == Key.State.Down)
-				key.MarkAs(Key.State.Hit);
-			else
-				key.MarkAs(Key.State.Missed);
-			score.currentSign.KeyDown(key);
-		}
-
-		public void MarkAs(Sign sign, Key.State state)
-		{
-			foreach (var key in keys)
-			{
-				if (key.note.InChord(sign))
-					key.MarkAs(state);
-			}
-		}
-
 		public void Reset()
 		{
 			foreach (var key in keys)
 			{
-				key.MarkAsHighlighted(false);
-				key.MarkAs(Key.State.Up);
+				key.Guess = false;
 			}
 		}
 	}

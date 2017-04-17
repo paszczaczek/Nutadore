@@ -5,29 +5,74 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Nutadore
 {
 	public class Accidental : Sign
 	{
-		public StaffPosition staffPosition;
+		readonly SolidColorBrush keySignatureHintColor = Brushes.LightGray;
 
-		public Accidental(StaffPosition statfPosition)
+		public enum Type
 		{
-			this.staffPosition = statfPosition;
+			None,
+			Flat,
+			Sharp,
+			Natural
 		}
 
-		public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		public Type type;
+		public StaffPosition staffPosition;
+		public Staff.Type? staffType;
+		public bool isKeySignatureHint;
+
+		public Accidental(Type type, StaffPosition statfPosition, Staff.Type? staffType = null)
+		{
+			this.type = type;
+			this.staffPosition = statfPosition;
+			this.staffType = staffType;
+		}
+
+		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left)
 		{
 			double right = left;
 
-			string glyphCode = "\x002e";
-			foreach (Staff staff in new[] { trebleStaff, bassStaff })
+			string glyphCode;
+			switch (type)
+			{
+				case Type.None:
+					return left;
+				case Type.Flat:
+					throw new NotImplementedException();
+				case Type.Sharp:
+					glyphCode = "\x002e";
+					break;
+				case Type.Natural:
+					throw new NotImplementedException();
+				default:
+					throw new NotImplementedException();
+			};
+
+			Staff[] staffs;
+			if (staffType == null)
+				staffs = new[] { trebleStaff, bassStaff };
+			else if (staffType == Staff.Type.Treble)
+				staffs = new[] { trebleStaff };
+			else
+				staffs = new[] { bassStaff };
+
+			foreach (Staff staff in staffs)
 			{
 				double glyphTop = staff.StaffPositionToY(staffPosition);
 
 				glyphTop -= 57 * score.Magnification;
-				right = base.AddFetaGlyph(score, left, glyphTop, glyphCode);
+				right = base.AddGlyphToScore(score, left, glyphTop, glyphCode);
+
+				if (isKeySignatureHint)
+				{
+					TextBlock glyph = base.elements.FindLast(e => true) as TextBlock;
+					glyph.Foreground = keySignatureHintColor;
+				}
 			}
 
 			return right;

@@ -10,38 +10,35 @@ namespace Nutadore
 	{
 		public List<Note> notes = new List<Note>();
 
-		public double left;
-
-		public double right;
-
-		public Perform.HowTo performHowToStaffTreble;
-		public Perform.HowTo performHowToStaffBass;
+		//public Step step {
+		//	set
+		//	{
+		//		notes.ForEach(note => note.step = value);
+		//	}
+		//}
 
 		public void Add(Note note)
 		{
-			note.isPartOfChord = true;
 			notes.Add(note);
 		}
 
-		public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left)
 		{
-			CalculateAndCorrectPerformHowTo();
-
 			double chordLeft = left;
 			double chordRight = left;
 			double cursor = left;
 
-			// Wyszukaj najwyższą nutę na pięciolinii wiolinowej.
+			// Wyszukaj najwyższą i najwyższą nutę na pięciolinii wiolinowej z liniami dodanymi.
 			var trebleNotes = notes.FindAll(note => note.staffType == Staff.Type.Treble);
 			trebleNotes.Sort();
-			Note trebleHighestNote = trebleNotes.LastOrDefault();
-			Note trebleLowestNote = trebleNotes.FirstOrDefault();
+			Note trebleHighestNote = trebleNotes.LastOrDefault(note => note.staffPosition >= StaffPosition.ByLegerAbove(1));
+			Note trebleLowestNote = trebleNotes.FirstOrDefault(note => note.staffPosition <= StaffPosition.ByLegerBelow(1));
 
-			// Wyszukaj najniższa nutę na pięciolinii basowej.
+			// Wyszukaj najniższa i najwyższą nutę na pięciolinii basowej z liniami dodanymi.
 			var bassNotes = notes.FindAll(note => note.staffType == Staff.Type.Bass);
 			bassNotes.Sort();
-			Note bassHighestNote = bassNotes.LastOrDefault();
-			Note bassLowestNote = bassNotes.FirstOrDefault();
+			Note bassHighestNote = bassNotes.LastOrDefault(note => note.staffPosition >= StaffPosition.ByLegerAbove(1));
+			Note bassLowestNote = bassNotes.FirstOrDefault(note => note.staffPosition <= StaffPosition.ByLegerBelow(1));
 
 			// Narysuj wszystkie nuty akordu.
 			foreach (var note in notes)
@@ -56,7 +53,7 @@ namespace Nutadore
 					= note.staffType == Staff.Type.Treble
 					? trebleStaff
 					: bassStaff;
-				double noteCursor = note.Show(score, trebleStaff, bassStaff, left);
+				double noteCursor = note.AddToScore(score, trebleStaff, bassStaff, step, left);
 				if (noteCursor == -1)
 					return -1;
 				if (noteCursor > cursor)
@@ -64,123 +61,19 @@ namespace Nutadore
 				if (note.right > chordRight || note.right == -1)
 					chordRight = note.right;
 				// Rozszerz obszar akrodru o obszar nuty.
-				base.ExtendBounds(score, note.bounds);
+				base.ExtendBounds(note.bounds);
 			}
-
-			// Dodaj prostokąt do focusowania akordu.
-			base.AddHighlightRectangle(score, trebleStaff, bassStaff, 101);
-
-			this.left = chordLeft;
-			this.right = chordRight;
 
 			return cursor;
 		}
 
-		public override void Hide(Score score)
+		public override void RemoveFromScore(Score score)
 		{
-			base.Hide(score);
-			notes.ForEach(note => note.Hide(score));
-		}
-
-		public override bool IsShown
-		{
-			get
+			base.RemoveFromScore(score);
+			foreach (Note note in notes)
 			{
-				return notes.Find(note => note.IsShown) != null;
+				note.RemoveFromScore(score);
 			}
 		}
-
-		/// <summary>
-		/// W akordzie nuty mogą być w różnych ottavach, a akord jako całość musi być w jednej.
-		/// Ta funcja koryguje ottavy poszczególnych nut żeby akord był w jednej ottavie.
-		/// </summary>
-		public void CalculateAndCorrectPerformHowTo()
-		{
-			// Wyszukaj wszystkie nuty akordu leżące na pięcilinii wilonowej.
-			var trebleNotes = notes.FindAll(note => note.staffType == Staff.Type.Treble);
-
-			// Czy sa jakieś nuty wymagające zmiany wysokości wykonania na pieciolinii wiolinowej?
-			if (trebleNotes.Any(note => note.performHowTo == Perform.HowTo.TwoOctaveHigher))
-			{
-				// Sa nuty wymagające zmiany wysokości wykonania o dwie oktawy wyżej.
-				// Wyszukaj wszystkie nuty wymagające wykonania o jedną oktawę wyżej
-				// i zmień je na wymagające wykonania o dwie oktawy wyżej.
-				trebleNotes
-					.FindAll(note => note.performHowTo == Perform.HowTo.OneOctaveHigher)
-					.ForEach(note =>
-					{
-						note.performHowTo = Perform.HowTo.TwoOctaveHigher;
-						note.staffPosition.Number -= 3.5;
-					});
-
-				// Wyszukaj wszystkie nuty nie wymagające zmiany wykonania i zmień je na
-				// wymagające wykonania o dwie oktawy wyżej.
-				trebleNotes
-					.FindAll(note => note.performHowTo == Perform.HowTo.AtPlace)
-					.ForEach(note =>
-					{
-						note.performHowTo = Perform.HowTo.TwoOctaveHigher;
-						note.staffPosition.Number -= 3.5 * 2;
-					});
-
-				// Teraz wszystkie nuty akordu leżące na pięciolinii wiolinowej
-				// będą wykonywane o dwie oktawy wyzej.
-				performHowToStaffTreble = Perform.HowTo.TwoOctaveHigher;
-			}
-			else if (trebleNotes.Any(note => note.performHowTo == Perform.HowTo.OneOctaveHigher))
-			{
-				// Są nuty wymagające zmiany wysokści wykonania o oktawę wyżej.
-				// Wyszukaj wszystkie nuty nie wymagające zmiany wykonania i zmień je na
-				// wymagające wykonania o jedną oktawę wyżej.
-				trebleNotes
-					.FindAll(note => note.performHowTo == Perform.HowTo.AtPlace)
-					.ForEach(note =>
-					{
-						note.performHowTo = Perform.HowTo.OneOctaveHigher;
-						note.staffPosition.Number -= 3.5; // 0.0; // To ma tak byc!
-					});
-
-				// Teraz wszyskie nuty akordu leżące na pęciolinii wiolinowej będą
-				// wykonywane o oktawę wyżej.
-				performHowToStaffTreble = Perform.HowTo.OneOctaveHigher;
-			}
-
-			// Wyszukaj wszystkie nuty akordu leżące na pięcilinii basowej.
-			var bassNotes = notes.FindAll(note => note.staffType == Staff.Type.Bass);
-
-			// Czy sa jakieś nuty wymagające zmiany wysokości wykonania?
-			if (bassNotes.Any(note => note.performHowTo == Perform.HowTo.OneOctaveLower))
-			{
-				// Jest przynajmniej jedna nuta wymagająca wykonania o oktawę niżej.
-				// Wyszukaj wszystkie nuty nie wymagające zmiany wykonania i zmień je na
-				// wymagające wykonania o jedną oktawę niżej.
-				bassNotes
-					.FindAll(note => note.performHowTo == Perform.HowTo.AtPlace)
-					.ForEach(note =>
-					{
-						note.performHowTo = Perform.HowTo.OneOctaveLower;
-						note.staffPosition.Number += 3.5;
-					});
-
-				// Teraz wszystkie nuty leżące na pięciolinii basowej
-				// będą wykonywane o oktawę nizej.
-				performHowToStaffBass = Perform.HowTo.OneOctaveLower;
-			}
-		}
-
-		public override void KeyDown(Key key)
-		{
-			// dopiero zaczęte
-			foreach (var note in notes.FindAll(n => n.Equals(key.note)))
-				note.MarkAsHit();
-		}
-
-		public override void KeyUp(Key key)
-		{
-			// dopiero zaczęte
-			foreach (var note in notes.FindAll(n => n.Equals(key.note)))
-				note.MarkAsHit();
-		}
-
 	}
 }

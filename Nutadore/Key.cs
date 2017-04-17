@@ -14,19 +14,57 @@ namespace Nutadore
 {
 	public class Key
 	{
-		private static readonly Color whiteKeyColor = Colors.Snow;
-		private static readonly Color blackKeyColor = Colors.Black;
+		private static readonly SolidColorBrush whiteKeyUpBrush = Brushes.Snow;
+		private static readonly SolidColorBrush blackKeyUpBrush = Brushes.Black;
 
-		public enum State
+		// Możliwe stany:
+		// Up (biały/czarny)
+		// Up Guess (żółty jasny/ciemnu)
+		// Down (mocno szary jasny/ciemny)
+		// Down Hit (zielony jasny/ciemny)
+		// Down !Hit (czerwony jasny/ciemny)
+		// Dodatkowo podświetlenie rozjaśniające kolory
+
+		private bool _highlighted;
+		public bool Highlighted
 		{
-			Up,
-			Down,
-			Hit,
-			Missed
+			get { return _highlighted; }
+			set { _highlighted = value; SetColor(); }
 		}
 
-		public State state = State.Up;
-		private bool isHighlighted;
+		private bool _guess;
+		public bool Guess
+		{
+			get { return _guess; }
+			set { _guess = value;  SetColor(); }
+		}
+
+		private bool? _guessed;
+		public bool? Guessed
+		{
+			get { return _guessed; }
+			set
+			{
+				_guessed = value;
+				if (_guessed != null)
+					_down = true;
+				SetColor();
+			}
+		}
+
+		private bool _down;
+		public bool Down
+		{
+			get { return _down; }
+			set
+			{
+				_down = value;
+				if (_down == false)
+					_guessed = null;
+				SetColor();
+			}
+		}
+
 		private Rectangle highlightRectangle;
 
 		private readonly int keyNoInOctave;
@@ -64,21 +102,21 @@ namespace Nutadore
 
 			// Wyznaczam literę nuty dla klawisza.
 			Note.Letter letter;
-			Note.Accidental accidental = Note.Accidental.None;
+			Accidental.Type accidental = Accidental.Type.None;
 			switch (keyNoInOctave)
 			{
 				case 0:
 					letter = Note.Letter.C;
 					break;
 				case 1:
-					accidental = Note.Accidental.Sharp;
+					accidental = Accidental.Type.Sharp;
 					letter = Note.Letter.C;
 					break;
 				case 2:
 					letter = Note.Letter.D;
 					break;
 				case 3:
-					accidental = Note.Accidental.Sharp;
+					accidental = Accidental.Type.Sharp;
 					letter = Note.Letter.D;
 					break;
 				case 4:
@@ -88,21 +126,21 @@ namespace Nutadore
 					letter = Note.Letter.F;
 					break;
 				case 6:
-					accidental = Note.Accidental.Sharp;
+					accidental = Accidental.Type.Sharp;
 					letter = Note.Letter.F;
 					break;
 				case 7:
 					letter = Note.Letter.G;
 					break;
 				case 8:
-					accidental = Note.Accidental.Sharp;
+					accidental = Accidental.Type.Sharp;
 					letter = Note.Letter.G;
 					break;
 				case 9:
 					letter = Note.Letter.A;
 					break;
 				case 10:
-					accidental = Note.Accidental.Sharp;
+					accidental = Accidental.Type.Sharp;
 					letter = Note.Letter.A;
 					break;
 				case 11:
@@ -126,7 +164,7 @@ namespace Nutadore
 				keyNoInOctave == 11;
 		}
 
-		public double Show(Score score, Keyboard keyboard)
+		public double AddToCanvas(Keyboard keyboard)
 		{
 			// szerokość klawiszy białych i czarnych
 			double whiteWidth = keyboard.ActualWidth / Keyboard.numberOfWhiteKeys;
@@ -168,7 +206,7 @@ namespace Nutadore
 				Width = width,
 				Height = height,
 				Margin = new Thickness(left, 0, 0, 0),
-				Fill = new SolidColorBrush(isWhite ? whiteKeyColor : blackKeyColor),
+				Fill = isWhite ? whiteKeyUpBrush : blackKeyUpBrush,
 				Stroke = Brushes.Black,
 				StrokeThickness = isWhite ? 0.2 : 0.8
 			};
@@ -187,10 +225,10 @@ namespace Nutadore
 			};
 			Canvas.SetZIndex(highlightRectangle, isWhite ? 1 : 3);
 			keyboard.Children.Add(highlightRectangle);
-			highlightRectangle.MouseEnter += HighlightRectangle_MouseEnter;
-			highlightRectangle.MouseLeave += HighlightRectangle_MouseLeave;
-			highlightRectangle.MouseDown += HighlightRectangle_MouseDown;
-			highlightRectangle.MouseUp += HighlightRectangle_MouseUp;
+			highlightRectangle.MouseEnter += MouseEnter;
+			highlightRectangle.MouseLeave += MouseLeave;
+			highlightRectangle.MouseDown += MouseDown;
+			highlightRectangle.MouseUp += MouseUp;
 
 			// Rysuję nazwy oktaw.
 			double keyboardHeight = whiteHeight;
@@ -202,9 +240,9 @@ namespace Nutadore
 				{
 					FontFamily = new FontFamily(familyName),
 					FontSize = fontSize,
-					Text = note.octave.ToString(),
+					//Text = note.octave.ToString(),
+					Text = Note.OctaveToString(note.octave),
 					Foreground = Brushes.Red,
-					//Margin = new Thickness(line.X1, line.Y2, 0, 0)
 					Margin = new Thickness(left + 3, height, 0, 0)
 				};
 				// Wyznaczamy wysokość napisu.
@@ -236,85 +274,83 @@ namespace Nutadore
 				keyboard.Children.Add(line);
 			}
 
+			SetColor();
+
 			return keyboardHeight;
 		}
 
-		private void HighlightRectangle_MouseEnter(object sender, MouseEventArgs e)
+		private void MouseEnter(object sender, MouseEventArgs e)
 		{
-			MarkAsHighlighted(true);
+			Highlighted = true;
 		}
 
-		private void HighlightRectangle_MouseLeave(object sender, MouseEventArgs e)
+		private void MouseLeave(object sender, MouseEventArgs e)
 		{
-			MarkAsHighlighted(false);
+			Highlighted = false;
 		}
 
-		private void HighlightRectangle_MouseDown(object sender, MouseButtonEventArgs e)
+		private void MouseDown(object sender, MouseButtonEventArgs e)
 		{
-			//if (state == State.Up)
-			//	state = State.Down;
-			//else if (state == State.Down)
-			//	state = State.Up;
-			//SetColor();
+			Down = true;
+			Guessed = Guess;
 			Keyboard keyboard = (sender as Rectangle).Tag as Keyboard;
-			keyboard.Check(this.note);
+			keyboard.KeyDown(note);
 		}
 
-		private void HighlightRectangle_MouseUp(object sender, MouseButtonEventArgs e)
+		private void MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
 		{
-			if (state == State.Hit)
-				state = State.Down;
-			else if (state == State.Missed)
-				state = State.Up;
-			SetColor();
-		}
-
-		public void MarkAs(State state)
-		{
-			this.state = state;
-			SetColor();
-		}
-
-		public void MarkAsHighlighted(bool isHighlighted)
-		{
-			this.isHighlighted = isHighlighted;
-			SetColor();
+			Down = false;
+			Guessed = null;
+			Keyboard keyboard = (sender as Rectangle).Tag as Keyboard;
+			keyboard.KeyUp(note);
 		}
 
 		private void SetColor()
 		{
-			SolidColorBrush brush = highlightRectangle.Fill as SolidColorBrush;
-			switch (state)
+			SolidColorBrush brush = Brushes.Black.Clone();
+			brush.Opacity = 1;
+
+			if (Guess)
 			{
-				case State.Up:
-					highlightRectangle.Fill = Brushes.LightGray;
-					if (isHighlighted)
-						highlightRectangle.Opacity = 0.4;
-					else
-						highlightRectangle.Opacity = 0.0;
-					break;
-				case State.Down:
-					highlightRectangle.Fill = Brushes.LightSeaGreen;
-					if (isHighlighted)
-						highlightRectangle.Opacity = 1.0;
-					else
-						highlightRectangle.Opacity = 0.7;
-					break;
-				case State.Hit:
-					highlightRectangle.Fill = Brushes.LightGreen;
-					if (isHighlighted)
-						highlightRectangle.Opacity = 1.0;
-					else
-						highlightRectangle.Opacity = 0.7;
-					break;
-				case State.Missed:
-					highlightRectangle.Fill = Brushes.PaleVioletRed;
-					if (isHighlighted)
-						highlightRectangle.Opacity = 1.0;
-					else
-						highlightRectangle.Opacity = 0.7;
-					break;
+				if (Highlighted)
+				{
+					brush.Color = Colors.Gold;
+				}
+				else
+				{
+					brush.Color = Colors.Yellow;
+				}
 			}
+			else
+			{
+				if (Highlighted)
+				{
+					brush.Color = Colors.LightGray;
+				}
+			}
+
+			if (Down)
+			{
+				if (Guessed == true)
+				{
+					brush.Color = Colors.LightGreen;
+				}
+				else if (Guessed == false)
+				{
+					brush.Color = Colors.Red;
+				}
+				else if (Guessed == null)
+				{
+					brush.Color = Colors.Gray;
+				}
+			}
+
+			if (brush.Color == Colors.Black)
+			{
+				brush.Opacity = 0;
+			}
+
+			highlightRectangle.Fill = brush;
 		}
 	}
 }

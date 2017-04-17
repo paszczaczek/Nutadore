@@ -3,12 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:Nutadore" x:Class="Nutadore.MainWindow"
         Title="MainWindow" Height="668.831" Width="1272.489">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <local:Score x:Name="score" Grid.Row="0"  Margin="10" />
-        <local:Keyboard x:Name="keyboard" Grid.Row="1" Margin="10" VerticalAlignment="Bottom"/>
-    </Grid>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition/>
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+		<local:Score x:Name="score" Grid.Row="0"  Margin="10" />
+		<local:Keyboard x:Name="keyboard" Grid.Row="1" Margin="10" VerticalAlignment="Bottom"/>
+	</Grid>
 </Window>

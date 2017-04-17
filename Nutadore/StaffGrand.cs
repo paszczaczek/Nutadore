@@ -19,8 +19,8 @@ namespace Nutadore
 		private Staff bassStaff;
 		private Clef clef;
 		private double cursor;
-		public Sign firstSign;
-		public Sign lastSign;
+		private Step firstStep;
+		public Step lastStep { get; private set; }
 		private List<Perform> performs = new List<Perform>();
 
 		public StaffGrand(Score score, double top)
@@ -29,26 +29,26 @@ namespace Nutadore
 			this.top = top;
 		}
 
-		public double Show(Sign fromSign, out Sign nextSign)
+		public double AddSteps(Step fromStep, out Step nextStep)
 		{
-			// Rysuję klamrę.
-			double braceRight = ShowBrace();
+			// Dodaję klamrę.
+			double braceRight = AddBraceToScore();
 
-			// Rysuję pięciolinie wiolinową i basową, klucze i znaki przykluczowe.
-			double bottom = ShowStaffs(braceRight);
+			// Dodaję pięciolinie wiolinową i basową, klucze i znaki przykluczowe.
+			double bottom = AddStaffsToScore(braceRight);
 
-			// Rysuję nuty i inne znaki - tyle ile sie zmiesci.
-			nextSign = ShowSigns(fromSign);
+			// Dodaję kroki - tyle ile sie zmiesci.
+			nextStep = AddStepsToScore(fromStep);
 
-			// Rysuję znaki zmiany wysokości wykonania (ottava)
-			ShowPerform(Staff.Type.Bass);
-			ShowPerform(Staff.Type.Treble);
+			// Dodaję znaki zmiany wysokości wykonania (ottava)
+			AddPerformToScore(Staff.Type.Bass);
+			AddPerformToScore(Staff.Type.Treble);
 
 			// Zwracam pierwszą nutę do narysowania na następnym StaffGrand
 			return bottom;
 		}
 
-		private double ShowBrace()
+		private double AddBraceToScore()
 		{
 			// wyznaczam wymiary klamry
 			string familyName = "MS Mincho";
@@ -84,7 +84,7 @@ namespace Nutadore
 			return braceRight;
 		}
 
-		private double ShowStaffs(double left)
+		private double AddStaffsToScore(double left)
 		{
 			// Rysuję pięciolinię wiolinową.
 			double trebleStaffTop = top + spaceAboveTrebleStaff;
@@ -101,10 +101,10 @@ namespace Nutadore
 
 			// Rysuję klucz wiolinowy i basowy.
 			clef = new Clef();
-			cursor = clef.Show(score, trebleStaff, bassStaff, left);
+			cursor = clef.AddToScore(score, trebleStaff, bassStaff, null, left);
 
 			// Rysuję znaki przykluczowe wynikające z tonacji.
-			cursor = score.scale.Show(score, trebleStaff, bassStaff, cursor);
+			cursor = score.scale.AddToScore(score, trebleStaff, bassStaff, null, cursor);
 
 			// Wyznaczam dolną krawędź StaffGrand i zwracam ją.
 			double bottom
@@ -115,37 +115,37 @@ namespace Nutadore
 			return bottom;
 		}
 
-		private Sign ShowSigns(Sign fromSign)
+		private Step AddStepsToScore(Step fromStep)
 		{
 			// Może nie być żadnych znaków do rysowania.
-			if (fromSign == null)
+			if (fromStep == null)
 				return null;
 
-			firstSign = fromSign;
-			for (int idx = score.signs.IndexOf(fromSign); idx < score.signs.Count; idx++)
+			firstStep = fromStep;
+			for (int idx = score.steps.IndexOf(fromStep); idx < score.steps.Count; idx++)
 			{
-				Sign sign = score.signs[idx];
-				cursor = sign.Show(score, trebleStaff, bassStaff, cursor);
+				Step step = score.steps[idx];
+				cursor = step.AddToScore(score, trebleStaff, bassStaff, cursor);
 
 				// Czy znak zmieścil się na pieciolinii?
 				if (cursor == -1)
 				{
 					// Nie - umieścimy go na kolejnym SraffGrand.
 					// Wycofujemy też wszyskie znaki do początku taktu.
-					int idxBar = HideToBeginOfMeasure(sign);
+					int idxBar = RemoveToBeginOfMeasure(step);
 					if (idxBar == -1)
 					{
 						// Nie znaleziono znaku taktu. Nie robimy wycofywania.
-						return sign;
+						return step;
 					}
-					lastSign = score.signs[idxBar];
-					Sign nextSign = score.signs[idxBar + 1];
-					return nextSign;
+					lastStep = score.steps[idxBar];
+					Step nextStep = score.steps[idxBar + 1];
+					return nextStep;
 				}
 				else
 				{
 					// Tak - zmieścił się.
-					lastSign = sign;
+					lastStep = step;
 				}
 			}
 
@@ -153,51 +153,31 @@ namespace Nutadore
 			return null;
 		}
 
-		private void ShowPerform(Staff.Type staffType)
+		private void AddPerformToScore(Staff.Type staffType)
 		{
-			if (score.signs.Count == 0)
+			if (score.steps.Count == 0)
 				return;
 
 			Perform.HowTo performHowTo = Perform.HowTo.AtPlace;
 			double performLeft = 0;
 			double performRight = 0;
 
-			int idxFirst = score.signs.FindIndex(sign => sign == firstSign);
-			int idxLast = score.signs.FindIndex(sign => sign == lastSign);
+			int idxFirst = score.steps.FindIndex(sign => sign == firstStep);
+			int idxLast = score.steps.FindIndex(sign => sign == lastStep);
 			for (int idx = idxFirst; idx <= idxLast; idx++)
 			{
-				Sign sign = score.signs[idx];
+				Step step = score.steps[idx];
 
-				Perform.HowTo singPerformHowTo;
-				double signLeft;
-				double signRight;
-				if (sign is Chord)
-				{
-					Chord chord = sign as Chord;
-					singPerformHowTo = staffType
-						== Staff.Type.Treble
-						? chord.performHowToStaffTreble
-						: chord.performHowToStaffBass;
-					signLeft = chord.left;
-					signRight = chord.right;
-				}
-				else if (sign is Note)
-				{
-					Note note = sign as Note;
-					if (note.staffType != staffType)
-						continue;
-					singPerformHowTo = note.performHowTo;
-					signLeft = note.left;
-					signRight = note.right;
-				}
-				else
-				{
-					continue;
-				}
+				Perform.HowTo stepPerformHowTo;
+				double stepLeft = step.bounds.Left;
+				double stepRight = step.bounds.Right;
+				stepPerformHowTo = staffType
+					== Staff.Type.Treble
+					? step.performHowToStaffTreble
+					: step.performHowToStaffBass;
 
-
-				bool performChanged = singPerformHowTo != performHowTo;
-				bool performNew = performChanged && singPerformHowTo != Perform.HowTo.AtPlace;
+				bool performChanged = stepPerformHowTo != performHowTo;
+				bool performNew = performChanged && stepPerformHowTo != Perform.HowTo.AtPlace;
 				bool performEnd = performChanged && performHowTo != Perform.HowTo.AtPlace;
 				if (performEnd)
 				{
@@ -205,16 +185,16 @@ namespace Nutadore
 					// TODO: konstruktor+show() ?
 					Perform perform = new Perform(performHowTo, performLeft, performRight);
 					performs.Add(perform);
-					perform.Show(score, trebleStaff, bassStaff);
+					perform.AddToScore(score, trebleStaff, bassStaff, null, 0);
 					performHowTo = Perform.HowTo.AtPlace;
 				}
 				if (performNew)
 				{
 					// Tu wystąpił początek znaku zmiany wysokości. Zapamiętuję jego położnie i wysokość.
-					performHowTo = singPerformHowTo;
-					performLeft = signLeft;
+					performHowTo = stepPerformHowTo;
+					performLeft = stepLeft;
 				}
-				performRight = signRight;
+				performRight = stepRight;
 			}
 
 
@@ -224,35 +204,35 @@ namespace Nutadore
 				// TODO: konstruktor+show() ?
 				Perform perform = new Perform(performHowTo, performLeft, performRight);
 				performs.Add(perform);
-				perform.Show(score, trebleStaff, bassStaff);
+				perform.AddToScore(score, trebleStaff, bassStaff, null, 0);
 				performHowTo = Perform.HowTo.AtPlace;
 			}
 		}
 
-		public void Hide()
+		public void RemoveFromScore()
 		{
 			foreach(var perform in performs)
-				perform.Hide(score);
+				perform.RemoveFromScore(score);
 
 			performs.Clear();
 		}
 
-		private int HideToBeginOfMeasure(Sign fromSign)
+		private int RemoveToBeginOfMeasure(Step fromStep)
 		{
-			List<Sign> signsForHide = new List<Sign>();
+			List<Step> stepsForRemove = new List<Step>();
 
-			for (int idx = score.signs.IndexOf(fromSign) - 1; idx >= 0 ; idx--)
+			for (int idx = score.steps.IndexOf(fromStep) - 1; idx >= 0 ; idx--)
 			{
-				Sign sign = score.signs[idx];
-				if (sign is Bar)
+				Step step = score.steps[idx];
+				if (step.IsBar)
 				{
 					// Jest znak taktu. Ukrywamy znaki i zwracamy jego index.
-					signsForHide.ForEach(s => s.Hide(score));
+					stepsForRemove.ForEach(s => s.RemoveFromScore(score));
 					return idx;
 				}
 				else
 				{
-					signsForHide.Add(sign);
+					stepsForRemove.Add(step);
 				}
 			}
 

@@ -10,7 +10,7 @@ namespace Nutadore
 		{
 		}
 
-		public override double Show(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left)
 		{
 			foreach (Staff staff in new[] { trebleStaff, bassStaff })
 			{
@@ -24,7 +24,7 @@ namespace Nutadore
 					Stroke = Brushes.Black,
 					StrokeThickness = 1
 				};
-				base.AddElement(score, barLine);
+				base.AddElementToScore(score, barLine);
 				//score.Children.Add(barLine);
 				//base.elements.Add(barLine);
 			}
@@ -35,7 +35,7 @@ namespace Nutadore
 			if (right >= score.ActualWidth - Staff.marginLeft)
 			{
 				// Nie zmieścił się - narysujemy ją na następnej pieciolinii.
-				Hide(score);
+				RemoveFromScore(score);
 
 				return -1;
 			}

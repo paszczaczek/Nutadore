@@ -1,4 +1,5 @@
-﻿using System;
+﻿using mshtml;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,37 +25,158 @@ namespace Nutadore
 		{
 			InitializeComponent();
 
-			score.keyboard = keyboard;
-			keyboard.score = score;
+			score.ConnectKeyboard(keyboard);
+			keyboard.ConnectScore(score);
 
-			AddAllTriads();
+			BachAirInDMajor();
+			//AddSteps();
+			//AddSteps();
+			//AddAllTriads();
 			//AddAllNotes();
 			//AddTriad();
-			score.Add(new Note(Note.Letter.C, Note.Accidental.None, Note.Octave.OneLined));
+			//score.Add(new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.OneLined));
 		}
 
-		private void AddTriad()
+		private void BachAirInDMajor()
 		{
-			Chord chord = new Chord();
+			score.scale = new Scale(Note.Letter.D, Scale.Type.Major);
 
-			chord.Add(new Note(Note.Letter.C, Note.Accidental.None, Note.Octave.OneLined));
-			//chord.Add(new Note(Note.Letter.D, Note.Octave.OneLined));
-			chord.Add(new Note(Note.Letter.E, Note.Accidental.None, Note.Octave.OneLined));
-			//chord.Add(new Note(Note.Letter.F, Note.Octave.OneLined));
-			chord.Add(new Note(Note.Letter.G, Note.Accidental.None, Note.Octave.OneLined));
-
-			score.Add(chord);
+			score
+				// measure 1
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.Small)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.OneLined, Staff.Type.Bass)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.OneLined, Staff.Type.Bass)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.Small)))
+				// measure 2
+				.Add(new Step()
+					.AddVoice(new Bar()))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.H, Accidental.Type.None, Note.Octave.Great)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.H, Accidental.Type.None, Note.Octave.Small)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.A, Accidental.Type.Sharp, Note.Octave.Small)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.A, Accidental.Type.None, Note.Octave.Great)))
+				// measure 3
+				.Add(new Step()
+					.AddVoice(new Bar()))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.Great)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.H, Accidental.Type.None, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.Small)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.TwoLined)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.TwoLined)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.E, Accidental.Type.None, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.H, Accidental.Type.None, Note.Octave.OneLined))
+					.AddVoice(new Note(Note.Letter.G, Accidental.Type.Sharp, Note.Octave.Small)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.TwoLined)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.G, Accidental.Type.Sharp, Note.Octave.Great)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.TwoLined)))
+				// measure 4
+				.Add(new Step()
+					.AddVoice(new Bar()))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.A, Accidental.Type.None, Note.Octave.OneLined))
+					.AddVoice(new Note(Note.Letter.A, Accidental.Type.None, Note.Octave.Great)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.A, Accidental.Type.None, Note.Octave.Small)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.H, Accidental.Type.None, Note.Octave.OneLined))
+					.AddVoice(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.Small)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.A, Accidental.Type.None, Note.Octave.OneLined)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.Great)))
+				// measure 5
+				.Add(new Step()
+					.AddVoice(new Bar()))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.A, Accidental.Type.None, Note.Octave.TwoLined))
+					.AddVoice(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.Great)))
+				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.C, Accidental.Type.Natural, Note.Octave.TwoLined)))
+					// tu skonczylem, kasownik rysuje sie jako #
+				;
 		}
+
+		private void AddSteps()
+		{
+			Chord chord1 = new Chord();
+			chord1.Add(new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.OneLined));
+			chord1.Add(new Note(Note.Letter.E, Accidental.Type.None, Note.Octave.OneLined));
+			chord1.Add(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.OneLined));
+
+			Note note1 = new Note(Note.Letter.E, Accidental.Type.None, Note.Octave.TwoLined);
+
+			Chord chord2 = new Chord();
+			chord2.Add(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.Great));
+			chord2.Add(new Note(Note.Letter.F, Accidental.Type.None, Note.Octave.Great));
+			chord2.Add(new Note(Note.Letter.A, Accidental.Type.None, Note.Octave.Great));
+
+			Note note2 = new Note(Note.Letter.F, Accidental.Type.None, Note.Octave.Small);
+
+			Step step = new Step();
+			step.AddVoice(chord1);
+			step.AddVoice(note1);
+			step.AddVoice(chord2);
+			step.AddVoice(note2);
+
+			score.Add(step);
+		}
+
+		//private void AddTriad()
+		//{
+		//	Chord chord = new Chord();
+
+		//	chord.Add(new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.OneLined));
+		//	//chord.Add(new Note(Note.Letter.D, Note.Octave.OneLined));
+		//	chord.Add(new Note(Note.Letter.E, Accidental.Type.None, Note.Octave.OneLined));
+		//	//chord.Add(new Note(Note.Letter.F, Note.Octave.OneLined));
+		//	chord.Add(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.OneLined));
+
+		//	score.Add(chord);
+		//}
 
 		private void AddAllNotes()
 		{
 			List<Key> whiteKeys = keyboard.keys.FindAll(key => key.isWhite);
 			for (int k = 0; k < whiteKeys.Count; k++)
 			{
-				score.Add(new Note(
+				Note note = new Note(
 					whiteKeys[k].note.letter,
-					whiteKeys[k].note.accidental,
-					whiteKeys[k].note.octave));
+					whiteKeys[k].note.accidentalType,
+					whiteKeys[k].note.octave);
+
+				Note note2 = new Note(
+					whiteKeys[k].note.letter,
+					Accidental.Type.Sharp,
+					whiteKeys[k].note.octave);
+
+				Step step = new Step();
+				step.AddVoice(note);
+				step.AddVoice(note2);
+
+				score.Add(step);
 			}
 		}
 
@@ -63,18 +185,23 @@ namespace Nutadore
 			List<Key> whiteKeys = keyboard.keys.FindAll(key => key.isWhite);
 			for (int k = 0; k < whiteKeys.Count - 4; k++)
 			{
-				Chord chord = new Chord();
+				Chord chord1 = new Chord();
 
-				chord.Add(new Note(whiteKeys[k + 0].note.letter, Note.Accidental.None, whiteKeys[k + 0].note.octave));
-				chord.Add(new Note(whiteKeys[k + 2].note.letter, Note.Accidental.None, whiteKeys[k + 2].note.octave));
-				chord.Add(new Note(whiteKeys[k + 4].note.letter, Note.Accidental.None, whiteKeys[k + 4].note.octave));
+				chord1.Add(new Note(whiteKeys[k + 0].note.letter, Accidental.Type.None, whiteKeys[k + 0].note.octave));
+				chord1.Add(new Note(whiteKeys[k + 2].note.letter, Accidental.Type.None, whiteKeys[k + 2].note.octave));
+				chord1.Add(new Note(whiteKeys[k + 4].note.letter, Accidental.Type.None, whiteKeys[k + 4].note.octave));
 
 				int u = whiteKeys.Count - 1 - 4 - k;
-				chord.Add(new Note(whiteKeys[u + 0].note.letter, Note.Accidental.None, whiteKeys[u + 0].note.octave));
-				chord.Add(new Note(whiteKeys[u + 2].note.letter, Note.Accidental.None, whiteKeys[u + 2].note.octave));
-				chord.Add(new Note(whiteKeys[u + 4].note.letter, Note.Accidental.None, whiteKeys[u + 4].note.octave));
+				Chord chord2 = new Chord();
+				chord2.Add(new Note(whiteKeys[u + 0].note.letter, Accidental.Type.None, whiteKeys[u + 0].note.octave));
+				chord2.Add(new Note(whiteKeys[u + 2].note.letter, Accidental.Type.None, whiteKeys[u + 2].note.octave));
+				chord2.Add(new Note(whiteKeys[u + 4].note.letter, Accidental.Type.None, whiteKeys[u + 4].note.octave));
 
-				score.Add(chord);
+				Step step = new Step();
+				step.AddVoice(chord1);
+				step.AddVoice(chord2);
+
+				score.Add(step);
 			}
 
 			AddBar();
@@ -82,7 +209,21 @@ namespace Nutadore
 
 		private void AddBar()
 		{
-			score.Add(new Bar());
+			Step step = new Step();
+			step.AddVoice(new Bar());
+
+			score.Add(step);
 		}
+
+		//private void WebBrowser_Navigating(object sender, NavigatingCancelEventArgs e)
+		//{
+		//	//e.Cancel = true;
+		//	mshtml.IHTMLDocument2 htmlDoc = webBrowser.Document as mshtml.IHTMLDocument2;
+		//	if (htmlDoc != null)
+		//	{
+		//		IHTMLElementCollection all = htmlDoc.all;
+		//		var t = all.item(0).tagName;
+		//	}
+		//}
 	}
 }
