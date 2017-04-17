@@ -83,7 +83,11 @@ namespace Nutadore
 			{
 				double voiceCursor = voice.AddToScore(score, trebleStaff, bassStaff, this, left);
 				if (voiceCursor == -1)
+				{
+					// Jeden z głosów nie zmieścił się - wycofujemy pozostałe.
+					RemoveFromScore(score);
 					return -1;
+				}
 				if (voiceCursor > cursor)
 					cursor = voiceCursor;
 				if (voice.bounds.Right > right || voice.bounds.Right == -1)

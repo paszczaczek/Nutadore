@@ -46,6 +46,7 @@ namespace Nutadore
 		public static readonly Note lowest = new Note(Letter.A, Accidental.Type.None, Octave.SubContra);
 		public static readonly Note highest = new Note(Letter.C, Accidental.Type.None, Octave.FiveLined);
 
+		private Accidental accidental;
 		private TextBlock head;
 
 		public enum Letter {
@@ -92,13 +93,14 @@ namespace Nutadore
 				: bassStaff;
 
 			// Rysujemy znak chromatyczny.
-			/* TODO: skonczyc
+			//* TODO: skonczyc
 			if (accidentalType != Accidental.Type.None)
 			{
-				Accidental accidental = new Accidental(Accidental.Type.Sharp, staffPosition, staffType);
+				accidental = new Accidental(Accidental.Type.Sharp, staffPosition, staffType);
+				base.ExtendBounds(accidental.bounds);
 				right = accidental.AddToScore(score, trebleStaff, bassStaff, step, left);
 			}
-			*/
+			//*/
 
 			// Rysujemy główkę nuty.
 			double noteLeft = right;
@@ -235,8 +237,7 @@ namespace Nutadore
 			if (right >= score.ActualWidth - Staff.marginLeft)
 			{
 				// Nie zmieścił się - narysujemy ją na następnej pieciolinii.
-				base.RemoveFromScore(score);
-
+				RemoveFromScore(score);
 				return -1;
 			}
 			else
@@ -249,6 +250,7 @@ namespace Nutadore
 	
 		public override void RemoveFromScore(Score score)
 		{
+			accidental?.RemoveFromScore(score);
 			base.RemoveFromScore(score);
 		}
 
@@ -415,7 +417,7 @@ namespace Nutadore
 			return StaffPosition.ByNumber(lineNumber);
 		}
 
-		public string ToString(string format = "{letter}{accidental}{octave}")
+		public string ToString(string format)
 		{
 			string octaveIndex = "";
 			bool letterUpper = false;
@@ -486,6 +488,11 @@ namespace Nutadore
 			//	letterUpper ? letter.ToString().ToUpper() : letter.ToString().ToLower(),
 			//	accidental,
 			//	octaveIndex);
+		}
+
+		public override string ToString()
+		{
+			return ToString("{letter}{accidental}{octave}");
 		}
 
 		public override bool Equals(object obj)

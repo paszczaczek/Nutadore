@@ -77,6 +77,8 @@ namespace Nutadore
 					.AddVoice(new Note(Note.Letter.H, Accidental.Type.None, Note.Octave.TwoLined))
 					.AddVoice(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.Small)))
 				.Add(new Step()
+					.AddVoice(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.TwoLined)))
+				.Add(new Step()
 					.AddVoice(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.TwoLined)))
 				.Add(new Step()
 					.AddVoice(new Note(Note.Letter.E, Accidental.Type.None, Note.Octave.TwoLined))
