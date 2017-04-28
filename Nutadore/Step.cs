@@ -94,7 +94,7 @@ namespace Nutadore
 			List<Note> noteOnLeft = new List<Note>();
 			for (int pass = 0; pass < 2; pass++)
 			{
-				bool collisionFound = false;
+				bool collisionFound = false; 
 				do
 				{
 					collisionFound = false;
