@@ -11,7 +11,7 @@ using System.Windows.Shapes;
 
 namespace Nutadore
 {
-	public class Step 
+	public class Step
 	{
 		public List<Sign> voices = new List<Sign>();
 
@@ -20,7 +20,7 @@ namespace Nutadore
 		private Staff trebleStaff;
 		private Staff bassStaff;
 		private double left;
-		
+
 		private static Brush currentBrush = Brushes.LightSeaGreen;
 		private static Brush highlightBrush = Brushes.Gray;
 
@@ -33,7 +33,7 @@ namespace Nutadore
 
 		public Perform.HowTo performHowToStaffTreble;
 		public Perform.HowTo performHowToStaffBass;
-		
+
 		private bool isHighlighted;
 		private Rectangle highlightRect;
 		public Rect bounds { get; private set; } = Rect.Empty;
@@ -78,6 +78,43 @@ namespace Nutadore
 			double cursor = left;
 			double right = left;
 
+			// Wyszukujemy wszystkie nuty w stepie odległe od siebie o połowę odstępu
+			List<Note> allNotesInStep = SelectNotes();
+			var x = (
+				from note1 in allNotesInStep
+				from note2 in allNotesInStep
+				where
+					note1.staffType == note2.staffType &&
+					Math.Abs(note1.staffPosition.Number - note2.staffPosition.Number) == 0.5
+				select new { note1, note2 }
+				).Distinct();
+
+			// Tu zaczalem ustawianie nut na prawo i lewo
+			List<Note> noteOnRigth = SelectNotes().OrderBy(note => note).ToList();
+			List<Note> noteOnLeft = new List<Note>();
+			for (int pass = 0; pass < 2; pass++)
+			{
+				bool collisionFound = false;
+				do
+				{
+					collisionFound = false;
+					foreach (Note note in noteOnRigth)
+					{
+						var collideNotes = noteOnRigth.Where(n =>
+							note.staffType == n.staffType
+							&& Math.Abs(note.staffPosition.Number - n.staffPosition.Number) == 0.5
+							&& !note.Equals(n));
+						if (collideNotes.Count() > (pass == 0 ? 1 : 0))
+						{
+							noteOnRigth.Remove(note);
+							noteOnLeft.Add(note);
+							collisionFound = true;
+							break;
+						}
+					}
+				} while (collisionFound);
+			}
+
 			// Jeśli nuta w jednym głosie ma przypadkowy znak chromatyczny, nuty w pozostałych 
 			// głosach trzeba przesunąć w prawo, by ich główki były w jednej linii.
 			double noteHeadShift = .0;
@@ -103,7 +140,8 @@ namespace Nutadore
 					if (voice.bounds.Right > right || voice.bounds.Right == -1)
 						right = voice.bounds.Right;
 				}
-				if (phase == 0) {
+				if (phase == 0)
+				{
 					// Czy jakaś nuta w jakimś głosie miała przypadkowy znak chromatyczny?
 					if (noteHeadShift > 0)
 					{
@@ -278,6 +316,15 @@ namespace Nutadore
 
 		public List<Note> SelectNotes()
 		{
+			return voices
+				.Where(voice => voice is Chord)
+				.SelectMany(voice => (voice as Chord).notes)
+				.Union(
+					voices
+						.Where(voice => voice is Note)
+						.Select(voice => voice as Note)
+				).ToList();
+			/*
 			List<Note> notes = new List<Note>();
 			foreach (Sign voice in voices)
 			{
@@ -294,6 +341,7 @@ namespace Nutadore
 			}
 
 			return notes;
+			*/
 		}
 
 		public void Highlight(bool highlight)

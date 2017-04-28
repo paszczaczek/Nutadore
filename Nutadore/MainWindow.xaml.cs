@@ -28,13 +28,50 @@ namespace Nutadore
 			score.ConnectKeyboard(keyboard);
 			keyboard.ConnectScore(score);
 
-			BachAirInDMajor();
-			//AddSteps();
+			//BachAirInDMajor();
+			AddTest1();
 			//AddSteps();
 			//AddAllTriads();
 			//AddAllNotes();
 			//AddTriad();
 			//score.Add(new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.OneLined));
+		}
+
+		private void AddTest1()
+		{
+			Chord chord1 = new Chord();
+			chord1.Add(new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.OneLined));
+			chord1.Add(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.OneLined));
+			chord1.Add(new Note(Note.Letter.E, Accidental.Type.None, Note.Octave.OneLined));
+			chord1.Add(new Note(Note.Letter.F, Accidental.Type.None, Note.Octave.OneLined));
+			chord1.Add(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.OneLined));
+
+			Note note1 = new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.TwoLined);
+			Note note2 = new Note(Note.Letter.E, Accidental.Type.None, Note.Octave.TwoLined);
+			Note note3 = new Note(Note.Letter.F, Accidental.Type.None, Note.Octave.TwoLined);
+			Note note4 = new Note(Note.Letter.H, Accidental.Type.None, Note.Octave.TwoLined);
+
+			Chord chord2 = new Chord();
+			chord2.Add(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.Great));
+			chord2.Add(new Note(Note.Letter.F, Accidental.Type.None, Note.Octave.Great));
+			chord2.Add(new Note(Note.Letter.A, Accidental.Type.None, Note.Octave.Great));
+			chord2.Add(new Note(Note.Letter.H, Accidental.Type.None, Note.Octave.Great));
+
+			Note note5 = new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.Great);
+			Note note6 = new Note(Note.Letter.F, Accidental.Type.None, Note.Octave.Small);
+
+
+			Step step = new Step();
+			step.AddVoice(chord1);
+			step.AddVoice(note1);
+			step.AddVoice(note2);
+			//step.AddVoice(note3);
+			//step.AddVoice(note4);
+			//step.AddVoice(chord2);
+			//step.AddVoice(note5);
+			//step.AddVoice(note6);
+
+			score.Add(step);
 		}
 
 		private void BachAirInDMajor()
