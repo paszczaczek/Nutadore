@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -6,16 +7,18 @@ using System.Windows.Shapes;
 
 namespace Nutadore
 {
-	public class Chord : Sign
+	public class Chord : Sign, INoteOffset
 	{
 		public List<Note> notes = new List<Note>();
 
-		//public Step step {
-		//	set
-		//	{
-		//		notes.ForEach(note => note.step = value);
-		//	}
-		//}
+		public double headOffset { get; private set; }
+
+		private double _offset;
+		public double offset
+		{
+			private get { return _offset; }
+			set { notes.ForEach(note => note.offset = value + headOffset - note.headOffset); _offset = value; }
+		}
 
 		public void Add(Note note)
 		{
@@ -41,6 +44,7 @@ namespace Nutadore
 			Note bassLowestNote = bassNotes.FirstOrDefault(note => note.staffPosition <= StaffPosition.ByLegerBelow(1));
 
 			// Narysuj wszystkie nuty akordu.
+			headOffset = 0;
 			foreach (var note in notes)
 			{
 				// Linie dodane rysuj tylko dla najwyzszej i najniższej nuty.
@@ -54,6 +58,7 @@ namespace Nutadore
 					? trebleStaff
 					: bassStaff;
 				double noteCursor = note.AddToScore(score, trebleStaff, bassStaff, step, left);
+				headOffset = Math.Max(headOffset, note.headOffset);
 				if (noteCursor == -1)
 					return -1;
 				if (noteCursor > cursor)

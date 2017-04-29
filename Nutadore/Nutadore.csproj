@@ -59,6 +59,7 @@
     </ApplicationDefinition>
     <Compile Include="Chord.cs" />
     <Compile Include="Clef.cs" />
+    <Compile Include="INoteOffset.cs" />
     <Compile Include="Key.cs" />
     <Compile Include="Keyboard.cs" />
     <Compile Include="KeyboardEventArgs.cs" />

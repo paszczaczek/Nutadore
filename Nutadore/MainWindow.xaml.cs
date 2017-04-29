@@ -40,13 +40,13 @@ namespace Nutadore
 		private void AddTest1()
 		{
 			Chord chord1 = new Chord();
-			chord1.Add(new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.OneLined));
+			chord1.Add(new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.OneLined));
 			chord1.Add(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.OneLined));
-			chord1.Add(new Note(Note.Letter.E, Accidental.Type.None, Note.Octave.OneLined));
-			chord1.Add(new Note(Note.Letter.F, Accidental.Type.None, Note.Octave.OneLined));
-			chord1.Add(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.OneLined));
+			chord1.Add(new Note(Note.Letter.E, Accidental.Type.Flat, Note.Octave.OneLined));
+			//chord1.Add(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.OneLined));
+			//chord1.Add(new Note(Note.Letter.G, Accidental.Type.Sharp, Note.Octave.OneLined));
 
-			Note note1 = new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.TwoLined);
+			Note note1 = new Note(Note.Letter.D, Accidental.Type.Sharp, Note.Octave.TwoLined);
 			Note note2 = new Note(Note.Letter.E, Accidental.Type.None, Note.Octave.TwoLined);
 			Note note3 = new Note(Note.Letter.F, Accidental.Type.None, Note.Octave.TwoLined);
 			Note note4 = new Note(Note.Letter.H, Accidental.Type.None, Note.Octave.TwoLined);
@@ -65,11 +65,12 @@ namespace Nutadore
 			step.AddVoice(chord1);
 			step.AddVoice(note1);
 			step.AddVoice(note2);
-			//step.AddVoice(note3);
-			//step.AddVoice(note4);
-			//step.AddVoice(chord2);
-			//step.AddVoice(note5);
-			//step.AddVoice(note6);
+
+			step.AddVoice(note3);
+			step.AddVoice(note4);
+			step.AddVoice(chord2);
+			step.AddVoice(note5);
+			step.AddVoice(note6);
 
 			score.Add(step);
 		}
@@ -201,7 +202,7 @@ namespace Nutadore
 			{
 				Note note = new Note(
 					whiteKeys[k].note.letter,
-					whiteKeys[k].note.accidentalType,
+					whiteKeys[k].note.accidental.type,
 					whiteKeys[k].note.octave);
 
 				Note note2 = new Note(

@@ -117,7 +117,7 @@ namespace Nutadore
 
 		private Key FindKey(Note note)
 		{
-			return keys.Find(key => key.note.Equals(note));
+			return keys.Find(key => key.note.EqualsEffective(note));
 		}
 
 		private void Keyboard_SizeChanged(object sender, SizeChangedEventArgs e)

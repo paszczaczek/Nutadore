@@ -13,6 +13,7 @@ namespace Nutadore
 {
 	public class Step
 	{
+		#region props & types
 		public List<Sign> voices = new List<Sign>();
 
 		private List<Note> notGuessedNotes = new List<Note>();
@@ -37,6 +38,7 @@ namespace Nutadore
 		private bool isHighlighted;
 		private Rectangle highlightRect;
 		public Rect bounds { get; private set; } = Rect.Empty;
+		#endregion
 
 		public Step AddVoice(Sign voice)
 		{
@@ -78,57 +80,23 @@ namespace Nutadore
 			double cursor = left;
 			double right = left;
 
-			// Wyszukujemy wszystkie nuty w stepie odległe od siebie o połowę odstępu
-			List<Note> allNotesInStep = SelectNotes();
-			var x = (
-				from note1 in allNotesInStep
-				from note2 in allNotesInStep
-				where
-					note1.staffType == note2.staffType &&
-					Math.Abs(note1.staffPosition.Number - note2.staffPosition.Number) == 0.5
-				select new { note1, note2 }
-				).Distinct();
-
-			// Tu zaczalem ustawianie nut na prawo i lewo
-			List<Note> noteOnRigth = SelectNotes().OrderBy(note => note).ToList();
-			List<Note> noteOnLeft = new List<Note>();
-			for (int pass = 0; pass < 2; pass++)
-			{
-				bool collisionFound = false; 
-				do
-				{
-					collisionFound = false;
-					foreach (Note note in noteOnRigth)
-					{
-						var collideNotes = noteOnRigth.Where(n =>
-							note.staffType == n.staffType
-							&& Math.Abs(note.staffPosition.Number - n.staffPosition.Number) == 0.5
-							&& !note.Equals(n));
-						if (collideNotes.Count() > (pass == 0 ? 1 : 0))
-						{
-							noteOnRigth.Remove(note);
-							noteOnLeft.Add(note);
-							collisionFound = true;
-							break;
-						}
-					}
-				} while (collisionFound);
-			}
+			// Przenieś główki nut na lewą stronę, gdy nachodzą na siebie.
+			EliminateNoteHeadsCollisions();
 
 			// Jeśli nuta w jednym głosie ma przypadkowy znak chromatyczny, nuty w pozostałych 
 			// głosach trzeba przesunąć w prawo, by ich główki były w jednej linii.
-			double noteHeadShift = .0;
+			double noteHeadOffsetMax = .0;
 			for (int phase = 0; phase <= 1; phase++)
 			{
 				// Dodajemy do score poszczególne głosy.
 				foreach (Sign voice in voices)
 				{
-					Note note = voice as Note;
+					INoteOffset note = voice as INoteOffset;
 					if (note != null)
-						note.headShift = phase == 0 ? .0 : noteHeadShift;
+						note.offset = phase == 0 ? .0 : noteHeadOffsetMax - note.headOffset;
 					double voiceCursor = voice.AddToScore(score, trebleStaff, bassStaff, this, left);
 					if (note != null)
-						noteHeadShift = Math.Max(note.headShift, noteHeadShift);
+						noteHeadOffsetMax = Math.Max(note.headOffset, noteHeadOffsetMax);
 					if (voiceCursor == -1)
 					{
 						// Jeden z głosów nie zmieścił się - wycofujemy pozostałe.
@@ -143,7 +111,7 @@ namespace Nutadore
 				if (phase == 0)
 				{
 					// Czy jakaś nuta w jakimś głosie miała przypadkowy znak chromatyczny?
-					if (noteHeadShift > 0)
+					if (noteHeadOffsetMax > 0)
 					{
 						// Tak - wycofujemy wszystkie głosy i narysujemy je jeszcze raz z przesunięciem.
 						foreach (Sign voice in voices)
@@ -192,6 +160,61 @@ namespace Nutadore
 			bounds = new Rect(left, top, right - left, bottom - top);
 
 			return cursor;
+		}
+
+		private void EliminateNoteHeadsCollisions()
+		{
+			// Główki nut zachodzące na siebie przenosi na lewą stronę.
+
+			// Wyszukujemy wszystkie nuty w stepie odległe od siebie o połowę odstępu.
+			List<Note> allNotesInStep = SelectNotes();
+			var x = (
+				from note1 in allNotesInStep
+				from note2 in allNotesInStep
+				where
+					note1.staffType == note2.staffType &&
+					Math.Abs(note1.staffPosition.Number - note2.staffPosition.Number) == 0.5
+				select new { note1, note2 }
+				).Distinct();
+
+			// W pierwszym kroku wyszukujemny nuty których główki kolidują z dwoma 
+			// innymi nutami i przenosimy je na lewą stronę. W drugim kroku to samo
+			// ale z nutami które kolidują z jedną inną nutą.
+			List<Note> notesOnRigth = SelectNotes().OrderBy(note => note).ToList();
+			List<Note> notesOnLeft = new List<Note>();
+			for (int pass = 0; pass < 2; pass++)
+			{
+				bool collisionFound = false;
+				do
+				{
+					collisionFound = false;
+					foreach (Note note in notesOnRigth)
+					{
+						var collideNotes = notesOnRigth.Where(n =>
+							note.staffType == n.staffType
+							&& Math.Abs(note.staffPosition.Number - n.staffPosition.Number) == 0.5
+							&& !note.Equals(n));
+						if (collideNotes.Count() > (pass == 0 ? 1 : 0))
+						{
+							notesOnRigth.Remove(note);
+							notesOnLeft.Add(note);
+							collisionFound = true;
+							break;
+						}
+					}
+				} while (collisionFound);
+			}
+
+			// Jeśli nut po lewej stronie jest więcej, to zamieniamy strony, bo to źle wygląda.
+			if (notesOnLeft.Count > notesOnRigth.Count)
+			{
+				var notesTmp = notesOnRigth;
+				notesOnRigth = notesOnLeft;
+				notesOnLeft = notesTmp;
+			}
+
+			// Zazanaczmy nuty po lewej stronie.
+			notesOnLeft.ForEach(note => note.isHeadOnLeft = true);
 		}
 
 		public void RemoveFromScore(Score score)
@@ -388,7 +411,7 @@ namespace Nutadore
 			else
 			{
 				// Nie, dodajemy czerwoną nutę.
-				note = new Note(noteDown.letter, noteDown.accidentalType, noteDown.octave);
+				note = new Note(noteDown.letter, noteDown.accidental.type, noteDown.octave);
 				note.AddToScore(score, trebleStaff, bassStaff, this, left);
 				note.Guessed = false;
 				notGuessedNotes.Add(note);

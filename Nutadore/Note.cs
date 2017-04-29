@@ -8,14 +8,15 @@ using System.Windows.Shapes;
 
 namespace Nutadore
 {
-	public class Note : Sign, IComparable<Note>
+	public class Note : Sign, INoteOffset, IComparable<Note>
 	{
+		#region props & types
 		private static Brush currentBrush = Brushes.DarkGray; // LightSeaGreen;
 		private static Brush highlightBrush = Brushes.DarkGray;
 
 		public Letter letter;
 		public Octave octave;
-		public Accidental.Type accidentalType;
+		public Accidental accidental;
 		public Perform.HowTo performHowTo;
 		public StaffPosition staffPosition = StaffPosition.ByLine(1);
 		public Staff.Type staffType;
@@ -41,16 +42,18 @@ namespace Nutadore
 		}
 
 		public bool showLegerLines = true;
-		public double right { get; private set; } 
+		public double right { get; private set; }
 
 		public static readonly Note lowest = new Note(Letter.A, Accidental.Type.None, Octave.SubContra);
 		public static readonly Note highest = new Note(Letter.C, Accidental.Type.None, Octave.FiveLined);
 
-		private Accidental accidental;
 		private TextBlock head;
-		public double headShift;
+		public double headOffset { get; private set; }
+		public double offset { private get; set; }
+		public bool isHeadOnLeft;
 
-		public enum Letter {
+		public enum Letter
+		{
 			C,
 			D,
 			E,
@@ -72,11 +75,12 @@ namespace Nutadore
 			FourLined,
 			FiveLined
 		}
+		#endregion
 
 		public Note(Letter letter, Accidental.Type accidentalType, Octave octave, Staff.Type? preferredStaffType = null)
 		{
 			this.letter = letter;
-			this.accidentalType = accidentalType;
+			this.accidental = new Accidental(accidentalType);
 			this.octave = octave;
 			this.staffPosition = ToStaffPosition(preferredStaffType);
 		}
@@ -94,127 +98,10 @@ namespace Nutadore
 				: bassStaff;
 
 			// Rysujemy znak chromatyczny.
-			if (accidentalType != Accidental.Type.None)
-			{
-				accidental = new Accidental(Accidental.Type.Sharp, staffPosition, staffType);
-				accidental.isKeySignatureHint = score.scale.AccidentalForLetter(letter) != Accidental.Type.None;
-				base.ExtendBounds(accidental.bounds);
-				right = accidental.AddToScore(score, trebleStaff, bassStaff, step, left);
-				headShift = right - left;
-			}
+			AddAccidentalToScore(score, trebleStaff, bassStaff, step, left);
 
 			// Rysujemy główkę nuty.
-			//double noteLeft = right;
-			string glyphCode = "\x0056";
-			double glyphTop
-					= staff.top * score.Magnification
-					 + (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
-			glyphTop -= 57.5 * score.Magnification;
-			right = base.AddGlyphToScore(score, left + headShift, glyphTop, glyphCode, 1);
-			head = base.elements.FindLast(e => true) as TextBlock;
-			// Rysujemy linie dodane górne i dolne - jeśli nuta nie jest częścią akordu.
-			if (showLegerLines)
-				AddLegerLinesToScore(score, trebleStaff, bassStaff, left + headShift);
-
-			// Rysujemy pomocniczą nazwę nuty - literę.
-			double letterTop
-					= staff.top * score.Magnification
-					+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
-			double letterLeft = left + headShift;
-			double letterScale = 1;
-			string noteString = ToString();
-			if (noteString.Length == 3) {
-				letterTop -= 3.5 * score.Magnification;
-				letterLeft += 2 * score.Magnification;
-				letterScale = 0.7;
-			} else if (noteString.Length == 2)
-			{
-				letterTop -= 4.5 * score.Magnification;
-				letterLeft += 3 * score.Magnification;
-				letterScale = 0.8;
-			}
-			else
-			{
-				letterTop -= 6 * score.Magnification;
-				letterLeft += 4 * score.Magnification;
-				letterScale = 0.9;
-			}
-			TextBlock letterTextBlock = new TextBlock
-			{
-				FontFamily = new FontFamily("Consolas"),
-				FontSize = 12 * score.Magnification * letterScale,
-				//Content = this.letter.ToString(),
-				Text = ToString("{letter}"),
-				Foreground = Brushes.White,
-				Padding = new Thickness(0, 0, 0, 0),
-				Margin = new Thickness(letterLeft, letterTop, 0, 0)
-			};
-			base.AddElementToScore(score, letterTextBlock, 2);
-			FormattedText letterFormattedText = new FormattedText(
-				letterTextBlock.Text,
-				CultureInfo.GetCultureInfo("en-us"),
-				FlowDirection.LeftToRight,
-				new Typeface("Consolas"),
-				letterTextBlock.FontSize,
-				Brushes.Black);
-
-			// Rysujemy pomocniczą nazwę nuty - krzyżyk lub bemol.
-			string accidentalGlyphCode = string.Empty;
-			double accidentalLeft = 0;
-			FormattedText accidentalFormattedText = null;
-			switch (accidentalType)
-			{
-				case Accidental.Type.Sharp:
-					accidentalGlyphCode = "\x002e";
-					break;
-				case Accidental.Type.Flat:
-					throw new NotImplementedException();
-			}
-			if (accidentalGlyphCode != string.Empty)
-			{
-				double accidentalTop
-						= staff.top * score.Magnification
-						+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
-				accidentalTop -= 9 * score.Magnification;
-				accidentalLeft = letterLeft + letterFormattedText.Width;
-				TextBlock accidentalTextBlock = new TextBlock
-				{
-					FontFamily = new FontFamily("feta26"),
-					FontSize = 12 * score.Magnification * 0.6,
-					Text = "\x002e",
-					Foreground = Brushes.White,
-					Padding = new Thickness(0, 0, 0, 0),
-					Margin = new Thickness(accidentalLeft, accidentalTop, 0, 0)
-				};
-				base.AddElementToScore(score, accidentalTextBlock, 2);
-				accidentalFormattedText = new FormattedText(
-					accidentalTextBlock.Text,
-					CultureInfo.GetCultureInfo("en-us"),
-					FlowDirection.LeftToRight,
-					new Typeface("feta26"),
-					letterTextBlock.FontSize,
-					Brushes.Black);
-			}
-
-			// Rysujemy pomocniczą nazwę nuty - numer oktawy.
-			double octaveTop
-						= staff.top * score.Magnification
-						+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
-			octaveTop -= 5.5 * score.Magnification;
-			double octaveLeft
-				= accidentalGlyphCode == string.Empty 
-				? letterLeft + letterFormattedText.Width
-				: accidentalLeft + accidentalFormattedText.Width;
-			TextBlock octaveTextBlock = new TextBlock
-			{
-				FontFamily = new FontFamily("Consola"),
-				FontSize = 12 * score.Magnification * 0.5,
-				Text = ToString("{octave}"),
-				Foreground = Brushes.White,
-				Padding = new Thickness(0, 0, 0, 0),
-				Margin = new Thickness(octaveLeft, octaveTop, 0, 0)
-			};
-			base.AddElementToScore(score, octaveTextBlock, 2);
+			AddHeadToScore(score, trebleStaff, bassStaff, staff, left);
 
 			// Dodajemy prostokąt reagujący na mysz.
 			double top = base.bounds.Top;
@@ -248,21 +135,9 @@ namespace Nutadore
 				return right + Staff.spaceBetweenSigns * score.Magnification;
 			}
 		}
-	
-		public override void RemoveFromScore(Score score)
-		{
-			accidental?.RemoveFromScore(score);
-			base.RemoveFromScore(score);
-		}
 
-		private void AddLegerLinesToScore(Score score, Staff trebleStaff, Staff bassStaff, double left)
+		private void AddLegerLinesToScore(Score score, Staff trebleStaff, Staff bassStaff, Staff staff, double left)
 		{
-			// Na której pięciolinii ma być umieszczona nuta?
-			Staff staff
-				= staffType == Staff.Type.Treble
-				? trebleStaff
-				: bassStaff;
-
 			// Czy trzeba dorysować linie dodane?
 			double legerLeft = left - (right - left) * 0.2;
 			double legerRight = right + (right - left) * 0.2;
@@ -308,6 +183,149 @@ namespace Nutadore
 			}
 		}
 
+		private void AddAccidentalToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left)
+		{
+			if (accidental.type == Accidental.Type.None)
+				return;
+			accidental.staffPosition = staffPosition;
+			accidental.staffType = staffType;
+			accidental.isKeySignatureHint = score.scale.AccidentalForLetter(letter) != Accidental.Type.None;
+			right = accidental.AddToScore(score, trebleStaff, bassStaff, step, left);
+			base.ExtendBounds(accidental.bounds);
+			headOffset = right - left;
+
+			//accidental = new Accidental(accidental.type, staffPosition, staffType);
+			//	accidental.isKeySignatureHint = score.scale.AccidentalForLetter(letter) != Accidental.Type.None;
+			//	base.ExtendBounds(accidental.bounds);
+			//}
+			//right = accidental.AddToScore(score, trebleStaff, bassStaff, step, left);
+			//headShift = right - left;
+		}
+
+		private void AddHeadToScore(Score score, Staff trebleStaff, Staff bassStaff, Staff staff, double left)
+		{
+			// Rysujemy główkę nuty.
+			string glyphCode = "\x0056";
+			double glyphTop
+					= staff.top * score.Magnification
+					 + (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
+			glyphTop -= 57.5 * score.Magnification;
+			right = base.AddGlyphToScore(score, left + offset + headOffset, glyphTop, glyphCode, 1);
+			head = base.elements.FindLast(e => true) as TextBlock;
+			// Rysujemy linie dodane górne i dolne - jeśli nuta nie jest częścią akordu.
+			if (showLegerLines)
+				AddLegerLinesToScore(score, trebleStaff, bassStaff, staff, left + headOffset);
+
+			// Rysujemy pomocniczą nazwę nuty - literę.
+			double letterTop
+					= staff.top * score.Magnification
+					+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
+			double letterLeft = left + offset + headOffset;
+			double letterScale = 1;
+			string noteString = ToString();
+			if (noteString.Length == 3)
+			{
+				letterTop -= 3.5 * score.Magnification;
+				letterLeft += 2 * score.Magnification;
+				letterScale = 0.7;
+			}
+			else if (noteString.Length == 2)
+			{
+				letterTop -= 4.5 * score.Magnification;
+				letterLeft += 3 * score.Magnification;
+				letterScale = 0.8;
+			}
+			else
+			{
+				letterTop -= 6 * score.Magnification;
+				letterLeft += 4 * score.Magnification;
+				letterScale = 0.9;
+			}
+			TextBlock letterTextBlock = new TextBlock
+			{
+				FontFamily = new FontFamily("Consolas"),
+				FontSize = 12 * score.Magnification * letterScale,
+				//Content = this.letter.ToString(),
+				Text = ToString("{letter}"),
+				Foreground = Brushes.White,
+				Padding = new Thickness(0, 0, 0, 0),
+				Margin = new Thickness(letterLeft, letterTop, 0, 0)
+			};
+			base.AddElementToScore(score, letterTextBlock, 2);
+			FormattedText letterFormattedText = new FormattedText(
+				letterTextBlock.Text,
+				CultureInfo.GetCultureInfo("en-us"),
+				FlowDirection.LeftToRight,
+				new Typeface("Consolas"),
+				letterTextBlock.FontSize,
+				Brushes.Black);
+
+			// Rysujemy pomocniczą nazwę nuty - krzyżyk lub bemol.
+			string accidentalGlyphCode = string.Empty;
+			double accidentalLeft = 0;
+			FormattedText accidentalFormattedText = null;
+			switch (accidental.type)
+			{
+				case Accidental.Type.Sharp:
+					accidentalGlyphCode = "\x002e";
+					break;
+				case Accidental.Type.Flat:
+					accidentalGlyphCode = "\x003a";
+					break;
+			}
+			if (accidentalGlyphCode != string.Empty)
+			{
+				double accidentalTop
+						= staff.top * score.Magnification
+						+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
+				accidentalTop -= 9 * score.Magnification;
+				accidentalLeft = letterLeft + letterFormattedText.Width;
+				TextBlock accidentalTextBlock = new TextBlock
+				{
+					FontFamily = new FontFamily("feta26"),
+					FontSize = 12 * score.Magnification * 0.6,
+					Text = "\x002e",
+					Foreground = Brushes.White,
+					Padding = new Thickness(0, 0, 0, 0),
+					Margin = new Thickness(accidentalLeft, accidentalTop, 0, 0)
+				};
+				base.AddElementToScore(score, accidentalTextBlock, 2);
+				accidentalFormattedText = new FormattedText(
+					accidentalTextBlock.Text,
+					CultureInfo.GetCultureInfo("en-us"),
+					FlowDirection.LeftToRight,
+					new Typeface("feta26"),
+					letterTextBlock.FontSize,
+					Brushes.Black);
+			}
+
+			// Rysujemy pomocniczą nazwę nuty - numer oktawy.
+			double octaveTop
+						= staff.top * score.Magnification
+						+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
+			octaveTop -= 5.5 * score.Magnification;
+			double octaveLeft
+				= accidentalGlyphCode == string.Empty
+				? letterLeft + letterFormattedText.Width
+				: accidentalLeft + accidentalFormattedText.Width;
+			TextBlock octaveTextBlock = new TextBlock
+			{
+				FontFamily = new FontFamily("Consola"),
+				FontSize = 12 * score.Magnification * 0.5,
+				Text = ToString("{octave}"),
+				Foreground = Brushes.White,
+				Padding = new Thickness(0, 0, 0, 0),
+				Margin = new Thickness(octaveLeft, octaveTop, 0, 0)
+			};
+			base.AddElementToScore(score, octaveTextBlock, 2);
+		}
+
+		public override void RemoveFromScore(Score score)
+		{
+			accidental?.RemoveFromScore(score);
+			base.RemoveFromScore(score);
+		}
+
 		public StaffPosition ToStaffPosition(Staff.Type? preferredStaffType, bool withPerform = true)
 		{
 			// na której linii leży dźwięk C z oktawy w której jest nuta
@@ -333,7 +351,7 @@ namespace Nutadore
 					// domyślnie wszystkie nuty z tej oktawy leżą na pięciolinii basowej
 					// nuty od F włącznie mogą leżeć na pięciolini wiolinowej
 					if (preferredStaffType == null ||
-						preferredStaffType == Staff.Type.Bass || 
+						preferredStaffType == Staff.Type.Bass ||
 						preferredStaffType == Staff.Type.Treble && letter < Letter.F)
 					{
 						staffType = Staff.Type.Bass;
@@ -349,7 +367,7 @@ namespace Nutadore
 					// domyślnie wszystkie nuty z tej oktawy leżą na pięciolinii wiolinowej
 					// nuty do G włącznie mogą leżeć na pięciolini basowej
 					if (preferredStaffType == null ||
-						preferredStaffType == Staff.Type.Treble || 
+						preferredStaffType == Staff.Type.Treble ||
 						preferredStaffType == Staff.Type.Bass && letter > Letter.G)
 					{
 						staffType = Staff.Type.Treble;
@@ -461,26 +479,26 @@ namespace Nutadore
 					letterUpper = false;
 					break;
 			}
-			string accidental;
-			switch (accidentalType)
+			string accidentalSing;
+			switch (accidental.type)
 			{
 				case Accidental.Type.None:
 				default:
-					accidental = "";
+					accidentalSing = "";
 					break;
 				case Accidental.Type.Flat:
-					accidental = "b";
+					accidentalSing = "b";
 					break;
 				case Accidental.Type.Sharp:
-					accidental = "#";
+					accidentalSing = "#";
 					break;
 				case Accidental.Type.Natural:
-					accidental = "N";
+					accidentalSing = "N";
 					break;
 			}
 
 			format = format.Replace("{letter}", letterUpper ? letter.ToString().ToUpper() : letter.ToString().ToLower());
-			format = format.Replace("{accidental}", accidental);
+			format = format.Replace("{accidental}", accidentalSing);
 			format = format.Replace("{octave}", octaveIndex);
 
 			return format;
@@ -507,7 +525,7 @@ namespace Nutadore
 				return false;
 
 			if (this.letter == other.letter &&
-				this.accidentalType == other.accidentalType &&
+				this.accidental.type == other.accidental.type &&
 				this.octave == other.octave)
 				return true;
 
@@ -516,9 +534,35 @@ namespace Nutadore
 			return false;
 		}
 
+		private Note UnificateAccidentals()
+		{
+			// Nute z krzyżykiem przerabiamy na nute z bemolem.
+			if (accidental.type == Accidental.Type.Flat)
+			{
+				Letter uLetter = letter == Letter.C ? Letter.H : letter - 1;
+				if (octave == Octave.SubContra)
+					throw new ArgumentOutOfRangeException(letter.ToString(), "Nuta poza dolnym zakresem!");
+				Octave uOctave = octave - 1;
+
+				return new Note(uLetter, Accidental.Type.Sharp, uOctave);
+			}
+			else
+				return new Note(letter, accidental.type, octave, staffType);
+		}
+
+		public bool EqualsEffective(Note other)
+		{
+			return UnificateAccidentals().EqualsChromatic(other.UnificateAccidentals());
+		}
+
+		public bool EqualsChromatic(Note other)
+		{
+			return CompareTo(other) == 0;
+		}
+
 		public override int GetHashCode()
 		{
-			return (int)octave * 10 + (int)letter;
+			return (int)octave * 100 + (int)letter * 10 + (int)accidental.type * 1;
 		}
 
 		public int CompareTo(Note other)

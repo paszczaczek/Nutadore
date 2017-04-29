@@ -26,7 +26,7 @@ namespace Nutadore
 		public Staff.Type? staffType;
 		public bool isKeySignatureHint;
 
-		public Accidental(Type type, StaffPosition statfPosition, Staff.Type? staffType = null)
+		public Accidental(Type type, StaffPosition statfPosition = null, Staff.Type? staffType = null)
 		{
 			this.type = type;
 			this.staffPosition = statfPosition;
@@ -43,7 +43,8 @@ namespace Nutadore
 				case Type.None:
 					return left;
 				case Type.Flat:
-					throw new NotImplementedException();
+					glyphCode = "\x003a";
+					break;
 				case Type.Sharp:
 					glyphCode = "\x002e";
 					break;
