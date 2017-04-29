@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Nutadore
 {
-	interface INoteOffset
+	interface INoteOffsets
 	{
 		double offset { set; }
 		double headOffset { get; }

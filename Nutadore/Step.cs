@@ -91,12 +91,12 @@ namespace Nutadore
 				// Dodajemy do score poszczególne głosy.
 				foreach (Sign voice in voices)
 				{
-					INoteOffset note = voice as INoteOffset;
-					if (note != null)
-						note.offset = phase == 0 ? .0 : noteHeadOffsetMax - note.headOffset;
+					INoteOffsets offs = voice as INoteOffsets;
+					if (offs != null)
+						offs.offset = phase == 0 ? .0 : noteHeadOffsetMax - offs.headOffset;
 					double voiceCursor = voice.AddToScore(score, trebleStaff, bassStaff, this, left);
-					if (note != null)
-						noteHeadOffsetMax = Math.Max(note.headOffset, noteHeadOffsetMax);
+					if (offs != null)
+						noteHeadOffsetMax = Math.Max(offs.headOffset, noteHeadOffsetMax);
 					if (voiceCursor == -1)
 					{
 						// Jeden z głosów nie zmieścił się - wycofujemy pozostałe.

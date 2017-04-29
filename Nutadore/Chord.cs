@@ -7,7 +7,7 @@ using System.Windows.Shapes;
 
 namespace Nutadore
 {
-	public class Chord : Sign, INoteOffset
+	public class Chord : Sign, INoteOffsets
 	{
 		public List<Note> notes = new List<Note>();
 

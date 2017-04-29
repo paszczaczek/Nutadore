@@ -8,7 +8,7 @@ using System.Windows.Shapes;
 
 namespace Nutadore
 {
-	public class Note : Sign, INoteOffset, IComparable<Note>
+	public class Note : Sign, INoteOffsets, IComparable<Note>
 	{
 		#region props & types
 		private static Brush currentBrush = Brushes.DarkGray; // LightSeaGreen;
