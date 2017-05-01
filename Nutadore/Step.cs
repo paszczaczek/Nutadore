@@ -227,7 +227,7 @@ namespace Nutadore
 			// algorytm jest trochę nadgorliwy i okazuje się że nie które
 			// znaki mozna przenieść do kolumn w prawo. Zaczynając od znaków
 			// najbardziej przesuniętych w lewo sprawdzamy, czy  nie można
-			// ich umieścić bliżej nuty.
+			// ich umieścić bardziej na prawo.
 			var notesOrdByAccidentalColumn = notes
 				.OrderBy(note => note)
 				.OrderByDescending(note => note.accidentalColumn);

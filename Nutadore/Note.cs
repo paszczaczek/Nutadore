@@ -258,18 +258,45 @@ namespace Nutadore
 					 + (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
 			glyphTop -= 57.5 * score.Magnification;
 			headOffset = right - left;
-			//double glyphLeft = left + offset + headOffset;
 			double glyphLeft = right;
-			if (isHeadReversed)
+			double headWidth = base.GlyphFormatedText(score, glyphCode).Width;
+			// Wyznaczamy położenie i offset głowki nuty.
+			/*
+			 *       |
+			 *     # |o  (2)
+			 *     #o|   (1)
+			 *    
+			 *   # |o    (3)
+			 *   #o|     (4)
+			 *     |
+			 */
+			if (stemDirection == StemDirection.Up)
 			{
-				double headWidth = base.GlyphFormatedText(score, glyphCode).Width;
-				if (stemDirection == StemDirection.Up)
+				if (!isHeadReversed)
 				{
-					// Nutę po drugiej stronie ogonka skierowanego ku górze rysujemy za ogonkiem.
+					// (1) Nuta z laseczka ku górze nieodwrócona - rysujemy przed laseczą.
+					// #o|
+				}
+				else
+				{
+					// (2) Nuta z laseczką ku górze odwrocona - rysujemy ja za laseczka.
+					// # |o
 					glyphLeft += headWidth;
-				} else if (stemDirection == StemDirection.Down)
+				}
+			}
+			else if (stemDirection == StemDirection.Down)
+			{
+				if (!isHeadReversed)
 				{
-					// Nutę po drugiej stronie ogonka sierowanego ku dolowi rysujemy przed ogonkiem.
+					// (3) Nuta z laseczką ku kołowi nieodwrócona - rysujemy za laseczką.
+					// # o|
+					headOffset += headWidth;
+					glyphLeft += headWidth;
+				}
+				else
+				{
+					// (4) Nuta z laseczką ku dołowi odwrócona - rysujemy ją przed laseczką.
+					// #o|
 					headOffset += headWidth;
 				}
 			}

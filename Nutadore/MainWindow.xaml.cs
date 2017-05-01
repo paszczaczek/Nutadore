@@ -90,7 +90,7 @@ namespace Nutadore
 			finger = 1;
 			foreach (Note note in notesDown)
 			{
-				note.stemDirection = Note.StemDirection.Up;
+				note.stemDirection = Note.StemDirection.Down;
 				note.finger = finger++;
 			}
 
@@ -107,8 +107,8 @@ namespace Nutadore
 			Step step = new Step();
 			//step.AddVoice(chord1);
 
-			notesUp.ForEach(note => step.AddVoice(note));
 			notesDown.ForEach(note => step.AddVoice(note));
+			notesUp.ForEach(note => step.AddVoice(note));
 
 			//step.AddVoice(chord2);
 			//step.AddVoice(note6);
