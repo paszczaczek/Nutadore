@@ -49,7 +49,8 @@ namespace Nutadore
 					glyphCode = "\x002e";
 					break;
 				case Type.Natural:
-					throw new NotImplementedException();
+					glyphCode = "\x0036";
+					break;
 				default:
 					throw new NotImplementedException();
 			};

@@ -46,10 +46,53 @@ namespace Nutadore
 			//chord1.Add(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.OneLined));
 			//chord1.Add(new Note(Note.Letter.G, Accidental.Type.Sharp, Note.Octave.OneLined));
 
-			Note note1 = new Note(Note.Letter.D, Accidental.Type.Sharp, Note.Octave.TwoLined);
-			Note note2 = new Note(Note.Letter.E, Accidental.Type.None, Note.Octave.TwoLined);
-			Note note3 = new Note(Note.Letter.F, Accidental.Type.None, Note.Octave.TwoLined);
-			Note note4 = new Note(Note.Letter.H, Accidental.Type.None, Note.Octave.TwoLined);
+			List<Note> notesUp = new List<Note> {
+				new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.TwoLined),
+				new Note(Note.Letter.D, Accidental.Type.Sharp, Note.Octave.TwoLined),
+				new Note(Note.Letter.E, Accidental.Type.Flat, Note.Octave.TwoLined),
+				new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.TwoLined),
+				new Note(Note.Letter.G, Accidental.Type.Sharp, Note.Octave.TwoLined),
+				new Note(Note.Letter.A, Accidental.Type.Sharp, Note.Octave.TwoLined),
+				new Note(Note.Letter.H, Accidental.Type.Flat, Note.Octave.TwoLined),
+
+				new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.ThreeLined),
+				new Note(Note.Letter.D, Accidental.Type.Sharp, Note.Octave.ThreeLined),
+				new Note(Note.Letter.E, Accidental.Type.Flat, Note.Octave.ThreeLined),
+				new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.ThreeLined),
+				new Note(Note.Letter.G, Accidental.Type.Sharp, Note.Octave.ThreeLined),
+				new Note(Note.Letter.A, Accidental.Type.Sharp, Note.Octave.ThreeLined),
+				new Note(Note.Letter.H, Accidental.Type.Flat, Note.Octave.ThreeLined)
+			};
+			int finger = 1;
+			foreach (Note note in notesUp)
+			{
+				note.stemDirection = Note.StemDirection.Up;
+				note.finger = finger++;
+			}
+
+			List<Note> notesDown = new List<Note> { 
+				new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.Great),
+				new Note(Note.Letter.D, Accidental.Type.Sharp, Note.Octave.Great),
+				new Note(Note.Letter.E, Accidental.Type.Flat, Note.Octave.Great),
+				new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.Great),
+				new Note(Note.Letter.G, Accidental.Type.Sharp, Note.Octave.Great),
+				new Note(Note.Letter.A, Accidental.Type.Sharp, Note.Octave.Great),
+				new Note(Note.Letter.H, Accidental.Type.Flat, Note.Octave.Great),
+
+				new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.Small),
+				new Note(Note.Letter.D, Accidental.Type.Sharp, Note.Octave.Small),
+				new Note(Note.Letter.E, Accidental.Type.Flat, Note.Octave.Small),
+				new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.Small),
+				new Note(Note.Letter.G, Accidental.Type.Sharp, Note.Octave.Small),
+				new Note(Note.Letter.A, Accidental.Type.Sharp, Note.Octave.Small),
+				new Note(Note.Letter.H, Accidental.Type.Flat, Note.Octave.Small)
+			};
+			finger = 1;
+			foreach (Note note in notesDown)
+			{
+				note.stemDirection = Note.StemDirection.Down;
+				note.finger = finger++;
+			}
 
 			Chord chord2 = new Chord();
 			chord2.Add(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.Great));
@@ -57,20 +100,19 @@ namespace Nutadore
 			chord2.Add(new Note(Note.Letter.A, Accidental.Type.None, Note.Octave.Great));
 			chord2.Add(new Note(Note.Letter.H, Accidental.Type.None, Note.Octave.Great));
 
-			Note note5 = new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.Great);
-			Note note6 = new Note(Note.Letter.F, Accidental.Type.None, Note.Octave.Small);
+			Note note6 = new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.Great);
+			Note note7 = new Note(Note.Letter.F, Accidental.Type.None, Note.Octave.Small);
 
 
 			Step step = new Step();
-			step.AddVoice(chord1);
-			step.AddVoice(note1);
-			step.AddVoice(note2);
+			//step.AddVoice(chord1);
 
-			step.AddVoice(note3);
-			step.AddVoice(note4);
-			step.AddVoice(chord2);
-			step.AddVoice(note5);
-			step.AddVoice(note6);
+			notesUp.ForEach(note => step.AddVoice(note));
+			notesDown.ForEach(note => step.AddVoice(note));
+
+			//step.AddVoice(chord2);
+			//step.AddVoice(note6);
+			//step.AddVoice(note7);
 
 			score.Add(step);
 		}
@@ -153,7 +195,7 @@ namespace Nutadore
 					.AddVoice(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.Great)))
 				.Add(new Step()
 					.AddVoice(new Note(Note.Letter.C, Accidental.Type.Natural, Note.Octave.TwoLined)))
-					// tu skonczylem, kasownik rysuje sie jako #
+				// tu skonczylem, kasownik rysuje sie jako #
 				;
 		}
 

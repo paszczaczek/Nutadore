@@ -11,6 +11,9 @@ namespace Nutadore
 {
 	abstract public class Sign
 	{
+		private static readonly string familyName = "feta26";
+		private static readonly double fontSize = 42;
+
 		protected List<UIElement> elements = new List<UIElement>();
 		public Rect bounds { get; protected set; } = Rect.Empty;
 
@@ -33,8 +36,7 @@ namespace Nutadore
 
 		protected double AddGlyphToScore(Score score, double glyphLeft, double glyphTop, string glyphCode, int zindex = 0)
 		{
-			const string familyName = "feta26";
-			double fontSize = 42 * score.Magnification;
+			double fontSize = Sign.fontSize * score.Magnification;
 
 			// Rysujemy symbol.
 			UIElement uiElement = new TextBlock
@@ -48,13 +50,7 @@ namespace Nutadore
 			AddElementToScore(score, uiElement, zindex);
 
 			// Wyznaczamy wymiary symbolu.
-			FormattedText formattedText = new FormattedText(
-				glyphCode,
-				CultureInfo.GetCultureInfo("en-us"),
-				FlowDirection.LeftToRight,
-				new Typeface(familyName),
-				fontSize,
-				Brushes.Black);
+			FormattedText formattedText = GlyphFormatedText(score, glyphCode);
 
 			// Wyznaczamy granice w ktorych mieszczą się czarne piksele symbolu.
 			Rect boundsGlyph = new Rect(
@@ -63,10 +59,22 @@ namespace Nutadore
 				formattedText.Width,
 				formattedText.Extent);
 			ExtendBounds(boundsGlyph);
-			//highlightElements.Add(uiElement);
 
 			// Zwracamy nowe położenie kursora.
 			return glyphLeft + formattedText.Width;
+		}
+
+		protected FormattedText GlyphFormatedText(Score score, string glyphCode)
+		{
+			double fontSize = Sign.fontSize * score.Magnification;
+
+			return new FormattedText(
+				glyphCode,
+				CultureInfo.GetCultureInfo("en-us"),
+				FlowDirection.LeftToRight,
+				new Typeface(familyName),
+				fontSize,
+				Brushes.Black);
 		}
 
 		protected void ExtendBounds(Rect extendBy)

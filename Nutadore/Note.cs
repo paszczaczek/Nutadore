@@ -50,7 +50,10 @@ namespace Nutadore
 		private TextBlock head;
 		public double headOffset { get; private set; }
 		public double offset { private get; set; }
-		public bool isHeadOnLeft;
+		public bool isHeadReversed;
+		public enum StemDirection { Up, Down }
+		public StemDirection stemDirection = StemDirection.Up;
+		public int finger = 1;
 
 		public enum Letter
 		{
@@ -89,7 +92,8 @@ namespace Nutadore
 		{
 			// Left i right będą potrzebne do rysowania znaków ottavy
 			this.step = step;
-			right = left;
+			//right = left;
+			right = left + offset;
 
 			// Na której pięciolinii ma być umieszczona nuta?
 			Staff staff
@@ -97,11 +101,21 @@ namespace Nutadore
 				? trebleStaff
 				: bassStaff;
 
-			// Rysujemy znak chromatyczny.
-			AddAccidentalToScore(score, trebleStaff, bassStaff, step, left);
+			// Po której stronie nuty ma być numer palca.
+			bool fingerBeforeNote =
+				!isHeadReversed && stemDirection == StemDirection.Up
+				|| isHeadReversed && stemDirection == StemDirection.Down;
 
-			// Rysujemy główkę nuty.
+			// Dodajemy numer palca.
+			if (fingerBeforeNote)
+				AddFingerToScore(score, staff, left);
+			// Dodajemy znaki chromatyczne.
+			AddAccidentalToScore(score, trebleStaff, bassStaff, step, left);
+			// Dodajemy głowkę nuty.
 			AddHeadToScore(score, trebleStaff, bassStaff, staff, left);
+			// Dodajemy numer palca.
+			if (!fingerBeforeNote)
+				AddFingerToScore(score, staff, left);
 
 			// Dodajemy prostokąt reagujący na mysz.
 			double top = base.bounds.Top;
@@ -183,6 +197,41 @@ namespace Nutadore
 			}
 		}
 
+		private void AddFingerToScore(Score score, Staff staff, double left)
+		{
+			// Rysujemy numer palca.
+			double fingerTop
+					= staff.top * score.Magnification
+					+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification
+					- 6 * score.Magnification;
+			double fingerLeft = right;
+			double fingerScale = 0.9;
+			TextBlock fingerTextBlock = new TextBlock
+			{
+				FontFamily = new FontFamily("Consolas"),
+				FontSize = 12 * score.Magnification * fingerScale,
+				Text = finger.ToString(),
+				Foreground = Brushes.Black,
+				Padding = new Thickness(0, 0, 0, 0),
+				Margin = new Thickness(fingerLeft, fingerTop, 0, 0)
+			};
+			base.AddElementToScore(score, fingerTextBlock, 2);
+			FormattedText fingerFormattedText = new FormattedText(
+				fingerTextBlock.Text,
+				CultureInfo.GetCultureInfo("en-us"),
+				FlowDirection.LeftToRight,
+				new Typeface("Consolas"),
+				fingerTextBlock.FontSize,
+				Brushes.Black);
+			Rect fingerBounds = new Rect(
+				fingerLeft,
+				fingerTop + fingerFormattedText.Height + fingerFormattedText.OverhangAfter - fingerFormattedText.Extent,
+				fingerFormattedText.Width,
+				fingerFormattedText.Extent);
+			base.ExtendBounds(fingerBounds);
+			right = fingerLeft + fingerFormattedText.Width;
+		}
+
 		private void AddAccidentalToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left)
 		{
 			if (accidental.type == Accidental.Type.None)
@@ -190,16 +239,10 @@ namespace Nutadore
 			accidental.staffPosition = staffPosition;
 			accidental.staffType = staffType;
 			accidental.isKeySignatureHint = score.scale.AccidentalForLetter(letter) != Accidental.Type.None;
-			right = accidental.AddToScore(score, trebleStaff, bassStaff, step, left);
-			base.ExtendBounds(accidental.bounds);
-			headOffset = right - left;
-
-			//accidental = new Accidental(accidental.type, staffPosition, staffType);
-			//	accidental.isKeySignatureHint = score.scale.AccidentalForLetter(letter) != Accidental.Type.None;
-			//	base.ExtendBounds(accidental.bounds);
-			//}
 			//right = accidental.AddToScore(score, trebleStaff, bassStaff, step, left);
-			//headShift = right - left;
+			right = accidental.AddToScore(score, trebleStaff, bassStaff, step, right);
+			base.ExtendBounds(accidental.bounds);
+			//headOffset = right - left;
 		}
 
 		private void AddHeadToScore(Score score, Staff trebleStaff, Staff bassStaff, Staff staff, double left)
@@ -210,17 +253,34 @@ namespace Nutadore
 					= staff.top * score.Magnification
 					 + (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
 			glyphTop -= 57.5 * score.Magnification;
-			right = base.AddGlyphToScore(score, left + offset + headOffset, glyphTop, glyphCode, 1);
+			headOffset = right - left;
+			//double glyphLeft = left + offset + headOffset;
+			double glyphLeft = right;
+			if (isHeadReversed)
+			{
+				double headWidth = base.GlyphFormatedText(score, glyphCode).Width;
+				if (stemDirection == StemDirection.Up)
+				{
+					// Nutę po drugiej stronie ogonka skierowanego ku górze rysujemy za ogonkiem.
+					glyphLeft += headWidth;
+				} else if (stemDirection == StemDirection.Down)
+				{
+					// Nutę po drugiej stronie ogonka sierowanego ku dolowi rysujemy przed ogonkiem.
+					headOffset += headWidth;
+				}
+			}
+			right = base.AddGlyphToScore(score, glyphLeft, glyphTop, glyphCode, 1);
 			head = base.elements.FindLast(e => true) as TextBlock;
 			// Rysujemy linie dodane górne i dolne - jeśli nuta nie jest częścią akordu.
 			if (showLegerLines)
-				AddLegerLinesToScore(score, trebleStaff, bassStaff, staff, left + headOffset);
+				AddLegerLinesToScore(score, trebleStaff, bassStaff, staff, glyphLeft);
 
 			// Rysujemy pomocniczą nazwę nuty - literę.
 			double letterTop
 					= staff.top * score.Magnification
 					+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
-			double letterLeft = left + offset + headOffset;
+			//double letterLeft = left + offset + headOffset;
+			double letterLeft = glyphLeft;
 			double letterScale = 1;
 			string noteString = ToString();
 			if (noteString.Length == 3)
@@ -284,7 +344,7 @@ namespace Nutadore
 				{
 					FontFamily = new FontFamily("feta26"),
 					FontSize = 12 * score.Magnification * 0.6,
-					Text = "\x002e",
+					Text = accidentalGlyphCode,
 					Foreground = Brushes.White,
 					Padding = new Thickness(0, 0, 0, 0),
 					Margin = new Thickness(accidentalLeft, accidentalTop, 0, 0)

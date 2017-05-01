@@ -80,8 +80,11 @@ namespace Nutadore
 			double cursor = left;
 			double right = left;
 
-			// Przenieś główki nut na lewą stronę, gdy nachodzą na siebie.
-			EliminateNoteHeadsCollisions();
+			// Przenieś główki nut drugą strone stem, jesli zachodzą na siebie.
+			EliminateHeadsOverlapping();
+
+			// Przesuń znaki chromatyczne, jeśli zachodza na siebie.
+			EliminateAccidentalOverlapping();
 
 			// Jeśli nuta w jednym głosie ma przypadkowy znak chromatyczny, nuty w pozostałych 
 			// głosach trzeba przesunąć w prawo, by ich główki były w jednej linii.
@@ -162,59 +165,84 @@ namespace Nutadore
 			return cursor;
 		}
 
-		private void EliminateNoteHeadsCollisions()
+		private void EliminateHeadsOverlapping()
 		{
-			// Główki nut zachodzące na siebie przenosi na lewą stronę.
-
-			// Wyszukujemy wszystkie nuty w stepie odległe od siebie o połowę odstępu.
-			List<Note> allNotesInStep = SelectNotes();
-			var x = (
-				from note1 in allNotesInStep
-				from note2 in allNotesInStep
-				where
-					note1.staffType == note2.staffType &&
-					Math.Abs(note1.staffPosition.Number - note2.staffPosition.Number) == 0.5
-				select new { note1, note2 }
-				).Distinct();
-
-			// W pierwszym kroku wyszukujemny nuty których główki kolidują z dwoma 
-			// innymi nutami i przenosimy je na lewą stronę. W drugim kroku to samo
-			// ale z nutami które kolidują z jedną inną nutą.
-			List<Note> notesOnRigth = SelectNotes().OrderBy(note => note).ToList();
-			List<Note> notesOnLeft = new List<Note>();
-			for (int pass = 0; pass < 2; pass++)
+			// Główki nut zachodzące na siebie przenosi na drugą strone kreseczki.
+			List<Note> notes = SelectNotes().OrderBy(note => note).ToList();
+			List<Note> notesReversed = new List<Note>();
+			bool overlappingFound = false;
+			do
 			{
-				bool collisionFound = false;
-				do
+				overlappingFound = false;
+				foreach (Note note in notes)
 				{
-					collisionFound = false;
-					foreach (Note note in notesOnRigth)
+					// Wyszukujemy nuty zachodzące na nuty po właściwej i po drugiej stronie kreseczki.
+					Func<Note, bool> overlappingCond = n =>
+									note.staffType == n.staffType
+									&& Math.Abs(note.staffPosition.Number - n.staffPosition.Number) == 0.5
+									&& !note.Equals(n);
+					bool overlaps = notes.Where(overlappingCond).Count() > 0;
+					bool overlapsReversed = notesReversed.Where(overlappingCond).Count() > 0;
+					// Nutę przenosimy na drugą stronę, jeśli koliduje z nutami po właściwej 
+					// stronie kreseczki i nie koliduje z nutami po drugiej stronie kreseczki.
+					if (overlaps && !overlapsReversed)
 					{
-						var collideNotes = notesOnRigth.Where(n =>
-							note.staffType == n.staffType
-							&& Math.Abs(note.staffPosition.Number - n.staffPosition.Number) == 0.5
-							&& !note.Equals(n));
-						if (collideNotes.Count() > (pass == 0 ? 1 : 0))
-						{
-							notesOnRigth.Remove(note);
-							notesOnLeft.Add(note);
-							collisionFound = true;
-							break;
-						}
+						notes.Remove(note);
+						notesReversed.Add(note);
+						overlappingFound = true;
+						break;
 					}
-				} while (collisionFound);
-			}
+				}
+			} while (overlappingFound);
 
-			// Jeśli nut po lewej stronie jest więcej, to zamieniamy strony, bo to źle wygląda.
-			if (notesOnLeft.Count > notesOnRigth.Count)
+			// Jeśli nut po drugies stronie jest więcej, to zamieniamy strony, bo to źle wygląda.
+			if (notesReversed.Count > notes.Count)
 			{
-				var notesTmp = notesOnRigth;
-				notesOnRigth = notesOnLeft;
-				notesOnLeft = notesTmp;
+				var notesTmp = notes;
+				notes = notesReversed;
+				notesReversed = notesTmp;
 			}
 
 			// Zazanaczmy nuty po lewej stronie.
-			notesOnLeft.ForEach(note => note.isHeadOnLeft = true);
+			notesReversed.ForEach(note => note.isHeadReversed = true);
+		}
+
+		private void EliminateAccidentalOverlapping()
+		{
+			// Znaki chromatyczne zachodzące na siebie przesuwa w lewą stronę.
+			List<List<Note>> cols = new List<List<Note>>() { new List<Note>() };
+			cols[0] = SelectNotes()
+				.Where(note => note.accidental.type != Accidental.Type.None)
+				.OrderBy(note => note)
+				.ToList();
+			bool overlappingFound = false;
+			do
+			{
+				overlappingFound = false;
+				foreach (Note note in cols[0])
+					if (overlappingFound = FindAccidentalOverlaping(note, 0, cols))
+						break;
+			} while (overlappingFound);
+		}
+
+		private bool FindAccidentalOverlaping(Note note, int col, List<List<Note>> cols)
+		{
+			// Wyszukujemy nuty zachodzące na nuty po właściwej i po drugiej stronie kreseczki.
+			if (col >= cols.Count())
+				return false;
+			List<Note> noteOverlapped = cols[col].Where(n =>
+					note.staffType == n.staffType
+					&& Math.Abs(note.staffPosition.Number - n.staffPosition.Number) <= 1.0
+					&& !note.Equals(n))
+				.ToList();
+			if (noteOverlapped.Count() == 0)
+				return false;
+			if (col + 1 >= cols.Count())
+				cols.Add(new List<Note>());
+			cols[col + 1].Add(note);
+			cols[col].Remove(note);
+			FindAccidentalOverlaping(note, col + 1, cols);
+			return true;
 		}
 
 		public void RemoveFromScore(Score score)
