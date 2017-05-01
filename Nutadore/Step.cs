@@ -168,7 +168,7 @@ namespace Nutadore
 		private void EliminateHeadsOverlapping()
 		{
 			// Główki nut zachodzące na siebie przenosi na drugą strone kreseczki.
-			List<Note> notes = SelectNotes().OrderBy(note => note).ToList();
+			List<Note> notes = SelectAllNotes().OrderByDescending(note => note).ToList();
 			List<Note> notesReversed = new List<Note>();
 			bool overlappingFound = false;
 			do
@@ -209,40 +209,49 @@ namespace Nutadore
 
 		private void EliminateAccidentalOverlapping()
 		{
-			// Znaki chromatyczne zachodzące na siebie przesuwa w lewą stronę.
-			List<List<Note>> cols = new List<List<Note>>() { new List<Note>() };
-			cols[0] = SelectNotes()
+			// Znaki chromatyczne zachodzące na siebie przesuwamy w lewą stronę.
+			// Wybieramy nuty ze stepu posiadające znaki chromatyczne.
+			var notes = SelectAllNotes()
 				.Where(note => note.accidental.type != Accidental.Type.None)
 				.OrderBy(note => note)
-				.ToList();
-			bool overlappingFound = false;
-			do
+				.AsEnumerable();
+			foreach (Note note in notes)
 			{
-				overlappingFound = false;
-				foreach (Note note in cols[0])
-					if (overlappingFound = FindAccidentalOverlaping(note, 0, cols))
-						break;
-			} while (overlappingFound);
+				// Ile kolumn w lewo trzeba przesunąć znak chromatyczny, 
+				// żeby nie kolidował z sąsiednimi znakami.
+				note.accidentalColumn = 0;
+				FindAccidentalOverlaping(note, 0, ref notes);
+			}
+
+			// Teraz żadne znaki chromnatyczne nie kolidują ze sobą, ale
+			// algorytm jest trochę nadgorliwy i okazuje się że nie które
+			// znaki mozna przenieść do kolumn w prawo. Zaczynając od znaków
+			// najbardziej przesuniętych w lewo sprawdzamy, czy  nie można
+			// ich umieścić bliżej nuty.
+			var notesOrdByAccidentalColumn = notes
+				.OrderBy(note => note)
+				.OrderByDescending(note => note.accidentalColumn);
+			foreach (var note in notesOrdByAccidentalColumn)
+			{
+				note.accidentalColumn = 0;
+				FindAccidentalOverlaping(note, 0, ref notes);
+			}
 		}
 
-		private bool FindAccidentalOverlaping(Note note, int col, List<List<Note>> cols)
+		private void FindAccidentalOverlaping(Note note, int col, ref IEnumerable<Note> notes)
 		{
-			// Wyszukujemy nuty zachodzące na nuty po właściwej i po drugiej stronie kreseczki.
-			if (col >= cols.Count())
-				return false;
-			List<Note> noteOverlapped = cols[col].Where(n =>
-					note.staffType == n.staffType
-					&& Math.Abs(note.staffPosition.Number - n.staffPosition.Number) <= 1.0
-					&& !note.Equals(n))
-				.ToList();
+			// Sprawdzamy czy znak chromatyczny nie koliduje z innymi znakami w kolumnie col.
+			var noteOverlapped = notes.Where(n =>
+					n.accidentalColumn == col
+					&& note.staffType == n.staffType
+					&& Math.Abs(note.staffPosition.Number - n.staffPosition.Number) <= 3.0
+					&& !note.Equals(n));
 			if (noteOverlapped.Count() == 0)
-				return false;
-			if (col + 1 >= cols.Count())
-				cols.Add(new List<Note>());
-			cols[col + 1].Add(note);
-			cols[col].Remove(note);
-			FindAccidentalOverlaping(note, col + 1, cols);
-			return true;
+				return;
+			// Koliduje - przesuwamy znak chromatyczny do kolumny na lewo
+			note.accidentalColumn++;
+			// i sprawdzamy w niej nie ma kolizji. I tak do skutku, aż znajdziemy dla niego miejsce.
+			FindAccidentalOverlaping(note, col + 1, ref notes);
 		}
 
 		public void RemoveFromScore(Score score)
@@ -288,7 +297,7 @@ namespace Nutadore
 		private void CalculateAndCorrectPerformHowTo()
 		{
 			// Wyszukujemy wszystkie nuty w kroku.
-			List<Note> stepNotes = SelectNotes();
+			List<Note> stepNotes = SelectAllNotes();
 
 			// Dodajemy również nuty błędnie wciśniętych klawiszy.
 			stepNotes.AddRange(notGuessedNotes);
@@ -365,7 +374,7 @@ namespace Nutadore
 			}
 		}
 
-		public List<Note> SelectNotes()
+		public List<Note> SelectAllNotes()
 		{
 			return voices
 				.Where(voice => voice is Chord)
@@ -407,7 +416,7 @@ namespace Nutadore
 			SetColor();
 
 			Score score = (sender as Rectangle).Tag as Score;
-			score.FireEvent(SelectNotes(), ScoreEventArgs.EventType.HighlightedOn);
+			score.FireEvent(SelectAllNotes(), ScoreEventArgs.EventType.HighlightedOn);
 		}
 
 		public void MouseLeave(object sender, MouseEventArgs e)
@@ -416,7 +425,7 @@ namespace Nutadore
 			SetColor();
 
 			Score score = (sender as Rectangle).Tag as Score;
-			score.FireEvent(SelectNotes(), ScoreEventArgs.EventType.HighlightedOff);
+			score.FireEvent(SelectAllNotes(), ScoreEventArgs.EventType.HighlightedOff);
 		}
 
 		public void MouseDown(object sender, MouseButtonEventArgs e)
@@ -424,13 +433,13 @@ namespace Nutadore
 			Score score = (sender as Rectangle).Tag as Score;
 			score.CurrentStep = this;
 
-			score.FireEvent(SelectNotes(), ScoreEventArgs.EventType.Selected);
+			score.FireEvent(SelectAllNotes(), ScoreEventArgs.EventType.Selected);
 		}
 
 		public void KeyDown(Note noteDown)
 		{
 			// Czy trafiono wciśnięto właściwy klawisz?
-			Note note = SelectNotes().Find(n => n.Equals(noteDown));
+			Note note = SelectAllNotes().Find(n => n.Equals(noteDown));
 			if (note != null)
 			{
 				// Tak, zaznaczmy nutę na zielono.
@@ -450,7 +459,7 @@ namespace Nutadore
 		public void KeyUp(Note noteDown)
 		{
 			// Czy trafiono we właściwy klawisz?
-			Note note = SelectNotes().Find(n => n.Equals(noteDown));
+			Note note = SelectAllNotes().Find(n => n.Equals(noteDown));
 			if (note != null)
 			{
 				// Tak, zmieniamy zielony kolor na czarny.

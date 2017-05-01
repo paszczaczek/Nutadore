@@ -90,7 +90,7 @@ namespace Nutadore
 			finger = 1;
 			foreach (Note note in notesDown)
 			{
-				note.stemDirection = Note.StemDirection.Down;
+				note.stemDirection = Note.StemDirection.Up;
 				note.finger = finger++;
 			}
 

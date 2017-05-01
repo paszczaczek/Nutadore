@@ -12,6 +12,7 @@ namespace Nutadore
 	public class Accidental : Sign
 	{
 		readonly SolidColorBrush keySignatureHintColor = Brushes.LightGray;
+		public static readonly string sharpGlyphCode = "\x002e";
 
 		public enum Type
 		{
@@ -46,7 +47,7 @@ namespace Nutadore
 					glyphCode = "\x003a";
 					break;
 				case Type.Sharp:
-					glyphCode = "\x002e";
+					glyphCode = sharpGlyphCode;
 					break;
 				case Type.Natural:
 					glyphCode = "\x0036";

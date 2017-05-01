@@ -41,7 +41,9 @@
   | <a'>4-\markup{a1} r4 r2
   | <cis,-5>4-\markup{Cis} <cis>-\markup{cis} <a,>-\markup{A} <fis>-\markup{fis}
   
-  | <ces''d'' e'' fis'' g'' a'' h'' cis''>1
+  | <ces''d'' e'' fis'' g'' aes''>4 r4 r2
+  | <b' a'>4 r4 r2
+  | <ces, d e fis g aes>4 r4 r2
 }
 
 

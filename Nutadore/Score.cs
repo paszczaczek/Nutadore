@@ -30,7 +30,7 @@ namespace Nutadore
 				if (_currentStep != null)
 				{
 					_currentStep.IsCurrent = true;
-					FireEvent(_currentStep.SelectNotes(), ScoreEventArgs.EventType.Selected);
+					FireEvent(_currentStep.SelectAllNotes(), ScoreEventArgs.EventType.Selected);
 				}
 			}
 		}

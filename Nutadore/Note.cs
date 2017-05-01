@@ -51,6 +51,7 @@ namespace Nutadore
 		public double headOffset { get; private set; }
 		public double offset { private get; set; }
 		public bool isHeadReversed;
+		public int accidentalColumn = 0;
 		public enum StemDirection { Up, Down }
 		public StemDirection stemDirection = StemDirection.Up;
 		public int finger = 1;
@@ -239,10 +240,13 @@ namespace Nutadore
 			accidental.staffPosition = staffPosition;
 			accidental.staffType = staffType;
 			accidental.isKeySignatureHint = score.scale.AccidentalForLetter(letter) != Accidental.Type.None;
-			//right = accidental.AddToScore(score, trebleStaff, bassStaff, step, left);
 			right = accidental.AddToScore(score, trebleStaff, bassStaff, step, right);
 			base.ExtendBounds(accidental.bounds);
-			//headOffset = right - left;
+			if (accidentalColumn > 0)
+			{
+				double sharpWidth = base.GlyphFormatedText(score, Accidental.sharpGlyphCode).Width;
+				right += accidentalColumn * sharpWidth;
+			}
 		}
 
 		private void AddHeadToScore(Score score, Staff trebleStaff, Staff bassStaff, Staff staff, double left)
