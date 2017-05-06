@@ -2,19 +2,19 @@
 
 \parallelMusic #'(voiceA voiceB voiceC) {
   % bar 1
-  <fis''-2>1~-\markup{fis2} |
-  <d''-1>1~-\markup{d2} |
-  <d-5>4-\markup{d} d'^\markup{d1} cis'^\markup{cis1} cis-\markup{cis} |
+    <fis''-2>1~-\markup{fis2} 
+  | <d''-1>1~-\markup{d2} 
+  | <d-5>4-\markup{d} d'^\markup{d1} cis'^\markup{cis1} cis-\markup{cis} 
   
   % bar 2  
-  <fis''-2>1~-\markup fis2 |
-  <d''-1>1~-\markup{d2} |
-  <b,-5>4-\markup{B} <b-1>^\markup{b} <a>^\markup{a} <a,-4>-\markup{A} |
+  | <fis''-2>1~-\markup fis2
+  | <d''-1>1~-\markup{d2} 
+  | <b,-5>4-\markup{B} <b-1>^\markup{b} <a>^\markup{a} <a,-4>-\markup{A}
 
   % bar 3
-  <fis''-2>4-\markup{fis2} <b''-5>8-\markup{b2} <g''-3>-\markup{g2} \grace<fis''-5> <e''-4>-\markup{e2} d''-\markup{d2} cis''-\markup{cis2} e''-\markup{e2} |
-  <d''-1>2-\markup{d2} <b'-1>-\markup{b1} |
-  <g,-5>4-\markup{G} <g-2>^\markup{g} <gis-1>^\markup{gis} <gis,-5>-\markup{Gis} 
+  | <fis''-2>4-\markup{fis2} <b''-5>8-\markup{b2} <g''-3>-\markup{g2} \grace<fis''-5> <e''-4>-\markup{e2} d''-\markup{d2} cis''-\markup{cis2} e''-\markup{e2}
+  | <d''-1>2-\markup{d2} <b'-1>-\markup{b1}
+  | <g,-5>4-\markup{G} <g-2>^\markup{g} <gis-1>^\markup{gis} <gis,-5>-\markup{Gis} 
 
   % bar 4
   | <cis''-3>2-\markup{cis2} a'8-\markup{a1} g'4.-\markup{g1} 
@@ -35,15 +35,17 @@
   | <g''-5>1~-\markup{g2}
   | <b'-1>4-\markup{b1} <e''-3>8-\markup{e2} <d''>-\markup{d2}  <e''>-\markup{e2} <fis''>-\markup{fis2} <g''>-\markup{g2} <e''>-\markup{e2}
   | <e,>4-\markup{E} <e>-\markup{e} <d>-\markup{d} <d,-4>-\markup{D}
-  
+
   % bar 8
   | <g''>8-\markup{g2} <e''-5>-\markup{e2} <b'-2>-\markup{g1} <a'>-\markup{a1} <d''-3>-\markup{d2} <cis''>-\markup{c2} <g''-5>-\markup{g2} <fis''-4>-\markup{fis2}
   | <a'>4-\markup{a1} r4 r2
-  | <cis,-5>4-\markup{Cis} <cis>-\markup{cis} <a,>-\markup{A} <fis>-\markup{fis}
-  
-  | <ces''d'' e'' fis'' g'' aes''>4 r4 r2
-  | <b' a'>4 r4 r2
-  | <ces, d e fis g aes>4 r4 r2
+  | <cis,-5>4-\markup{Cis} <cis>-\markup{cis} <a,>-\markup{A} <fis>-\markup{fis}  
+
+  | <cis''-1 dis'' ees''-3 fis'' gis'' ais'' bes'' cis''' dis''' ees''' fis''' gis''' ais''' bes'''>4 r4 r2
+  | r1
+  %| <cis, dis, ees, fis, gis, ais, bes, cis dis ees fis gis ais bes>4 r4 r2
+  | <gis ais bes>4 r4 r2
+  %| <cis, dis, fis, ais, cis ees gis bes>4 r4 r2
 }
 
 
@@ -61,14 +63,14 @@
     \new Staff <<            
       \tempo "Adagio"
       \clef treble
-      \key d \major
+      %\key d \major
       \voiceA 
       \\ 
        \voiceB
     >>
     \new Staff <<
       \clef bass
-      \key d \major
+      %\key d \major
        \voiceC
     >>    
     %{

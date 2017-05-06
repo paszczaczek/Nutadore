@@ -29,7 +29,8 @@ namespace Nutadore
 			keyboard.ConnectScore(score);
 
 			//BachAirInDMajor();
-			AddTest1();
+			//AddTestAccidentalsFingers();
+			LyParser();
 			//AddSteps();
 			//AddAllTriads();
 			//AddAllNotes();
@@ -37,15 +38,14 @@ namespace Nutadore
 			//score.Add(new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.OneLined));
 		}
 
-		private void AddTest1()
+		private void LyParser()
 		{
-			Chord chord1 = new Chord();
-			chord1.Add(new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.OneLined));
-			chord1.Add(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.OneLined));
-			chord1.Add(new Note(Note.Letter.E, Accidental.Type.Flat, Note.Octave.OneLined));
-			//chord1.Add(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.OneLined));
-			//chord1.Add(new Note(Note.Letter.G, Accidental.Type.Sharp, Note.Octave.OneLined));
+			LyParser parser = new LyParser(@"C:\Users\Zabwa\Source\Repos\Nutadore\Nutadore\Misc\bach-air-in-d-major.ly");
+		}
 
+		private void AddTestAccidentalsFingers()
+		{
+			Chord chord = new Chord();
 			List<Note> notesUp = new List<Note> {
 				new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.TwoLined),
 				new Note(Note.Letter.D, Accidental.Type.Sharp, Note.Octave.TwoLined),
@@ -63,11 +63,12 @@ namespace Nutadore
 				new Note(Note.Letter.A, Accidental.Type.Sharp, Note.Octave.ThreeLined),
 				new Note(Note.Letter.H, Accidental.Type.Flat, Note.Octave.ThreeLined)
 			};
-			int finger = 1;
+			int finger = 0;
 			foreach (Note note in notesUp)
 			{
 				note.stemDirection = Note.StemDirection.Up;
-				note.finger = finger++;
+				note.finger = finger++ % 5;
+				chord.Add(note);
 			}
 
 			List<Note> notesDown = new List<Note> { 
@@ -91,29 +92,14 @@ namespace Nutadore
 			foreach (Note note in notesDown)
 			{
 				note.stemDirection = Note.StemDirection.Down;
-				note.finger = finger++;
+				note.finger = finger++ % 5;
+				if (note.finger == 0)
+					note.finger = null;
 			}
 
-			Chord chord2 = new Chord();
-			chord2.Add(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.Great));
-			chord2.Add(new Note(Note.Letter.F, Accidental.Type.None, Note.Octave.Great));
-			chord2.Add(new Note(Note.Letter.A, Accidental.Type.None, Note.Octave.Great));
-			chord2.Add(new Note(Note.Letter.H, Accidental.Type.None, Note.Octave.Great));
-
-			Note note6 = new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.Great);
-			Note note7 = new Note(Note.Letter.F, Accidental.Type.None, Note.Octave.Small);
-
-
 			Step step = new Step();
-			//step.AddVoice(chord1);
-
+			step.AddVoice(chord);
 			notesDown.ForEach(note => step.AddVoice(note));
-			notesUp.ForEach(note => step.AddVoice(note));
-
-			//step.AddVoice(chord2);
-			//step.AddVoice(note6);
-			//step.AddVoice(note7);
-
 			score.Add(step);
 		}
 

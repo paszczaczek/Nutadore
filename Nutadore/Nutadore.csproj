@@ -63,6 +63,7 @@
     <Compile Include="Key.cs" />
     <Compile Include="Keyboard.cs" />
     <Compile Include="KeyboardEventArgs.cs" />
+    <Compile Include="LyParser.cs" />
     <Compile Include="Note.cs" />
     <Compile Include="Perform.cs" />
     <Compile Include="Scale.cs" />

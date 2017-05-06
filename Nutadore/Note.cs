@@ -54,7 +54,8 @@ namespace Nutadore
 		public int accidentalColumn = 0;
 		public enum StemDirection { Up, Down }
 		public StemDirection stemDirection = StemDirection.Up;
-		public int finger = 1;
+		public int? finger;
+		public int fingerColumn;
 
 		public enum Letter
 		{
@@ -93,7 +94,6 @@ namespace Nutadore
 		{
 			// Left i right będą potrzebne do rysowania znaków ottavy
 			this.step = step;
-			//right = left;
 			right = left + offset;
 
 			// Na której pięciolinii ma być umieszczona nuta?
@@ -107,16 +107,14 @@ namespace Nutadore
 				!isHeadReversed && stemDirection == StemDirection.Up
 				|| isHeadReversed && stemDirection == StemDirection.Down;
 
-			// Dodajemy numer palca.
-			if (fingerBeforeNote)
-				AddFingerToScore(score, staff, left);
 			// Dodajemy znaki chromatyczne.
 			AddAccidentalToScore(score, trebleStaff, bassStaff, step, left);
+			// Dodajemy numer palca.
+			AddFingerToScore(score, staff, left, !fingerBeforeNote);
 			// Dodajemy głowkę nuty.
 			AddHeadToScore(score, trebleStaff, bassStaff, staff, left);
 			// Dodajemy numer palca.
-			if (!fingerBeforeNote)
-				AddFingerToScore(score, staff, left);
+			AddFingerToScore(score, staff, left, fingerBeforeNote);
 
 			// Dodajemy prostokąt reagujący na mysz.
 			double top = base.bounds.Top;
@@ -146,7 +144,6 @@ namespace Nutadore
 			else
 			{
 				// Znak zmieścił sie na pięciolinii.
-				//right += Staff.spaceBetweenSigns * score.Magnification;
 				return right + Staff.spaceBetweenSigns * score.Magnification;
 			}
 		}
@@ -198,7 +195,7 @@ namespace Nutadore
 			}
 		}
 
-		private void AddFingerToScore(Score score, Staff staff, double left)
+		private void AddFingerToScore(Score score, Staff staff, double left, bool onlyPlaceholder)
 		{
 			// Rysujemy numer palca.
 			double fingerTop
@@ -211,8 +208,8 @@ namespace Nutadore
 			{
 				FontFamily = new FontFamily("Consolas"),
 				FontSize = 12 * score.Magnification * fingerScale,
-				Text = finger.ToString(),
-				Foreground = Brushes.Black,
+				Text = (finger ?? 0).ToString(),
+				Foreground = onlyPlaceholder || finger == null ? Brushes.Transparent : Brushes.Black,
 				Padding = new Thickness(0, 0, 0, 0),
 				Margin = new Thickness(fingerLeft, fingerTop, 0, 0)
 			};
