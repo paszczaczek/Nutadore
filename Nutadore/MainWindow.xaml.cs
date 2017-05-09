@@ -40,7 +40,7 @@ namespace Nutadore
 
 		private void LyParser()
 		{
-			LyParser parser = new LyParser(@"C:\Users\Zabwa\Source\Repos\Nutadore\Nutadore\Misc\bach-air-in-d-major.ly");
+			LyParser parser = new LyParser(@"Misc\bach-air-in-d-major.ly");
 		}
 
 		private void AddTestAccidentalsFingers()

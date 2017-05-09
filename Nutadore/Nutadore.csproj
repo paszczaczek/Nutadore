@@ -135,7 +135,9 @@
     <Resource Include="Misc\Readme.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Misc\bach-air-in-d-major.ly" />
+    <Content Include="Misc\bach-air-in-d-major.ly">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Misc\bach-air-in-d-major.mid" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
