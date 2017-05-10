@@ -7,7 +7,7 @@
   | <d-5>4-\markup{d} d'^\markup{d1} cis'^\markup{cis1} cis-\markup{cis} 
   
   % bar 2  
-  | <fis''-2>1~-\markup fis2
+  | <fis''-2>1~-\markup{fis2}
   | <d''-1>1~-\markup{d2} 
   | <b,-5>4-\markup{B} <b-1>^\markup{b} <a>^\markup{a} <a,-4>-\markup{A}
 

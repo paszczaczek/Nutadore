@@ -79,6 +79,6 @@ namespace Nutadore
 			}
 
 			return right;
-		}
+		}		
 	}
 }

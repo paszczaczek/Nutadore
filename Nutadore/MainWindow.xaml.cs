@@ -30,7 +30,7 @@ namespace Nutadore
 
 			//BachAirInDMajor();
 			//AddTestAccidentalsFingers();
-			LyParser();
+			LyParserTest();
 			//AddSteps();
 			//AddAllTriads();
 			//AddAllNotes();
@@ -38,9 +38,15 @@ namespace Nutadore
 			//score.Add(new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.OneLined));
 		}
 
-		private void LyParser()
+		private void LyParserTest()
 		{
-			LyParser parser = new LyParser(@"Misc\bach-air-in-d-major.ly");
+			List<Sign>[] pm = LyParser.ParallelMusic(@"Misc\bach-air-in-d-major.ly");
+			foreach (Sign sign in pm[0])
+			{
+				Step step = new Step();
+				step.AddVoice(sign);
+				score.Add(step);
+			}
 		}
 
 		private void AddTestAccidentalsFingers()
@@ -93,8 +99,8 @@ namespace Nutadore
 			{
 				note.stemDirection = Note.StemDirection.Down;
 				note.finger = finger++ % 5;
-				if (note.finger == 0)
-					note.finger = null;
+				//if (note.finger == 0)
+				//	note.finger = null;
 			}
 
 			Step step = new Step();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Shapes;
@@ -79,6 +80,21 @@ namespace Nutadore
 			{
 				note.RemoveFromScore(score);
 			}
+		}
+
+		public override string ToString()
+		{
+			StringBuilder sb =  new StringBuilder();
+			sb.Append("<");
+			foreach (Note note in notes)
+			{
+				if (sb.Length > 1)
+					sb.Append(" ");
+				sb.Append(note);
+			}
+			sb.Append(">");
+
+			return sb.ToString();
 		}
 	}
 }

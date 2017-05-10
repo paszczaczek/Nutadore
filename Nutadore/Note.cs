@@ -54,7 +54,7 @@ namespace Nutadore
 		public int accidentalColumn = 0;
 		public enum StemDirection { Up, Down }
 		public StemDirection stemDirection = StemDirection.Up;
-		public int? finger;
+		public int finger = 0;
 		public int fingerColumn;
 
 		public enum Letter
@@ -208,8 +208,10 @@ namespace Nutadore
 			{
 				FontFamily = new FontFamily("Consolas"),
 				FontSize = 12 * score.Magnification * fingerScale,
-				Text = (finger ?? 0).ToString(),
-				Foreground = onlyPlaceholder || finger == null ? Brushes.Transparent : Brushes.Black,
+				//Text = (finger ?? 0).ToString(),
+				Text = finger.ToString(),
+				//Foreground = onlyPlaceholder || finger == null ? Brushes.Transparent : Brushes.Black,
+				Foreground = onlyPlaceholder || finger == 0 ? Brushes.Transparent : Brushes.Black,
 				Padding = new Thickness(0, 0, 0, 0),
 				Margin = new Thickness(fingerLeft, fingerTop, 0, 0)
 			};
