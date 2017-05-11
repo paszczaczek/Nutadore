@@ -43,18 +43,7 @@ namespace Nutadore
 		public Step AddVoice(Sign voice)
 		{
 			voices.Add(voice);
-
 			return this;
-			//if (voice is Chord)
-			//{
-			//	Chord chord = voice as Chord;
-			//	chord.step = this;
-			//}
-			//else if (voice is Note)
-			//{
-			//	Note note = voice as Note;
-			//	note.step = this;
-			//}
 		}
 
 		public bool IsBar
@@ -476,5 +465,11 @@ namespace Nutadore
 			}
 		}
 
+		public override string ToString()
+		{
+			StringBuilder sb = new StringBuilder();
+			voices.ForEach(voice => sb.Append(voice.ToString()));
+			return sb.ToString();
+		}
 	}
 }

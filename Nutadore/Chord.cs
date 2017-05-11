@@ -8,9 +8,15 @@ using System.Windows.Shapes;
 
 namespace Nutadore
 {
-	public class Chord : Sign, INoteOffsets
+	public class Chord : Sign, IDurationable, INoteOffsets
 	{
 		public List<Note> notes = new List<Note>();
+
+		private Duration _duration = new Duration();
+		public Duration duration {
+			get { return _duration; }
+			set { notes.ForEach(note => note.duration = value); _duration = value; }
+		}
 
 		public double headOffset { get; private set; }
 

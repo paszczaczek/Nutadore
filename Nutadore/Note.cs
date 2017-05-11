@@ -8,7 +8,7 @@ using System.Windows.Shapes;
 
 namespace Nutadore
 {
-	public class Note : Sign, INoteOffsets, IComparable<Note>
+	public class Note : Sign, IDurationable, INoteOffsets, IComparable<Note>
 	{
 		#region props & types
 		private static Brush currentBrush = Brushes.DarkGray; // LightSeaGreen;
@@ -17,6 +17,7 @@ namespace Nutadore
 		public Letter letter;
 		public Octave octave;
 		public Accidental accidental;
+		public Duration duration { get; set; } = new Duration();
 		public Perform.HowTo performHowTo;
 		public StaffPosition staffPosition = StaffPosition.ByLine(1);
 		public Staff.Type staffType;
@@ -82,11 +83,12 @@ namespace Nutadore
 		}
 		#endregion
 
-		public Note(Letter letter, Accidental.Type accidentalType, Octave octave, Staff.Type? preferredStaffType = null)
+		public Note(Letter letter, Accidental.Type accidentalType, Octave octave, Duration duration = null, Staff.Type? preferredStaffType = null)
 		{
 			this.letter = letter;
 			this.accidental = new Accidental(accidentalType);
 			this.octave = octave;
+			this.duration = duration ?? new Duration();
 			this.staffPosition = ToStaffPosition(preferredStaffType);
 		}
 
@@ -103,18 +105,26 @@ namespace Nutadore
 				: bassStaff;
 
 			// Po której stronie nuty ma być numer palca.
-			bool fingerBeforeNote =
-				!isHeadReversed && stemDirection == StemDirection.Up
-				|| isHeadReversed && stemDirection == StemDirection.Down;
+			//bool fingerBeforeNote =
+			//	!isHeadReversed && stemDirection == StemDirection.Up
+			//	|| isHeadReversed && stemDirection == StemDirection.Down;
+			bool fingerAfterNote =
+				isHeadReversed && stemDirection == StemDirection.Up
+				|| !isHeadReversed && stemDirection == StemDirection.Down;
+
+			// Czy w stepie są jakieś numery palców?
+			bool fingersExist = step.SelectAllNotes().Exists(note => note.finger > 0);
 
 			// Dodajemy znaki chromatyczne.
 			AddAccidentalToScore(score, trebleStaff, bassStaff, step, left);
 			// Dodajemy numer palca.
-			AddFingerToScore(score, staff, left, !fingerBeforeNote);
+			if (fingersExist)
+				AddFingerToScore(score, staff, left, fingerAfterNote);
 			// Dodajemy głowkę nuty.
 			AddHeadToScore(score, trebleStaff, bassStaff, staff, left);
 			// Dodajemy numer palca.
-			AddFingerToScore(score, staff, left, fingerBeforeNote);
+			if (fingersExist && fingerAfterNote)
+				AddFingerToScore(score, staff, left);
 
 			// Dodajemy prostokąt reagujący na mysz.
 			double top = base.bounds.Top;
@@ -195,7 +205,7 @@ namespace Nutadore
 			}
 		}
 
-		private void AddFingerToScore(Score score, Staff staff, double left, bool onlyPlaceholder)
+		private void AddFingerToScore(Score score, Staff staff, double left, bool onlyPlaceholder = false)
 		{
 			// Rysujemy numer palca.
 			double fingerTop
@@ -587,9 +597,35 @@ namespace Nutadore
 					break;
 			}
 
+			string durationString;
+			switch (duration.value)
+			{
+				case Duration.Value.Whole:
+					durationString = "*1";
+					break;
+				case Duration.Value.Half:
+					durationString = "*2";
+					break;
+				case Duration.Value.Quarter:
+					durationString = "*4";
+					break;
+				case Duration.Value.Eighth:
+					durationString = "*8";
+					break;
+				case Duration.Value.Sixteenth:
+					durationString = "*16";
+					break;
+				case Duration.Value.ThirtySecond:
+					durationString = "*32";
+					break;
+				default:
+					throw new Exception();
+			}
+
 			format = format.Replace("{letter}", letterUpper ? letter.ToString().ToUpper() : letter.ToString().ToLower());
 			format = format.Replace("{accidental}", accidentalSing);
 			format = format.Replace("{octave}", octaveIndex);
+			format = format.Replace("{duration}", durationString);
 
 			return format;
 			//return string.Format(
@@ -601,7 +637,7 @@ namespace Nutadore
 
 		public override string ToString()
 		{
-			return ToString("{letter}{accidental}{octave}");
+			return ToString("{letter}{accidental}{octave}{duration}");
 		}
 
 		public override bool Equals(object obj)
@@ -637,7 +673,7 @@ namespace Nutadore
 				return new Note(uLetter, Accidental.Type.Sharp, uOctave);
 			}
 			else
-				return new Note(letter, accidental.type, octave, staffType);
+				return new Note(letter, accidental.type, octave, null, staffType);
 		}
 
 		public bool EqualsEffective(Note other)

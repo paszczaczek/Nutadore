@@ -8,7 +8,7 @@ namespace Nutadore
 {
 	internal class LyParser
 	{
-		static private bool debug = true;
+		static private bool debug = false;
 
 		#region regex
 		// # ...
@@ -41,12 +41,12 @@ namespace Nutadore
 			\s*
 			{reCurlyBrackets}");
 
-		// ... | ... | ...
-		static Regex reMeasures = new Regex(@"(?x)
+		// ... |
+		static Regex reMeasure = new Regex(@"(?x)
 			(
-				(?<measures>[^|]+)
+				[^|]+
 				\|?
-			)+");
+			)");
 
 		// -\markup{c2}
 		static Regex reMarkup = new Regex(@"(?x)
@@ -54,7 +54,7 @@ namespace Nutadore
 				[-_^]
 				\\markup
 				\{
-					(?<markup>[^{}]*)
+					(?<markup>.*?)
 				\}
 			)
 		");
@@ -62,11 +62,13 @@ namespace Nutadore
 		// cis
 		static Regex reLetter = new Regex(@"(?x)
 			(
+				(?<!\\) # \grace to nie g
+				\b
 				(?<letter>[a-g])
 				(?<accidental>is|es|)
 			)");
 
-		// '''
+		// ''' lub ,,
 		static Regex reOctave = new Regex(@"(?x)
 			(?<octave>
 				'{1,4} |
@@ -80,10 +82,12 @@ namespace Nutadore
 				(?<finger>[1-9])
 			)");
 
-		// 4
+		// 4.
 		static Regex reDuration = new Regex(@"(?x)
-			(?<duration>1|2|4|8|16)
-		");
+			(
+				(?<duration>1|2|4|8|16|32)
+				(?<dotted>\.?)
+			)");
 
 		// ~
 		static Regex reTie = new Regex(@"(?x)
@@ -92,7 +96,7 @@ namespace Nutadore
 
 		// fis''-2~-\markup{fis2}
 		static Regex reNote = new Regex($@"(?x)
-			(?<note>
+			(
 				{reLetter}
 				{reOctave}?
 				{reDuration}?
@@ -102,39 +106,33 @@ namespace Nutadore
 
 		// <fis''-2 ces,-3>~-\markup{fis2}
 		static Regex reChord = new Regex($@"(?x)
-			(?<chord>
+			(
 				<
-					[^<>]*
+					(?<notes>.*?)
 				>
 				{reDuration}?
 				{reTie}?
 				{reMarkup}?
 			)");
 
-		// fis''-2 c des,
-		static Regex reNotesInChord = new Regex($@"(?x)
-			(
-				\s*
-				(?<notesInChord>
-					{reLetter}
-					{reOctave}?
-					{reFinger}?
-				)
-			)+");
+		// |
+		static Regex reBar = new Regex(@"(?x)
+			\|");
 
-		// \grace
-		static Regex reGrace = new Regex(@"(?x)
-			\\grace");
-
-		// <fis''-2 ces,-3>~-\markup{fis2} d'^\markup{b} r4 ...
-		static Regex reSigns = new Regex($@"(?x)
+		// fis''-2
+		static Regex reNoteInChord = new Regex($@"(?x)
 			(
-				\s*
-				(
-					(?<signs>{reChord}|{reNote})
-					| {reGrace}
-				)
-			)+");
+				{reLetter}
+				{reOctave}?
+				{reFinger}?
+			)");
+
+		static Regex reSign = new Regex($@"(?x)
+			(
+				{reChord} |
+				{reNote} |
+				{reBar}
+			)");
 		#endregion
 
 		static public List<Sign>[] ParallelMusic(string lyFileName)
@@ -143,17 +141,20 @@ namespace Nutadore
 
 			string lyText = File.ReadAllText(lyFileName);
 
-			// % ...
-			lyText = reComment.Replace(lyText, "\r");
+			// Usuwanie komentarzy.
+			lyText = reComment.Replace(lyText, "");
 
-			// \parallelMusic #'(voiceA voiceB voiceC) {...}
+			// Wczytanie parallelMusic.
 			Match parallelMusic = reParallelMusic.Match(lyText);
 			if (parallelMusic.Success)
 			{
+				// Liczba głosów w parellelMusic.
 				CaptureCollection voicesNames = parallelMusic.Groups["voicesNames"].Captures;
 				voices = new List<Sign>[voicesNames.Count];
 				for (int v = 0; v < voices.Count(); v++)
 					voices[v] = new List<Sign>();
+
+				// Zawartość nawisaów klamrowych w parellelMusic.
 				string curlyBrackets = parallelMusic.Groups["curlyBrackets"].Value;
 				if (debug)
 				{
@@ -163,53 +164,55 @@ namespace Nutadore
 					Console.WriteLine($") {{\n{curlyBrackets}}}");
 				}
 
-				// ... | ... | ... |
-				CaptureCollection measures = reMeasures.Match(curlyBrackets).Groups["measures"].Captures;
-				for (int m = 0; m < measures.Count; m++)
+				// Wczytywanie kolejnych taktów w parallelMusic.
+				int measureNo = -1;
+				foreach (Match measure in reMeasure.Matches(curlyBrackets))
 				{
-					Capture measure = measures[m];
+					measureNo++;
 					if (debug)
-						Console.WriteLine($"measure: {measure.ToString().Trim()}");
+						Console.WriteLine("measure {0}: {1}",
+							measureNo,
+							Regex.Replace(measure.ToString().Trim(), @"\r+|\n+", ""));
 
-					// <fis''-2 ces,-3>~-\markup{fis2} d'^\markup{b} ...
-					Match signs = reSigns.Match(measure.Value);
-					foreach (Capture sign in signs.Groups["signs"].Captures)
+					// Wczytanie kolejnych znaków w takcie.
+					foreach (Match sign in reSign.Matches(measure.Value))
 					{
-						//if (debug)
-						//	Console.WriteLine($"\tsign: {sign}");						
-
-						// <fis''-2 ces,-3>~-\markup{fis2}
+						// Czy to jest akord?
 						Match mChord = reChord.Match(sign.Value);
 						if (mChord.Success)
 						{
 							if (debug)
 								Console.WriteLine($"\tchord: {mChord}");
-							Match notesInChord = reNotesInChord.Match(mChord.Value);
 							Chord chord = new Chord();
-							foreach (Capture noteInChord in notesInChord.Groups["notesInChord"].Captures)
+							foreach (Match noteInChord in reNoteInChord.Matches(mChord.Groups["notes"].Value))
 							{
-								Match not = reNote.Match(noteInChord.Value);
-								if (not.Success)
-								{
-									if (debug)
-										Console.WriteLine($"\t\tnote: {not.Groups["note"].Captures[0]}");
-									chord.Add(CreateNote(not));
-								}
-								else
-								{
-									throw new Exception();
-								}
+								if (debug)
+									Console.WriteLine($"\t\tnote: {noteInChord}");
+
+								chord.Add(GetNote(noteInChord));
 							}
-							voices[m % 3].Add(chord);
+							chord.duration = GetDuration(mChord);
+							voices[measureNo % 3].Add(chord);
+							continue;
 						}
 
-						// fis''-2~-\markup{fis2}
+						// Czy to jest nuta?
 						Match note = reNote.Match(sign.Value);
-						if (!mChord.Success && note.Success)
+						if (note.Success)
 						{
 							if (debug)
-								Console.WriteLine($"\tnote: {note.Groups["note"].Captures[0]}");
-							voices[m % 3].Add(CreateNote(note));
+								Console.WriteLine($"\tnote: {note}");
+							voices[measureNo % 3].Add(GetNote(note));
+							continue;
+						}
+
+						// Czy to jest koniec taktu?
+						if (reBar.IsMatch(sign.Value))
+						{
+							if (debug)
+								Console.WriteLine("\tbar");
+							voices[measureNo % 3].Add(new Bar());
+							continue;
 						}
 					}
 				}
@@ -217,8 +220,8 @@ namespace Nutadore
 
 			return voices;
 		}
-
-		private static Note CreateNote(Match mNote)
+	
+		private static Note GetNote(Match mNote)
 		{
 			Note.Letter letter;
 			switch (mNote.Groups["letter"].Value)
@@ -261,12 +264,35 @@ namespace Nutadore
 					throw new ArgumentOutOfRangeException("octave");
 			}
 
-			Note note = new Note(letter, accidentalType, octave);
+			Duration duration = GetDuration(mNote);
+
+			Note note = new Note(letter, accidentalType, octave, duration);
 			int finger;
 			if (int.TryParse(mNote.Groups["finger"].Value, out finger))
 				note.finger = finger;
 
 			return note;
+		}
+
+		static private Duration GetDuration(Match durable)
+		{
+			Duration duration = new Duration();
+			switch (durable.Groups["duration"].Value)
+			{
+				case "1": duration.value = Duration.Value.Whole; break;
+				case "2": duration.value = Duration.Value.Half; break;
+				case "":
+				case "4": duration.value = Duration.Value.Quarter; break;
+				case "8": duration.value = Duration.Value.Eighth; break;
+				case "16": duration.value = Duration.Value.Sixteenth; break;
+				case "32": duration.value = Duration.Value.ThirtySecond; break;
+				default:
+					throw new ArgumentOutOfRangeException("duration");
+			}
+			if (durable.Groups["dotted"].Value == ".")
+				duration.dotted = true;
+
+			return duration;
 		}
 	}
 }

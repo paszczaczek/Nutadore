@@ -38,15 +38,78 @@ namespace Nutadore
 			//score.Add(new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.OneLined));
 		}
 
+		class Voice
+		{
+			public List<Sign> signs;
+			public List<Sign>.Enumerator enumerator;
+			public double durationLeft;
+		}
 		private void LyParserTest()
 		{
-			List<Sign>[] pm = LyParser.ParallelMusic(@"Misc\bach-air-in-d-major.ly");
-			foreach (Sign sign in pm[0])
+			List<Sign>[] parallelMusic = LyParser.ParallelMusic(@"Misc\bach-air-in-d-major.ly");
+
+			List<Voice> voices = new List<Voice>();
+			for (int v = 0; v < parallelMusic.Count(); v++)
+			{
+				Voice voice = new Voice
+				{
+					signs = parallelMusic[v],
+					enumerator = parallelMusic[v].GetEnumerator()
+				};
+				voice.enumerator.MoveNext();
+				voices.Add(voice);
+			}
+
+			bool endOfMusic = false;
+			double lastStepDuration = 0;
+			do
 			{
 				Step step = new Step();
-				step.AddVoice(sign);
+				bool endOfMeasure = true;
+				endOfMusic = true;
+				foreach (Voice voice in voices)
+				{
+					Sign sign = voice.enumerator.Current;
+					voice.durationLeft -= lastStepDuration;
+
+					endOfMusic &= sign == null;
+					if (sign == null)
+						continue;
+
+					bool signIsBar = sign is Bar;
+					endOfMeasure &= signIsBar;					
+
+					IDurationable durationable = sign as IDurationable;
+					if (durationable != null)
+					{
+						if (voice.durationLeft == 0)
+						{
+							step.AddVoice(sign);
+							voice.durationLeft = durationable.duration.ToDouble();
+							voice.enumerator.MoveNext();
+						}
+					}
+					
+				}
+				if (endOfMeasure)
+				{
+					step.AddVoice(new Bar());
+					lastStepDuration = 0;
+					voices.ForEach(voice => voice.enumerator.MoveNext());
+				}
+				else
+				{
+					lastStepDuration = step.SelectAllNotes().Min(note => note.duration.ToDouble());
+				}
 				score.Add(step);
-			}
+			} while (!endOfMusic);
+
+			//foreach (Sign sign in voices[0])
+			//{
+			//	Step step = new Step();
+			//	step.AddVoice(sign);
+			//	score.Add(step);
+			//}
 		}
 
 		private void AddTestAccidentalsFingers()
@@ -77,7 +140,7 @@ namespace Nutadore
 				chord.Add(note);
 			}
 
-			List<Note> notesDown = new List<Note> { 
+			List<Note> notesDown = new List<Note> {
 				new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.Great),
 				new Note(Note.Letter.D, Accidental.Type.Sharp, Note.Octave.Great),
 				new Note(Note.Letter.E, Accidental.Type.Flat, Note.Octave.Great),
@@ -94,7 +157,7 @@ namespace Nutadore
 				new Note(Note.Letter.A, Accidental.Type.Sharp, Note.Octave.Small),
 				new Note(Note.Letter.H, Accidental.Type.Flat, Note.Octave.Small)
 			};
-			finger = 1;
+			finger = 0;
 			foreach (Note note in notesDown)
 			{
 				note.stemDirection = Note.StemDirection.Down;
@@ -120,9 +183,9 @@ namespace Nutadore
 					.AddVoice(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.TwoLined))
 					.AddVoice(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.Small)))
 				.Add(new Step()
-					.AddVoice(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.OneLined, Staff.Type.Bass)))
+					.AddVoice(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.OneLined, null, Staff.Type.Bass)))
 				.Add(new Step()
-					.AddVoice(new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.OneLined, Staff.Type.Bass)))
+					.AddVoice(new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.OneLined, null, Staff.Type.Bass)))
 				.Add(new Step()
 					.AddVoice(new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.Small)))
 				// measure 2
