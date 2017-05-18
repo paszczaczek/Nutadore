@@ -8,14 +8,27 @@ namespace Nutadore
 {
 	internal class LyParser
 	{
+		/*
+		 % !!!
+		% Nutadore nie uwzglednia dlugosci nuty z poprzednej nuty, np. dla c8 d e wychodzi c*8 d*4 e*4
+		% zaimplementowac !
+		% !!!
+		*/
+
 		static private bool debug = false;
 
 		#region regex
 		// # ...
-		static Regex reComment = new Regex(@"(?mx)
+		static Regex reLineComment = new Regex(@"(?mx)
 			%.*
 			\r*
 			$");
+
+		// %{ ... %}
+		static Regex reBlockComment = new Regex(@"(?sx)
+			%\{
+			.*?
+			%\}");
 
 		// { ... }
 		static Regex reCurlyBrackets = new Regex(@"(?x)
@@ -142,7 +155,8 @@ namespace Nutadore
 			string lyText = File.ReadAllText(lyFileName);
 
 			// Usuwanie komentarzy.
-			lyText = reComment.Replace(lyText, "");
+			lyText = reBlockComment.Replace(lyText, "");
+			lyText = reLineComment.Replace(lyText, "");
 
 			// Wczytanie parallelMusic.
 			Match parallelMusic = reParallelMusic.Match(lyText);

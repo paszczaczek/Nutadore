@@ -82,14 +82,13 @@ namespace Nutadore
 					IDurationable durationable = sign as IDurationable;
 					if (durationable != null)
 					{
-						if (voice.durationLeft == 0)
+						if (voice.durationLeft <= 0)
 						{
 							step.AddVoice(sign);
 							voice.durationLeft = durationable.duration.ToDouble();
 							voice.enumerator.MoveNext();
 						}
 					}
-					
 				}
 				if (endOfMeasure)
 				{

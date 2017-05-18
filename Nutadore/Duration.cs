@@ -22,17 +22,22 @@ namespace Nutadore
 
 		public double ToDouble()
 		{
+			double val;
 			switch (value)
 			{
-				case Value.Whole: return 4;
-				case Value.Half: return 2;
-				case Value.Quarter: return 1;
-				case Value.Eighth: return 1.0 / 2;
-				case Value.Sixteenth: return 1.0 / 4;
-				case Value.ThirtySecond: return 1.0 / 8;
+				case Value.Whole: val = 4; break;
+				case Value.Half: val = 2; break;
+				case Value.Quarter: val = 1; break;
+				case Value.Eighth: val = 1.0 / 2; break;
+				case Value.Sixteenth: val = 1.0 / 4; break;
+				case Value.ThirtySecond: val = 1.0 / 8; break;
 				default:
 					throw new Exception();
 			}
+			if (dotted)
+				val = val * 1.5;
+
+			return val;
 		}
 	}
 }
