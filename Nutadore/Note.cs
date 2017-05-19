@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 using System.Windows.Shapes;
 
 namespace Nutadore
@@ -13,6 +14,7 @@ namespace Nutadore
 		#region props & types
 		private static Brush currentBrush = Brushes.DarkGray; // LightSeaGreen;
 		private static Brush highlightBrush = Brushes.DarkGray;
+		private static Brush textOverWhiteHeadBrush = Brushes.Gray;
 
 		public Letter letter;
 		public Octave octave;
@@ -52,6 +54,7 @@ namespace Nutadore
 		public double headOffset { get; private set; }
 		public double offset { private get; set; }
 		public bool isHeadReversed;
+		public bool IsHeadBlack { get { return duration.name != Duration.Name.Whole && duration.name != Duration.Name.Half; } }
 		public int accidentalColumn = 0;
 		public enum StemDirection { Up, Down }
 		public StemDirection stemDirection = StemDirection.Up;
@@ -258,7 +261,7 @@ namespace Nutadore
 		private void AddHeadToScore(Score score, Staff trebleStaff, Staff bassStaff, Staff staff, double left)
 		{
 			// Rysujemy główkę nuty.
-			string glyphCode = "\x0056";
+			string glyphCode = IsHeadBlack ? "\x0056" : "\x0055";
 			double glyphTop
 					= staff.top * score.Magnification
 					 + (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
@@ -314,9 +317,8 @@ namespace Nutadore
 
 			// Rysujemy pomocniczą nazwę nuty - literę.
 			double letterTop
-					= staff.top * score.Magnification
-					+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
-			//double letterLeft = left + offset + headOffset;
+				= staff.top * score.Magnification
+				+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
 			double letterLeft = glyphLeft;
 			double letterScale = 1;
 			string noteString = ToString();
@@ -342,9 +344,8 @@ namespace Nutadore
 			{
 				FontFamily = new FontFamily("Consolas"),
 				FontSize = 12 * score.Magnification * letterScale,
-				//Content = this.letter.ToString(),
 				Text = ToString("{letter}"),
-				Foreground = Brushes.White,
+				Foreground = IsHeadBlack? Brushes.White : textOverWhiteHeadBrush,
 				Padding = new Thickness(0, 0, 0, 0),
 				Margin = new Thickness(letterLeft, letterTop, 0, 0)
 			};
@@ -382,10 +383,12 @@ namespace Nutadore
 					FontFamily = new FontFamily("feta26"),
 					FontSize = 12 * score.Magnification * 0.6,
 					Text = accidentalGlyphCode,
-					Foreground = Brushes.White,
+					Foreground = IsHeadBlack? Brushes.White : textOverWhiteHeadBrush,
 					Padding = new Thickness(0, 0, 0, 0),
 					Margin = new Thickness(accidentalLeft, accidentalTop, 0, 0)
 				};
+				//if (!IsHeadBlack)
+				//	letterTextBlock.Effect = shadowOverWhiteHead;
 				base.AddElementToScore(score, accidentalTextBlock, 2);
 				accidentalFormattedText = new FormattedText(
 					accidentalTextBlock.Text,
@@ -410,7 +413,7 @@ namespace Nutadore
 				FontFamily = new FontFamily("Consola"),
 				FontSize = 12 * score.Magnification * 0.5,
 				Text = ToString("{octave}"),
-				Foreground = Brushes.White,
+				Foreground = IsHeadBlack? Brushes.White : textOverWhiteHeadBrush,
 				Padding = new Thickness(0, 0, 0, 0),
 				Margin = new Thickness(octaveLeft, octaveTop, 0, 0)
 			};
@@ -595,24 +598,24 @@ namespace Nutadore
 			}
 
 			string durationString;
-			switch (duration.value)
+			switch (duration.name)
 			{
-				case Duration.Value.Whole:
+				case Duration.Name.Whole:
 					durationString = "*1";
 					break;
-				case Duration.Value.Half:
+				case Duration.Name.Half:
 					durationString = "*2";
 					break;
-				case Duration.Value.Quarter:
+				case Duration.Name.Quarter:
 					durationString = "*4";
 					break;
-				case Duration.Value.Eighth:
+				case Duration.Name.Eighth:
 					durationString = "*8";
 					break;
-				case Duration.Value.Sixteenth:
+				case Duration.Name.Sixteenth:
 					durationString = "*16";
 					break;
-				case Duration.Value.ThirtySecond:
+				case Duration.Name.ThirtySecond:
 					durationString = "*32";
 					break;
 				default:
@@ -833,5 +836,5 @@ namespace Nutadore
 					return "";
 			}
 		}
-	}
+	}	
 }

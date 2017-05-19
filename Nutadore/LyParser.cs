@@ -293,13 +293,13 @@ namespace Nutadore
 			Duration duration = new Duration();
 			switch (durable.Groups["duration"].Value)
 			{
-				case "1": duration.value = Duration.Value.Whole; break;
-				case "2": duration.value = Duration.Value.Half; break;
+				case "1": duration.name = Duration.Name.Whole; break;
+				case "2": duration.name = Duration.Name.Half; break;
 				case "":
-				case "4": duration.value = Duration.Value.Quarter; break;
-				case "8": duration.value = Duration.Value.Eighth; break;
-				case "16": duration.value = Duration.Value.Sixteenth; break;
-				case "32": duration.value = Duration.Value.ThirtySecond; break;
+				case "4": duration.name = Duration.Name.Quarter; break;
+				case "8": duration.name = Duration.Name.Eighth; break;
+				case "16": duration.name = Duration.Name.Sixteenth; break;
+				case "32": duration.name = Duration.Name.ThirtySecond; break;
 				default:
 					throw new ArgumentOutOfRangeException("duration");
 			}

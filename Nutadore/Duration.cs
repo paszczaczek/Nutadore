@@ -8,7 +8,7 @@ namespace Nutadore
 {
 	public class Duration
 	{
-		public enum Value
+		public enum Name
 		{
 			Whole,
 			Half,
@@ -17,20 +17,20 @@ namespace Nutadore
 			Sixteenth,
 			ThirtySecond
 		}
-		public Value value = Value.Quarter;
+		public Name name = Name.Quarter;
 		public bool dotted = false;
 
 		public double ToDouble()
 		{
 			double val;
-			switch (value)
+			switch (name)
 			{
-				case Value.Whole: val = 4; break;
-				case Value.Half: val = 2; break;
-				case Value.Quarter: val = 1; break;
-				case Value.Eighth: val = 1.0 / 2; break;
-				case Value.Sixteenth: val = 1.0 / 4; break;
-				case Value.ThirtySecond: val = 1.0 / 8; break;
+				case Name.Whole: val = 4; break;
+				case Name.Half: val = 2; break;
+				case Name.Quarter: val = 1; break;
+				case Name.Eighth: val = 1.0 / 2; break;
+				case Name.Sixteenth: val = 1.0 / 4; break;
+				case Name.ThirtySecond: val = 1.0 / 8; break;
 				default:
 					throw new Exception();
 			}
