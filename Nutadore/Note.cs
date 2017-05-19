@@ -105,9 +105,6 @@ namespace Nutadore
 				: bassStaff;
 
 			// Po której stronie nuty ma być numer palca.
-			//bool fingerBeforeNote =
-			//	!isHeadReversed && stemDirection == StemDirection.Up
-			//	|| isHeadReversed && stemDirection == StemDirection.Down;
 			bool fingerAfterNote =
 				isHeadReversed && stemDirection == StemDirection.Up
 				|| !isHeadReversed && stemDirection == StemDirection.Down;
