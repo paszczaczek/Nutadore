@@ -30,12 +30,17 @@ namespace Nutadore
 
 			//BachAirInDMajor();
 			//AddTestAccidentalsFingers();
-			LyParserTest();
+			LyParserTest2();
 			//AddSteps();
 			//AddAllTriads();
 			//AddAllNotes();
 			//AddTriad();
 			//score.Add(new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.OneLined));
+		}
+
+		private void LyParserTest2()
+		{
+			LyParser.Parse(@"Misc\bach-air-in-d-major.ly");
 		}
 
 		class Voice

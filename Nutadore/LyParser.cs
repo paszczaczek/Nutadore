@@ -148,6 +148,59 @@ namespace Nutadore
 			)");
 		#endregion
 
+		internal static void Parse(string fileName)
+		{
+			// Wczytaj glosy zapisane jako \parallelMusic
+			List<Sign>[] voices = ParallelMusic(fileName);
+
+			// Znajdź najkrótszą nutę lub pauzę w utworze.
+			Duration.Name shortestDurationName = voices.Min(voice =>
+				voice
+					.Select(sign => sign as IDurationable)
+					.Where(durationable => durationable != null)
+					.DefaultIfEmpty()
+					.Min(durationable => durationable?.duration.name ?? Duration.Name.Whole));
+
+			// Znajdź najktótszą nutę lub pauzę z kropką.
+			Duration.Name shortestDottedDurationName = voices.Min(voice =>
+				voice
+					.Select(durationable => durationable as IDurationable)
+					.Where(duartionable => duartionable != null && duartionable.duration.dotted)
+					.DefaultIfEmpty()
+					.Min(durationable => durationable?.duration.name ?? Duration.Name.Whole)
+			);
+
+			// Wyznacz najmniejszą jednostkę rytmiczną.
+			if (shortestDurationName == shortestDottedDurationName)
+				shortestDurationName--;
+			Duration tick = new Duration(shortestDurationName);
+
+			// Rozmieść nuty i pauzy w tablicy (wiersze to glosy, kolumny to czas).
+			List<Sign>[] voiceVectors = new List<Sign>[voices.Count()];
+			for (int v = 0; v < voices.Count(); v++)
+			{
+				voiceVectors[v] = new List<Sign>();
+				foreach (Sign sign in voices[v])
+				{
+					IDurationable da = sign as IDurationable;
+					if (da != null)
+					{
+						int count = da.duration.ContainsHowMuch(tick);
+						voiceVectors[v].Add(sign);
+						for (int i = 1; i < count; i++)
+							voiceVectors[v].Add(null);
+					}
+				}
+			}
+
+			int minCount = voiceVectors.Min(voiceVector => voiceVector.Count());
+			int maxCount = voiceVectors.Max(voiceVector => voiceVector.Count());
+			//if (minCount != maxCount)
+			//	throw new Exception("Długości rytmiczne głosów nie są równe.");
+
+			// Usuń z tablicy te kolumny ktore nie zawierają żadnej nuty lub pauzy.
+		}
+
 		static public List<Sign>[] ParallelMusic(string lyFileName)
 		{
 			List<Sign>[] voices = null;
@@ -234,7 +287,7 @@ namespace Nutadore
 
 			return voices;
 		}
-	
+
 		private static Note GetNote(Match mNote)
 		{
 			Note.Letter letter;

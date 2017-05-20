@@ -26,8 +26,9 @@
   % bar 4
   | <cis''-3>2-\markup{cis2} a'8-\markup{a1} g'4.-\markup{g1} 
   | <a'-1>2-\markup{a1} r2
-  | <a,-5>4-\markup{A} <a-1>^\markup{a} <g>^\markup{g} <g,-4>-\markup{G}
+  | <a,-5>4-\markup{A} <a-1>4^\markup{a} <g>4^\markup{g} <g,-4>4-\markup{G}
 
+  %{
   % bar 5
   | <a''-5>1~-\markup{a2}
   %| r4 <c''-2>8-\markup{c2} <a'-1>8-\markup{a1} <c''>4-\markup{c2} <a''>4-\markup{a2}
@@ -52,6 +53,8 @@
   | <cis''-1 dis'' ees''-3 fis'' gis'' ais'' bes'' cis''' dis''' ees''' fis''' gis''' ais''' bes'''>4 r4 r2
   | r1
   | <gis ais bes>4 r4 r2
+
+%}
 }
 
 

@@ -621,6 +621,8 @@ namespace Nutadore
 				default:
 					throw new Exception();
 			}
+			if (duration.dotted)
+				durationString += ".";
 
 			format = format.Replace("{letter}", letterUpper ? letter.ToString().ToUpper() : letter.ToString().ToLower());
 			format = format.Replace("{accidental}", accidentalSing);

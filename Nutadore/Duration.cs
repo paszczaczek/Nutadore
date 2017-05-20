@@ -10,15 +10,61 @@ namespace Nutadore
 	{
 		public enum Name
 		{
-			Whole,
-			Half,
-			Quarter,
-			Eighth,
+			ThirtySecond,
 			Sixteenth,
-			ThirtySecond
+			Eighth,
+			Quarter,
+			Half,
+			Whole
 		}
+
 		public Name name = Name.Quarter;
 		public bool dotted = false;
+
+		public Duration() { }
+
+		public Duration(Name name)
+		{
+			this.name = name;
+		}
+
+		public int Fraction()
+		{
+			int fraction;
+			switch (name)
+			{
+				case Name.Whole:
+					fraction = 1;
+					break;
+				case Name.Half:
+					fraction = 2;
+					break;
+				case Name.Quarter:
+					fraction = 4;
+					break;
+				case Name.Eighth:
+					fraction = 8;
+					break;
+				case Name.Sixteenth:
+					fraction = 16;
+					break;
+				case Name.ThirtySecond:
+					fraction = 32;
+					break;
+				default:
+					throw new NotImplementedException();
+			}
+			if (dotted)
+				fraction = (int)(fraction * 1.5);
+
+			return fraction;
+		}
+
+		public int ContainsHowMuch(Duration tick)
+		{
+			//return tick.Fraction / Fraction;
+			return (int)(ToDouble() / tick.ToDouble());
+		}
 
 		public double ToDouble()
 		{
@@ -39,5 +85,7 @@ namespace Nutadore
 
 			return val;
 		}
+
+
 	}
 }
