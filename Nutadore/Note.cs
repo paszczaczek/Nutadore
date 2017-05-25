@@ -9,12 +9,12 @@ using System.Windows.Shapes;
 
 namespace Nutadore
 {
-	public class Note : Sign, IDurationable, INoteOffsets, IComparable<Note>
+	public class Note : Sign, IDuration, INoteOffsets, IComparable<Note>
 	{
 		#region props & types
 		private static Brush currentBrush = Brushes.DarkGray; // LightSeaGreen;
 		private static Brush highlightBrush = Brushes.DarkGray;
-		private static Brush textOverWhiteHeadBrush = Brushes.Gray;
+		private static Brush textOverWhiteHeadBrush = Brushes.Black;
 
 		public Letter letter;
 		public Octave octave;
@@ -597,32 +597,7 @@ namespace Nutadore
 					break;
 			}
 
-			string durationString;
-			switch (duration.name)
-			{
-				case Duration.Name.Whole:
-					durationString = "*1";
-					break;
-				case Duration.Name.Half:
-					durationString = "*2";
-					break;
-				case Duration.Name.Quarter:
-					durationString = "*4";
-					break;
-				case Duration.Name.Eighth:
-					durationString = "*8";
-					break;
-				case Duration.Name.Sixteenth:
-					durationString = "*16";
-					break;
-				case Duration.Name.ThirtySecond:
-					durationString = "*32";
-					break;
-				default:
-					throw new Exception();
-			}
-			if (duration.dotted)
-				durationString += ".";
+			string durationString = duration.ToString();
 
 			format = format.Replace("{letter}", letterUpper ? letter.ToString().ToUpper() : letter.ToString().ToLower());
 			format = format.Replace("{accidental}", accidentalSing);

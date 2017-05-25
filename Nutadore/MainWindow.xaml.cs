@@ -30,6 +30,7 @@ namespace Nutadore
 
 			//BachAirInDMajor();
 			//AddTestAccidentalsFingers();
+			//RestTest();
 			LyParserTest2();
 			//AddSteps();
 			//AddAllTriads();
@@ -38,9 +39,16 @@ namespace Nutadore
 			//score.Add(new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.OneLined));
 		}
 
+		private void RestTest()
+		{
+			score
+				.Add(new Step()
+					.AddVoice(new Rest(new Duration(Duration.Name.Quarter))));
+		}
+
 		private void LyParserTest2()
 		{
-			LyParser.Parse(@"Misc\bach-air-in-d-major.ly");
+			LyParser.Load(score, @"Misc\bach-air-in-d-major.ly");
 		}
 
 		class Voice
@@ -84,13 +92,13 @@ namespace Nutadore
 					bool signIsBar = sign is Bar;
 					endOfMeasure &= signIsBar;					
 
-					IDurationable durationable = sign as IDurationable;
+					IDuration durationable = sign as IDuration;
 					if (durationable != null)
 					{
 						if (voice.durationLeft <= 0)
 						{
 							step.AddVoice(sign);
-							voice.durationLeft = durationable.duration.ToDouble();
+							voice.durationLeft = durationable.duration.Count();
 							voice.enumerator.MoveNext();
 						}
 					}
@@ -103,7 +111,7 @@ namespace Nutadore
 				}
 				else
 				{
-					lastStepDuration = step.SelectAllNotes().Min(note => note.duration.ToDouble());
+					lastStepDuration = step.SelectAllNotes().Min(note => note.duration.Count());
 				}
 				score.Add(step);
 			} while (!endOfMusic);

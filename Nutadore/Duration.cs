@@ -23,9 +23,10 @@ namespace Nutadore
 
 		public Duration() { }
 
-		public Duration(Name name)
+		public Duration(Name name, bool dotted = false)
 		{
 			this.name = name;
+			this.dotted = dotted;
 		}
 
 		public int Fraction()
@@ -63,10 +64,10 @@ namespace Nutadore
 		public int ContainsHowMuch(Duration tick)
 		{
 			//return tick.Fraction / Fraction;
-			return (int)(ToDouble() / tick.ToDouble());
+			return (int)(Count() / tick.Count());
 		}
 
-		public double ToDouble()
+		public double Count()
 		{
 			double val;
 			switch (name)
@@ -86,6 +87,11 @@ namespace Nutadore
 			return val;
 		}
 
-
+		public override string ToString()
+		{
+			return string.Format("*{0}{1}",
+				Fraction(),
+				dotted ? "." : "");
+		}
 	}
 }

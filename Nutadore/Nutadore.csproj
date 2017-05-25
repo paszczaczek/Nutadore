@@ -61,12 +61,13 @@
     <Compile Include="Chord.cs" />
     <Compile Include="Clef.cs" />
     <Compile Include="Duration.cs" />
-    <Compile Include="IDurationable.cs" />
+    <Compile Include="IDuration.cs" />
     <Compile Include="INoteOffsets.cs" />
     <Compile Include="Key.cs" />
     <Compile Include="Keyboard.cs" />
     <Compile Include="KeyboardEventArgs.cs" />
     <Compile Include="LyParser.cs" />
+    <Compile Include="Rest.cs" />
     <Compile Include="Note.cs" />
     <Compile Include="Perform.cs" />
     <Compile Include="Scale.cs" />

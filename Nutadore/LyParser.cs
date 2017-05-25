@@ -8,13 +8,6 @@ namespace Nutadore
 {
 	internal class LyParser
 	{
-		/*
-		 % !!!
-		% Nutadore nie uwzglednia dlugosci nuty z poprzednej nuty, np. dla c8 d e wychodzi c*8 d*4 e*4
-		% zaimplementowac !
-		% !!!
-		*/
-
 		static private bool debug = false;
 
 		#region regex
@@ -128,6 +121,13 @@ namespace Nutadore
 				{reMarkup}?
 			)");
 
+		// r4
+		static Regex reRest = new Regex($@"(?x)
+			(
+				r
+				{reDuration}?
+			)");
+
 		// |
 		static Regex reBar = new Regex(@"(?x)
 			\|");
@@ -144,61 +144,92 @@ namespace Nutadore
 			(
 				{reChord} |
 				{reNote} |
+				{reRest} |
 				{reBar}
 			)");
 		#endregion
 
-		internal static void Parse(string fileName)
+		private static Duration[] lastDuration;
+
+		internal static void Load(Score score, string fileName)
 		{
 			// Wczytaj glosy zapisane jako \parallelMusic
-			List<Sign>[] voices = ParallelMusic(fileName);
+			List<Sign>[] parallelMusic = ParallelMusic(fileName);
 
-			// Znajdź najkrótszą nutę lub pauzę w utworze.
-			Duration.Name shortestDurationName = voices.Min(voice =>
+			// Znajdź najkrótszą nutę lub pauzę w utworzne.
+			Duration.Name shortestDurationName = parallelMusic.Min(voice =>
 				voice
-					.Select(sign => sign as IDurationable)
-					.Where(durationable => durationable != null)
+					.Select(sign => sign as IDuration)
+					.Where(signd => signd != null)
 					.DefaultIfEmpty()
-					.Min(durationable => durationable?.duration.name ?? Duration.Name.Whole));
+					.Min(signd => signd?.duration.name ?? Duration.Name.Whole));
 
 			// Znajdź najktótszą nutę lub pauzę z kropką.
-			Duration.Name shortestDottedDurationName = voices.Min(voice =>
+			Duration.Name shortestDottedDurationName = parallelMusic.Min(voice =>
 				voice
-					.Select(durationable => durationable as IDurationable)
-					.Where(duartionable => duartionable != null && duartionable.duration.dotted)
+					.Select(sign => sign as IDuration)
+					.Where(signd => signd != null && signd.duration.dotted)
 					.DefaultIfEmpty()
-					.Min(durationable => durationable?.duration.name ?? Duration.Name.Whole)
+					.Min(signd => signd?.duration.name ?? Duration.Name.Whole)
 			);
 
 			// Wyznacz najmniejszą jednostkę rytmiczną.
 			if (shortestDurationName == shortestDottedDurationName)
 				shortestDurationName--;
-			Duration tick = new Duration(shortestDurationName);
+			Duration tickDuration = new Duration(shortestDurationName);
 
-			// Rozmieść nuty i pauzy w tablicy (wiersze to glosy, kolumny to czas).
-			List<Sign>[] voiceVectors = new List<Sign>[voices.Count()];
-			for (int v = 0; v < voices.Count(); v++)
+			// Rozmieść nuty i pauzy w tablicy rytmicznej (wiersze to glosy, kolumny to jednostki rytmiczne).
+			List<Sign>[] voiceTable = new List<Sign>[parallelMusic.Count()];
+			for (int voiceNo = 0; voiceNo < parallelMusic.Count(); voiceNo++)
 			{
-				voiceVectors[v] = new List<Sign>();
-				foreach (Sign sign in voices[v])
+				voiceTable[voiceNo] = new List<Sign>();
+				foreach (Sign sign in parallelMusic[voiceNo])
 				{
-					IDurationable da = sign as IDurationable;
-					if (da != null)
+					IDuration signd = sign as IDuration;
+					if (signd != null)
 					{
-						int count = da.duration.ContainsHowMuch(tick);
-						voiceVectors[v].Add(sign);
+						int count = signd.duration.ContainsHowMuch(tickDuration);
+						voiceTable[voiceNo].Add(sign);
 						for (int i = 1; i < count; i++)
-							voiceVectors[v].Add(null);
+							voiceTable[voiceNo].Add(null);
 					}
 				}
 			}
 
-			int minCount = voiceVectors.Min(voiceVector => voiceVector.Count());
-			int maxCount = voiceVectors.Max(voiceVector => voiceVector.Count());
+			// Sprawdź czy długość wszystkich głosów jest równa.
+			int minCount = voiceTable.Min(voice => voice.Count());
+			int maxCount = voiceTable.Max(voice => voice.Count());
 			//if (minCount != maxCount)
 			//	throw new Exception("Długości rytmiczne głosów nie są równe.");
 
-			// Usuń z tablicy te kolumny ktore nie zawierają żadnej nuty lub pauzy.
+			// Na ile liczy się takt? (time signature)
+			int numerator = 4;
+			Duration denominator = new Duration(Duration.Name.Quarter);
+			double measureCount = numerator * denominator.Count();
+
+			// Przeglądamy tablicę rytmiczną 
+			double musicCount = 0;
+			for (int v = 0; v < maxCount; v++)
+			{
+				// Liczymy wszystkie jednostki rytmiczne, żeby móc dzielić na takty.
+				musicCount += tickDuration.Count();
+
+				// Czy jednostka rytmiczna zawiera przynajmniej jedną nutę lub pauzę?
+				if (!voiceTable.All(voice => v >= voice.Count() || voice.ElementAt(v) == null))
+				{
+					// Zawiera, Dodajemy do kroku.
+					Step step = new Step();
+					foreach (List<Sign> voice in voiceTable)
+						if (v < voice.Count())
+							if (voice.ElementAt(v) != null)
+								step.AddVoice(voice.ElementAt(v));
+					score.Add(step);
+				}
+
+				// Może tu powinien być koniec taktu?
+				if (musicCount % measureCount == 0)
+					score.Add(new Step().AddVoice(new Bar()));
+			}
 		}
 
 		static public List<Sign>[] ParallelMusic(string lyFileName)
@@ -218,8 +249,13 @@ namespace Nutadore
 				// Liczba głosów w parellelMusic.
 				CaptureCollection voicesNames = parallelMusic.Groups["voicesNames"].Captures;
 				voices = new List<Sign>[voicesNames.Count];
+				lastDuration = new Duration[voices.Count()];
 				for (int v = 0; v < voices.Count(); v++)
+				{
 					voices[v] = new List<Sign>();
+					lastDuration[v] = new Duration();
+				}
+
 
 				// Zawartość nawisaów klamrowych w parellelMusic.
 				string curlyBrackets = parallelMusic.Groups["curlyBrackets"].Value;
@@ -244,6 +280,8 @@ namespace Nutadore
 					// Wczytanie kolejnych znaków w takcie.
 					foreach (Match sign in reSign.Matches(measure.Value))
 					{
+						int voiceNo = measureNo % 3;
+
 						// Czy to jest akord?
 						Match mChord = reChord.Match(sign.Value);
 						if (mChord.Success)
@@ -256,10 +294,10 @@ namespace Nutadore
 								if (debug)
 									Console.WriteLine($"\t\tnote: {noteInChord}");
 
-								chord.Add(GetNote(noteInChord));
+								chord.Add(GetNote(noteInChord, voiceNo));
 							}
-							chord.duration = GetDuration(mChord);
-							voices[measureNo % 3].Add(chord);
+							chord.duration = GetDuration(mChord, voiceNo);
+							voices[voiceNo].Add(chord);
 							continue;
 						}
 
@@ -269,7 +307,17 @@ namespace Nutadore
 						{
 							if (debug)
 								Console.WriteLine($"\tnote: {note}");
-							voices[measureNo % 3].Add(GetNote(note));
+							voices[voiceNo].Add(GetNote(note, voiceNo));
+							continue;
+						}
+
+						// Czy to jest pauza?
+						Match rest = reRest.Match(sign.Value);
+						if (rest.Success)
+						{
+							if (debug)
+								Console.WriteLine($"\rest: {rest}");
+							voices[measureNo % 3].Add(GetRest(rest, voiceNo));
 							continue;
 						}
 
@@ -288,7 +336,7 @@ namespace Nutadore
 			return voices;
 		}
 
-		private static Note GetNote(Match mNote)
+		private static Note GetNote(Match mNote, int voiceNo)
 		{
 			Note.Letter letter;
 			switch (mNote.Groups["letter"].Value)
@@ -331,7 +379,7 @@ namespace Nutadore
 					throw new ArgumentOutOfRangeException("octave");
 			}
 
-			Duration duration = GetDuration(mNote);
+			Duration duration = GetDuration(mNote, voiceNo);
 
 			Note note = new Note(letter, accidentalType, octave, duration);
 			int finger;
@@ -341,25 +389,38 @@ namespace Nutadore
 			return note;
 		}
 
-		static private Duration GetDuration(Match durable)
+		private static Duration GetDuration(Match durable, int voiceNo)
 		{
 			Duration duration = new Duration();
 			switch (durable.Groups["duration"].Value)
 			{
 				case "1": duration.name = Duration.Name.Whole; break;
 				case "2": duration.name = Duration.Name.Half; break;
-				case "":
 				case "4": duration.name = Duration.Name.Quarter; break;
 				case "8": duration.name = Duration.Name.Eighth; break;
 				case "16": duration.name = Duration.Name.Sixteenth; break;
 				case "32": duration.name = Duration.Name.ThirtySecond; break;
+				case "":
+					duration = lastDuration[voiceNo]; break;
 				default:
 					throw new ArgumentOutOfRangeException("duration");
 			}
 			if (durable.Groups["dotted"].Value == ".")
 				duration.dotted = true;
 
+			lastDuration[voiceNo] = duration;
+
 			return duration;
 		}
+
+		private static Rest GetRest(Match mRest, int voiceNo)
+		{
+			Duration duration = GetDuration(mRest, voiceNo);
+
+			Rest rest = new Rest(duration);
+
+			return rest;
+		}
+
 	}
 }

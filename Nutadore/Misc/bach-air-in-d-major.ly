@@ -8,9 +8,11 @@
   % !!!
   
   % bar 1
+  
     <fis''-2>1~-\markup{fis2} 
   | <d''-1>1~-\markup{d2} 
   | <d-5>4-\markup{d} d'^\markup{d1} cis'^\markup{cis1} cis-\markup{cis} 
+  
 
   % bar 2  
   | <fis''-2>1~-\markup{fis2}
@@ -28,12 +30,13 @@
   | <a'-1>2-\markup{a1} r2
   | <a,-5>4-\markup{A} <a-1>4^\markup{a} <g>4^\markup{g} <g,-4>4-\markup{G}
 
-  %{
+  
   % bar 5
   | <a''-5>1~-\markup{a2}
-  %| r4 <c''-2>8-\markup{c2} <a'-1>8-\markup{a1} <c''>4-\markup{c2} <a''>4-\markup{a2}
-  | f'4 <c''-2>8-\markup{c2} <a'-1>8-\markup{a1} <c''>4-\markup{c2} <a''>4-\markup{a2}
+  | r4 <c''-2>8-\markup{c2} <a'-1>8-\markup{a1} <c''>4-\markup{c2} <a''>4-\markup{a2}
+  %| f'4 <c''-2>8-\markup{c2} <a'-1>8-\markup{a1} <c''>4-\markup{c2} <a''>4-\markup{a2}
   | <fis,-5>-\markup{Fis} <fis>^\markup{fis} <e>^\markup{e} <e,-4>-\markup{E}
+
 
   % bar 6
   | <a''>8-\markup{a2} <g''-4>8-\markup{g2} <c''-2>8-\markup{c2} <b'>8-\markup{b1} <e''>8-\markup{e2} <dis''>8-\markup{dis2} <a''-5>8-\markup{a2} <g''>8-\markup{g2}
@@ -42,14 +45,14 @@
  
   % bar 7
   | <g''-5>1~-\markup{g2}
-  | <b'-1>4-\markup{b1} <e''-3>8-\markup{e2} <d''>8-\markup{d2}  <e''>8-\markup{e2} <fis''>8-\markup{fis2} <g''>8-\markup{g2} <e''>8-\markup{e2}
+  | <b'-1>4-\markup{b1} <e''-3>8-\markup{e2} <d''>-\markup{d2}  <e''>-\markup{e2} <fis''>-\markup{fis2} <g''>-\markup{g2} <e''>-\markup{e2}
   | <e,>4-\markup{E} <e>-\markup{e} <d>-\markup{d} <d,-4>-\markup{D}
 
   % bar 8
   | <g''>8-\markup{g2} <e''-5>8-\markup{e2} <b'-2>8-\markup{g1} <a'>8-\markup{a1} <d''-3>8-\markup{d2} <cis''>8-\markup{c2} <g''-5>8-\markup{g2} <fis''-4>8-\markup{fis2}
   | <a'>4-\markup{a1} r4 r2
   | <cis,-5>4-\markup{Cis} <cis>4-\markup{cis} <a,>4-\markup{A} <fis>4-\markup{fis}  
-  
+%{  
   | <cis''-1 dis'' ees''-3 fis'' gis'' ais'' bes'' cis''' dis''' ees''' fis''' gis''' ais''' bes'''>4 r4 r2
   | r1
   | <gis ais bes>4 r4 r2
