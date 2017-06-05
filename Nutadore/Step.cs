@@ -160,8 +160,8 @@ namespace Nutadore
 			foreach (Chord chord in SelectAll<Chord>())
 			{
 				List<Note> notesOnLine = chord.notes
-					.Where(note => 
-						!note.staffPosition.LineAbove 
+					.Where(note =>
+						!note.staffPosition.LineAbove
 						&& note.accidental.type == Accidental.Type.None)
 					.ToList();
 				List<Note> notesAboveLine = chord.notes
@@ -169,11 +169,36 @@ namespace Nutadore
 						note.staffPosition.LineAbove ||
 						note.accidental.type != Accidental.Type.None)
 					.ToList();
-				List<Note> notesReversed
-					= notesOnLine.Count < notesAboveLine.Count
-					? notesOnLine
-					: notesAboveLine;
+
+				List<Note> notesReversed;
+				//= notesOnLine.Count < notesAboveLine.Count
+				//? notesOnLine
+				//: notesAboveLine;
+				List<Note> notesNotReversed;
+				if (notesOnLine.Count < notesAboveLine.Count)
+				{
+					notesReversed = notesOnLine;
+					notesNotReversed = notesAboveLine;
+				}
+				else
+				{
+					notesReversed = notesAboveLine;
+					notesNotReversed = notesOnLine;
+				}
+
 				notesReversed.ForEach(note => note.isHeadReversed = true);
+
+				foreach (Note noteReversed in notesReversed)
+				{
+					bool exists = notesNotReversed
+						.Where(noteNotReversed =>
+							noteNotReversed.staffType == noteReversed.staffType &&
+							Math.Abs(noteNotReversed.staffPosition.Number - noteReversed.staffPosition.Number) < 1.0)
+						.Any();
+					if (!exists)
+						noteReversed.isHeadReversed = false;
+				}
+
 			}
 
 			// TODO: Zachodzić na siebi mogą równiez pojenyńcze nuty. Ich nie przenosi się na drugą
