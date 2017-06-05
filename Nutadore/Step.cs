@@ -156,45 +156,30 @@ namespace Nutadore
 
 		private void EliminateHeadsOverlapping()
 		{
-			// Główki nut zachodzące na siebie przenosi na drugą strone kreseczki.
-			List<Note> notes = SelectAllNotes().OrderByDescending(note => note).ToList();
-			List<Note> notesReversed = new List<Note>();
-			bool overlappingFound = false;
-			do
+			// Główki nut (w ramach akordu) zachodzące na siebie przenosim na drugą strone kreseczki.
+			foreach (Chord chord in SelectAll<Chord>())
 			{
-				overlappingFound = false;
-				foreach (Note note in notes)
-				{
-					// Wyszukujemy nuty zachodzące na nuty po właściwej i po drugiej stronie kreseczki.
-					Func<Note, bool> overlappingCond = n =>
-									note.staffType == n.staffType
-									&& Math.Abs(note.staffPosition.Number - n.staffPosition.Number) == 0.5
-									&& !note.Equals(n);
-					bool overlaps = notes.Where(overlappingCond).Count() > 0;
-					bool overlapsReversed = notesReversed.Where(overlappingCond).Count() > 0;
-					// Nutę przenosimy na drugą stronę, jeśli koliduje z nutami po właściwej 
-					// stronie kreseczki i nie koliduje z nutami po drugiej stronie kreseczki.
-					if (overlaps && !overlapsReversed)
-					{
-						notes.Remove(note);
-						notesReversed.Add(note);
-						overlappingFound = true;
-						break;
-					}
-				}
-			} while (overlappingFound);
-
-			// Jeśli nut po drugies stronie jest więcej, to zamieniamy strony, bo to źle wygląda.
-			if (notesReversed.Count > notes.Count)
-			{
-				var notesTmp = notes;
-				notes = notesReversed;
-				notesReversed = notesTmp;
+				List<Note> notesOnLine = chord.notes
+					.Where(note => 
+						!note.staffPosition.LineAbove 
+						&& note.accidental.type == Accidental.Type.None)
+					.ToList();
+				List<Note> notesAboveLine = chord.notes
+					.Where(note =>
+						note.staffPosition.LineAbove ||
+						note.accidental.type != Accidental.Type.None)
+					.ToList();
+				List<Note> notesReversed
+					= notesOnLine.Count < notesAboveLine.Count
+					? notesOnLine
+					: notesAboveLine;
+				notesReversed.ForEach(note => note.isHeadReversed = true);
 			}
 
-			// Zazanaczmy nuty po lewej stronie.
-			notesReversed.ForEach(note => note.isHeadReversed = true);
+			// TODO: Zachodzić na siebi mogą równiez pojenyńcze nuty. Ich nie przenosi się na drugą
+			// stronę kreseczki, tylko trzeba przesunąć. Tego na razie nie implementuje.
 		}
+
 
 		private void EliminateAccidentalOverlapping()
 		{
@@ -361,6 +346,14 @@ namespace Nutadore
 				// będą wykonywane o oktawę nizej.
 				performHowToStaffBass = Perform.HowTo.OneOctaveLower;
 			}
+		}
+
+		public List<T> SelectAll<T>() where T : class
+		{
+			return voices
+				.Where(voice => voice is T)
+				.Select(voice => voice as T)
+				.ToList<T>();
 		}
 
 		public List<Note> SelectAllNotes()

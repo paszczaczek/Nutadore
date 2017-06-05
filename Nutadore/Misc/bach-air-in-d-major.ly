@@ -52,6 +52,11 @@
   | <g''>8-\markup{g2} <e''-5>8-\markup{e2} <b'-2>8-\markup{g1} <a'>8-\markup{a1} <d''-3>8-\markup{d2} <cis''>8-\markup{c2} <g''-5>8-\markup{g2} <fis''-4>8-\markup{fis2}
   | <a'>4-\markup{a1} r4 r2
   | <cis,-5>4-\markup{Cis} <cis>4-\markup{cis} <a,>4-\markup{A} <fis>4-\markup{fis}  
+  
+  % test
+  | <c' d' e' g' a'>4 r4 r4 r4
+  | r1
+  | <c d e g a>4 r4 r4 r4
 %{  
   | <cis''-1 dis'' ees''-3 fis'' gis'' ais'' bes'' cis''' dis''' ees''' fis''' gis''' ais''' bes'''>4 r4 r2
   | r1

@@ -126,6 +126,10 @@ namespace Nutadore
 			if (fingersExist && fingerAfterNote)
 				AddFingerToScore(score, staff, left);
 
+			// test
+			//if (isHeadReversed)
+			//	AddNoteNameToScore(score, staff);
+
 			// Dodajemy prostokąt reagujący na mysz.
 			double top = base.bounds.Top;
 			double bottom = base.bounds.Bottom;
@@ -157,7 +161,7 @@ namespace Nutadore
 				return right + Staff.spaceBetweenSigns * score.Magnification;
 			}
 		}
-
+		
 		private void AddLegerLinesToScore(Score score, Staff trebleStaff, Staff bassStaff, Staff staff, double left)
 		{
 			// Czy trzeba dorysować linie dodane?
@@ -240,6 +244,41 @@ namespace Nutadore
 				fingerFormattedText.Extent);
 			base.ExtendBounds(fingerBounds);
 			right = fingerLeft + fingerFormattedText.Width;
+		}
+
+		private void AddNoteNameToScore(Score score, Staff staff)
+		{
+			// Rysujemy nazwę nuty.
+			double noteNameTop
+					= staff.top * score.Magnification
+					+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification
+					- 6 * score.Magnification;
+			double noteNameLeft = right;
+			double noteNameScale = 0.9;
+			TextBlock noteNameTextBlock = new TextBlock
+			{
+				FontFamily = new FontFamily("Consolas"),
+				FontSize = 12 * score.Magnification * noteNameScale,
+				Text = ToString(),
+				Foreground = Brushes.Black,
+				Padding = new Thickness(0, 0, 0, 0),
+				Margin = new Thickness(noteNameLeft, noteNameTop, 0, 0)
+			};
+			base.AddElementToScore(score, noteNameTextBlock, 2);
+			FormattedText fingerFormattedText = new FormattedText(
+				noteNameTextBlock.Text,
+				CultureInfo.GetCultureInfo("en-us"),
+				FlowDirection.LeftToRight,
+				new Typeface("Consolas"),
+				noteNameTextBlock.FontSize,
+				Brushes.Black);
+			Rect noteNameBounds = new Rect(
+				noteNameLeft,
+				noteNameTop + fingerFormattedText.Height + fingerFormattedText.OverhangAfter - fingerFormattedText.Extent,
+				fingerFormattedText.Width,
+				fingerFormattedText.Extent);
+			base.ExtendBounds(noteNameBounds);
+			right = noteNameLeft + fingerFormattedText.Width;
 		}
 
 		private void AddAccidentalToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left)

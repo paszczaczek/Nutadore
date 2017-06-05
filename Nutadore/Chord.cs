@@ -27,9 +27,10 @@ namespace Nutadore
 			set { notes.ForEach(note => note.offset = value + headOffset - note.headOffset); _offset = value; }
 		}
 
-		public void Add(Note note)
+		public Chord AddNote(Note note)
 		{
 			notes.Add(note);
+			return this;
 		}
 
 		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left)

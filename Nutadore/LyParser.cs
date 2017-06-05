@@ -294,7 +294,7 @@ namespace Nutadore
 								if (debug)
 									Console.WriteLine($"\t\tnote: {noteInChord}");
 
-								chord.Add(GetNote(noteInChord, voiceNo));
+								chord.AddNote(GetNote(noteInChord, voiceNo));
 							}
 							chord.duration = GetDuration(mChord, voiceNo);
 							voices[voiceNo].Add(chord);
