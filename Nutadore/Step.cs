@@ -156,24 +156,23 @@ namespace Nutadore
 
 		private void EliminateHeadsOverlapping()
 		{
-			// Główki nut (w ramach akordu) zachodzące na siebie przenosim na drugą strone kreseczki.
+			// Główki nut (w ramach akordu) zachodzące na siebie przenosim na drugą strone laseczki.
 			foreach (Chord chord in SelectAll<Chord>())
 			{
+				// Podziel nuty leżące na liniach i pomiędzy liniami.
 				List<Note> notesOnLine = chord.notes
 					.Where(note =>
 						!note.staffPosition.LineAbove
-						&& note.accidental.type == Accidental.Type.None)
+						/*&& note.accidental.type == Accidental.Type.None*/)
 					.ToList();
 				List<Note> notesAboveLine = chord.notes
 					.Where(note =>
-						note.staffPosition.LineAbove ||
-						note.accidental.type != Accidental.Type.None)
+						note.staffPosition.LineAbove /*||
+						note.accidental.type != Accidental.Type.None*/)
 					.ToList();
 
+				// Tych których jest mniej prznosimy na drugą stronę laseczki.
 				List<Note> notesReversed;
-				//= notesOnLine.Count < notesAboveLine.Count
-				//? notesOnLine
-				//: notesAboveLine;
 				List<Note> notesNotReversed;
 				if (notesOnLine.Count < notesAboveLine.Count)
 				{
@@ -185,26 +184,36 @@ namespace Nutadore
 					notesReversed = notesAboveLine;
 					notesNotReversed = notesOnLine;
 				}
-
 				notesReversed.ForEach(note => note.isHeadReversed = true);
 
+				// Przenosimy z powrotem te, dla których znajdzie się miejsce po właściwej stronie laseczki.
 				foreach (Note noteReversed in notesReversed)
 				{
-					bool exists = notesNotReversed
+					bool canUndone = !notesNotReversed
 						.Where(noteNotReversed =>
 							noteNotReversed.staffType == noteReversed.staffType &&
 							Math.Abs(noteNotReversed.staffPosition.Number - noteReversed.staffPosition.Number) < 1.0)
 						.Any();
-					if (!exists)
+					if (canUndone)
 						noteReversed.isHeadReversed = false;
 				}
 
+				// Dla, np c i c#, c# powinno byc przeniesione na druga strone laseczki.
+				foreach (Note noteNotReversed in notesNotReversed)
+				{
+					notesNotReversed
+						.Where(note => 
+							note.staffPosition.LineName == noteNotReversed.staffPosition.LineName &&
+							note.accidental.type != noteNotReversed.accidental.type)
+						.Where(note => note.accidental.type != Accidental.Type.None)
+						.ToList()
+						.ForEach(note => note.isHeadReversed = true);
+				}
 			}
 
 			// TODO: Zachodzić na siebi mogą równiez pojenyńcze nuty. Ich nie przenosi się na drugą
 			// stronę kreseczki, tylko trzeba przesunąć. Tego na razie nie implementuje.
 		}
-
 
 		private void EliminateAccidentalOverlapping()
 		{

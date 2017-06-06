@@ -12,7 +12,7 @@ namespace Nutadore.Tests
 	[TestClass()]
 	public class StepTests
 	{
-		[TestMethod()]
+		[TestMethod]
 		public void EliminateHeadsOverlapping()
 		{
 			Application app = Common.Initialize();
@@ -44,14 +44,46 @@ namespace Nutadore.Tests
 					.AddVoice(chordStemUp)
 					.AddVoice(chordStemDown));
 
+			// Akord z c i c# - powinno nastąpić odwrócenie.
+			Chord chordSemitone = new Chord()
+				.AddNote(new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.OneLined))
+				.AddNote(new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.OneLined));
+			chordSemitone.notes.ForEach(note => note.stemDirection = Note.StemDirection.Up);
+
 			// Akord w którym nie powinno wystąpić odwrócenie nuty.
 			Chord chord = new Chord()
 				.AddNote(new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.Small))
 				.AddNote(new Note(Note.Letter.F, Accidental.Type.None, Note.Octave.Small));
+			chord.notes.ForEach(note => note.stemDirection = Note.StemDirection.Down);
 
 			app.score.Invoke("Add",
 				new Nutadore.Step()
-					.AddVoice(chord));
+					.AddVoice(chord)
+					.AddVoice(chordSemitone));
+
+			app.mw.ShowDialog();
+
+			Assert.IsTrue(true);
+		}
+
+		[TestMethod]
+		public void EliminateAccidentalOverlapping()
+		{
+			Application app = Common.Initialize();
+
+			Chord chord = new Chord()
+				.AddNote(new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.OneLined))
+				.AddNote(new Note(Note.Letter.D, Accidental.Type.Sharp, Note.Octave.OneLined))
+				.AddNote(new Note(Note.Letter.E, Accidental.Type.Flat, Note.Octave.OneLined))
+				.AddNote(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.OneLined))
+				.AddNote(new Note(Note.Letter.G, Accidental.Type.Sharp, Note.Octave.OneLined))
+				.AddNote(new Note(Note.Letter.A, Accidental.Type.Sharp, Note.Octave.OneLined))
+				.AddNote(new Note(Note.Letter.H, Accidental.Type.Flat, Note.Octave.OneLined))
+				;
+			chord.notes.ForEach(note => note.stemDirection = Note.StemDirection.Up);
+
+			app.score.Invoke("Add", new Nutadore.Step()
+				.AddVoice(chord));
 
 			app.mw.ShowDialog();
 
