@@ -217,32 +217,34 @@ namespace Nutadore
 
 		private void EliminateAccidentalOverlapping()
 		{
-			// Znaki chromatyczne zachodzące na siebie przesuwamy w lewą stronę.
-			// Wybieramy nuty ze stepu posiadające znaki chromatyczne.
-			var notes = SelectAllNotes()
-				.Where(note => note.accidental.type != Accidental.Type.None)
-				.OrderBy(note => note)
-				.AsEnumerable();
-			foreach (Note note in notes)
+			// Ustawiamy znaki chromatyczne w akordach
+			foreach (Chord chord in SelectAll<Chord>())
 			{
-				// Ile kolumn w lewo trzeba przesunąć znak chromatyczny, 
-				// żeby nie kolidował z sąsiednimi znakami.
-				note.accidentalColumn = 0;
-				FindAccidentalOverlaping(note, 0, ref notes);
-			}
+				// Wybieramy nuty ze znakami chromnatycznymi i sortujemy na przemiennie,
+				// tj. jedna z góry akrodu, jedna z dołu, itd.
+				var notesWithAcc = chord.notes
+					.Where(note => note.accidental.type != Accidental.Type.None);
+				var notesOrderAsc = notesWithAcc.OrderBy(note => note).ToList();
+				var notesOrderDsc = notesWithAcc.OrderByDescending(note => note).ToList();
+				List<Note> notesOrderAlt = new List<Note>();
+				for (int i = 0; i < notesOrderDsc.Count(); i++)
+				{
+					notesOrderAlt.Add(notesOrderDsc[i]);
+					if (notesOrderDsc[i] == notesOrderAsc[i])
+						break;
+					notesOrderAlt.Add(notesOrderAsc[i]);
+				}
 
-			// Teraz żadne znaki chromnatyczne nie kolidują ze sobą, ale
-			// algorytm jest trochę nadgorliwy i okazuje się że nie które
-			// znaki mozna przenieść do kolumn w prawo. Zaczynając od znaków
-			// najbardziej przesuniętych w lewo sprawdzamy, czy  nie można
-			// ich umieścić bardziej na prawo.
-			var notesOrdByAccidentalColumn = notes
-				.OrderBy(note => note)
-				.OrderByDescending(note => note.accidentalColumn);
-			foreach (var note in notesOrdByAccidentalColumn)
-			{
-				note.accidentalColumn = 0;
-				FindAccidentalOverlaping(note, 0, ref notes);
+				// Znaki chromatyczne zachodzące na siebie przesuwamy w lewą stronę.
+				notesOrderAlt.ForEach(note => note.accidentalColumn = -1);
+				var notes = notesOrderAlt.AsEnumerable();
+				foreach (Note note in notes)
+				{
+					// Ile kolumn w lewo trzeba przesunąć znak chromatyczny, 
+					// żeby nie kolidował z sąsiednimi znakami.
+					note.accidentalColumn = 0;
+					FindAccidentalOverlaping(note, 0, ref notes);
+				}
 			}
 		}
 
@@ -252,7 +254,7 @@ namespace Nutadore
 			var noteOverlapped = notes.Where(n =>
 					n.accidentalColumn == col
 					&& note.staffType == n.staffType
-					&& Math.Abs(note.staffPosition.Number - n.staffPosition.Number) <= 3.0
+					&& Math.Abs(note.staffPosition.Number - n.staffPosition.Number) </*=*/ 3.0
 					&& !note.Equals(n));
 			if (noteOverlapped.Count() == 0)
 				return;

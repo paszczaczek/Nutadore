@@ -71,19 +71,29 @@ namespace Nutadore.Tests
 		{
 			Application app = Common.Initialize();
 
-			Chord chord = new Chord()
+			Chord chordSteamUp = new Chord()
 				.AddNote(new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.OneLined))
 				.AddNote(new Note(Note.Letter.D, Accidental.Type.Sharp, Note.Octave.OneLined))
 				.AddNote(new Note(Note.Letter.E, Accidental.Type.Flat, Note.Octave.OneLined))
 				.AddNote(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.OneLined))
 				.AddNote(new Note(Note.Letter.G, Accidental.Type.Sharp, Note.Octave.OneLined))
 				.AddNote(new Note(Note.Letter.A, Accidental.Type.Sharp, Note.Octave.OneLined))
-				.AddNote(new Note(Note.Letter.H, Accidental.Type.Flat, Note.Octave.OneLined))
-				;
-			chord.notes.ForEach(note => note.stemDirection = Note.StemDirection.Up);
+				.AddNote(new Note(Note.Letter.H, Accidental.Type.Flat, Note.Octave.OneLined));
+			chordSteamUp.notes.ForEach(note => note.stemDirection = Note.StemDirection.Up);
+
+			Chord chordSteamDown = new Chord()
+				.AddNote(new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.Small))
+				.AddNote(new Note(Note.Letter.D, Accidental.Type.Sharp, Note.Octave.Small))
+				.AddNote(new Note(Note.Letter.E, Accidental.Type.Flat, Note.Octave.Small))
+				.AddNote(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.Small))
+				.AddNote(new Note(Note.Letter.G, Accidental.Type.Sharp, Note.Octave.Small))
+				.AddNote(new Note(Note.Letter.A, Accidental.Type.Sharp, Note.Octave.Small))
+				.AddNote(new Note(Note.Letter.H, Accidental.Type.Flat, Note.Octave.Small));
+			chordSteamDown.notes.ForEach(note => note.stemDirection = Note.StemDirection.Down);
 
 			app.score.Invoke("Add", new Nutadore.Step()
-				.AddVoice(chord));
+				.AddVoice(chordSteamUp)
+				.AddVoice(chordSteamDown));
 
 			app.mw.ShowDialog();
 

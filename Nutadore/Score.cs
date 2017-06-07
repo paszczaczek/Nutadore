@@ -17,6 +17,8 @@ namespace Nutadore
 		public Scale scale = new Scale(Note.Letter.C, Scale.Type.Major);
 		private List<StaffGrand> staffGrands = new List<StaffGrand>();
 		public List<Step> steps = new List<Step>();
+		public bool showFingers = true;
+		public bool showNotesName = true;
 
 		private Step _currentStep;
 		public Step CurrentStep

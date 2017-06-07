@@ -54,15 +54,14 @@
   | <cis,-5>4-\markup{Cis} <cis>4-\markup{cis} <a,>4-\markup{A} <fis>4-\markup{fis}  
   
   % test
-  | <c' d' e' g' a'>4 r4 r4 r4
+  | <c' cis'>4 r4 r4 r4
   | r1
   | <c d e g a>4 r4 r4 r4
-%{  
-  | <cis''-1 dis'' ees''-3 fis'' gis'' ais'' bes'' cis''' dis''' ees''' fis''' gis''' ais''' bes'''>4 r4 r2
+ 
+  | <cis''-1 dis'' ees''-3 fis'' gis'' ais'' bes'' >4 r4 r2
   | r1
-  | <gis ais bes>4 r4 r2
+  | <cis-1 dis ees-3 fis gis ais bes >4 r4 r2
 
-%}
 }
 
 
