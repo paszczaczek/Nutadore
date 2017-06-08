@@ -69,7 +69,7 @@ namespace Nutadore
 			F,
 			G,
 			A,
-			H
+			B
 		}
 
 		public enum Octave
@@ -93,6 +93,12 @@ namespace Nutadore
 			this.octave = octave;
 			this.duration = duration ?? new Duration();
 			this.staffPosition = ToStaffPosition(preferredStaffType);
+
+			if (this < lowest || this > highest)
+				throw new ArgumentOutOfRangeException(
+					"octave, letter",
+					new { octave = octave, letter = letter },
+					$"Wysokość nuty poza zakresem: {lowest.ToString()} .. {highest.ToString()}");
 		}
 
 		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left)
@@ -107,28 +113,29 @@ namespace Nutadore
 				? trebleStaff
 				: bassStaff;
 
-			// Po której stronie nuty ma być numer palca.
-			bool fingerAfterNote =
+			// Po której stronie nuty ma być opis nuty (nazwa i numer palca).
+			bool DescrAfterHead =
 				isHeadReversed && stemDirection == StemDirection.Up
 				|| !isHeadReversed && stemDirection == StemDirection.Down;
 
 			// Czy w stepie są jakieś numery palców?
 			bool fingersExist = step.SelectAllNotes().Exists(note => note.finger > 0);
 
+			// Czy i jakie opisy wyświetlać?
+			bool showFingers = fingersExist && score.showFingers;
+			bool showNoteNames = score.showNotesName;
+			bool showDescr = showFingers || showNoteNames;
+
 			// Dodajemy znaki chromatyczne.
 			AddAccidentalToScore(score, trebleStaff, bassStaff, step, left);
-			// Dodajemy numer palca.
-			if (fingersExist)
-				AddFingerToScore(score, staff, left, fingerAfterNote);
+			// Dodajemy opis nuty przed główką.
+			if (showDescr)
+				AddDescrToScore(score, staff, left, DescrAfterHead);
 			// Dodajemy głowkę nuty.
 			AddHeadToScore(score, trebleStaff, bassStaff, staff, left);
-			// Dodajemy numer palca.
-			if (fingersExist && fingerAfterNote)
-				AddFingerToScore(score, staff, left);
-
-			// test
-			//if (isHeadReversed)
-			//	AddNoteNameToScore(score, staff);
+			// Dodajemy opis nuty za główką.
+			if (showDescr && DescrAfterHead)
+				AddDescrToScore(score, staff, left);
 
 			// Dodajemy prostokąt reagujący na mysz.
 			double top = base.bounds.Top;
@@ -209,25 +216,33 @@ namespace Nutadore
 			}
 		}
 
-		private void AddFingerToScore(Score score, Staff staff, double left, bool onlyPlaceholder = false)
+		private void AddDescrToScore(Score score, Staff staff, double left, bool onlyPlaceholder = false)
 		{
+			// Po której stronie nuty ma być opis nuty (nazwa i numer palca).
+			bool DescrAfterNote =
+				isHeadReversed && stemDirection == StemDirection.Up
+				|| !isHeadReversed && stemDirection == StemDirection.Down;
+
 			// Rysujemy numer palca.
-			double fingerTop
+			double DescrTop
 					= staff.top * score.Magnification
 					+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification
 					- 6 * score.Magnification;
 			double fingerLeft = right;
 			double fingerScale = 0.9;
+			string descr = "";
+			if (score.showFingers)
+				descr += finger > 0 ? finger.ToString() : "";
+			if (score.showNotesName)
+				descr += ToString("{letter}{accidental}{octave}");
 			TextBlock fingerTextBlock = new TextBlock
 			{
 				FontFamily = new FontFamily("Consolas"),
 				FontSize = 12 * score.Magnification * fingerScale,
-				//Text = (finger ?? 0).ToString(),
-				Text = finger.ToString(),
-				//Foreground = onlyPlaceholder || finger == null ? Brushes.Transparent : Brushes.Black,
-				Foreground = onlyPlaceholder || finger == 0 ? Brushes.Transparent : Brushes.Black,
+				Text = descr,
+				Foreground = onlyPlaceholder ? Brushes.Transparent : Brushes.Black,
 				Padding = new Thickness(0, 0, 0, 0),
-				Margin = new Thickness(fingerLeft, fingerTop, 0, 0)
+				Margin = new Thickness(fingerLeft, DescrTop, 0, 0)
 			};
 			base.AddElementToScore(score, fingerTextBlock, 2);
 			FormattedText fingerFormattedText = new FormattedText(
@@ -239,46 +254,11 @@ namespace Nutadore
 				Brushes.Black);
 			Rect fingerBounds = new Rect(
 				fingerLeft,
-				fingerTop + fingerFormattedText.Height + fingerFormattedText.OverhangAfter - fingerFormattedText.Extent,
+				DescrTop + fingerFormattedText.Height + fingerFormattedText.OverhangAfter - fingerFormattedText.Extent,
 				fingerFormattedText.Width,
 				fingerFormattedText.Extent);
 			base.ExtendBounds(fingerBounds);
 			right = fingerLeft + fingerFormattedText.Width;
-		}
-
-		private void AddNoteNameToScore(Score score, Staff staff)
-		{
-			// Rysujemy nazwę nuty.
-			double noteNameTop
-					= staff.top * score.Magnification
-					+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification
-					- 6 * score.Magnification;
-			double noteNameLeft = right;
-			double noteNameScale = 0.9;
-			TextBlock noteNameTextBlock = new TextBlock
-			{
-				FontFamily = new FontFamily("Consolas"),
-				FontSize = 12 * score.Magnification * noteNameScale,
-				Text = ToString(),
-				Foreground = Brushes.Black,
-				Padding = new Thickness(0, 0, 0, 0),
-				Margin = new Thickness(noteNameLeft, noteNameTop, 0, 0)
-			};
-			base.AddElementToScore(score, noteNameTextBlock, 2);
-			FormattedText fingerFormattedText = new FormattedText(
-				noteNameTextBlock.Text,
-				CultureInfo.GetCultureInfo("en-us"),
-				FlowDirection.LeftToRight,
-				new Typeface("Consolas"),
-				noteNameTextBlock.FontSize,
-				Brushes.Black);
-			Rect noteNameBounds = new Rect(
-				noteNameLeft,
-				noteNameTop + fingerFormattedText.Height + fingerFormattedText.OverhangAfter - fingerFormattedText.Extent,
-				fingerFormattedText.Width,
-				fingerFormattedText.Extent);
-			base.ExtendBounds(noteNameBounds);
-			right = noteNameLeft + fingerFormattedText.Width;
 		}
 
 		private void AddAccidentalToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left)
@@ -353,110 +333,6 @@ namespace Nutadore
 			// Rysujemy linie dodane górne i dolne - jeśli nuta nie jest częścią akordu.
 			if (showLegerLines)
 				AddLegerLinesToScore(score, trebleStaff, bassStaff, staff, glyphLeft);
-
-			// Rysujemy pomocniczą nazwę nuty - literę.
-			double letterTop
-				= staff.top * score.Magnification
-				+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
-			double letterLeft = glyphLeft;
-			double letterScale = 1;
-			string noteString = ToString();
-			if (noteString.Length == 3)
-			{
-				letterTop -= 3.5 * score.Magnification;
-				letterLeft += 2 * score.Magnification;
-				letterScale = 0.7;
-			}
-			else if (noteString.Length == 2)
-			{
-				letterTop -= 4.5 * score.Magnification;
-				letterLeft += 3 * score.Magnification;
-				letterScale = 0.8;
-			}
-			else
-			{
-				letterTop -= 6 * score.Magnification;
-				letterLeft += 4 * score.Magnification;
-				letterScale = 0.9;
-			}
-			TextBlock letterTextBlock = new TextBlock
-			{
-				FontFamily = new FontFamily("Consolas"),
-				FontSize = 12 * score.Magnification * letterScale,
-				Text = ToString("{letter}"),
-				Foreground = IsHeadBlack? Brushes.White : textOverWhiteHeadBrush,
-				Padding = new Thickness(0, 0, 0, 0),
-				Margin = new Thickness(letterLeft, letterTop, 0, 0)
-			};
-			base.AddElementToScore(score, letterTextBlock, 2);
-			FormattedText letterFormattedText = new FormattedText(
-				letterTextBlock.Text,
-				CultureInfo.GetCultureInfo("en-us"),
-				FlowDirection.LeftToRight,
-				new Typeface("Consolas"),
-				letterTextBlock.FontSize,
-				Brushes.Black);
-
-			// Rysujemy pomocniczą nazwę nuty - krzyżyk lub bemol.
-			string accidentalGlyphCode = string.Empty;
-			double accidentalLeft = 0;
-			FormattedText accidentalFormattedText = null;
-			switch (accidental.type)
-			{
-				case Accidental.Type.Sharp:
-					accidentalGlyphCode = "\x002e";
-					break;
-				case Accidental.Type.Flat:
-					accidentalGlyphCode = "\x003a";
-					break;
-			}
-			if (accidentalGlyphCode != string.Empty)
-			{
-				double accidentalTop
-						= staff.top * score.Magnification
-						+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
-				accidentalTop -= 9 * score.Magnification;
-				accidentalLeft = letterLeft + letterFormattedText.Width;
-				TextBlock accidentalTextBlock = new TextBlock
-				{
-					FontFamily = new FontFamily("feta26"),
-					FontSize = 12 * score.Magnification * 0.6,
-					Text = accidentalGlyphCode,
-					Foreground = IsHeadBlack? Brushes.White : textOverWhiteHeadBrush,
-					Padding = new Thickness(0, 0, 0, 0),
-					Margin = new Thickness(accidentalLeft, accidentalTop, 0, 0)
-				};
-				//if (!IsHeadBlack)
-				//	letterTextBlock.Effect = shadowOverWhiteHead;
-				base.AddElementToScore(score, accidentalTextBlock, 2);
-				accidentalFormattedText = new FormattedText(
-					accidentalTextBlock.Text,
-					CultureInfo.GetCultureInfo("en-us"),
-					FlowDirection.LeftToRight,
-					new Typeface("feta26"),
-					letterTextBlock.FontSize,
-					Brushes.Black);
-			}
-
-			// Rysujemy pomocniczą nazwę nuty - numer oktawy.
-			double octaveTop
-						= staff.top * score.Magnification
-						+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
-			octaveTop -= 5.5 * score.Magnification;
-			double octaveLeft
-				= accidentalGlyphCode == string.Empty
-				? letterLeft + letterFormattedText.Width
-				: accidentalLeft + accidentalFormattedText.Width;
-			TextBlock octaveTextBlock = new TextBlock
-			{
-				FontFamily = new FontFamily("Consola"),
-				FontSize = 12 * score.Magnification * 0.5,
-				Text = ToString("{octave}"),
-				Foreground = IsHeadBlack? Brushes.White : textOverWhiteHeadBrush,
-				Padding = new Thickness(0, 0, 0, 0),
-				Margin = new Thickness(octaveLeft, octaveTop, 0, 0)
-			};
-			base.AddElementToScore(score, octaveTextBlock, 2);
 		}
 
 		public override void RemoveFromScore(Score score)
@@ -582,15 +458,15 @@ namespace Nutadore
 			switch (octave)
 			{
 				case Octave.SubContra:
-					octaveIndex = "2";
+					octaveIndex = "3";
 					letterUpper = true;
 					break;
 				case Octave.Contra:
-					octaveIndex = "1";
+					octaveIndex = "2";
 					letterUpper = true;
 					break;
 				case Octave.Great:
-					octaveIndex = "";
+					octaveIndex = "1";
 					letterUpper = true;
 					break;
 				case Octave.Small:
@@ -681,7 +557,7 @@ namespace Nutadore
 			// Nute z krzyżykiem przerabiamy na nute z bemolem.
 			if (accidental.type == Accidental.Type.Flat)
 			{
-				Letter uLetter = letter == Letter.C ? Letter.H : letter - 1;
+				Letter uLetter = letter == Letter.C ? Letter.B : letter - 1;
 				if (octave == Octave.SubContra)
 					throw new ArgumentOutOfRangeException(letter.ToString(), "Nuta poza dolnym zakresem!");
 				Octave uOctave = octave - 1;
@@ -721,6 +597,28 @@ namespace Nutadore
 				return 1;
 			else
 				return -1;
+		}
+
+		public static bool operator <(Note a, Note b)
+		{
+			if (Object.ReferenceEquals(a, b))
+				return true;
+
+			if ((object)a == null || (object)b == null)
+				return false;
+
+			return a.CompareTo(b) < 0;
+		}
+
+		public static bool operator >(Note a, Note b)
+		{
+			if (Object.ReferenceEquals(a, b))
+				return true;
+
+			if ((object)a == null || (object)b == null)
+				return false;
+
+			return a.CompareTo(b) > 0;
 		}
 
 		private void MouseEnter(object sender, MouseEventArgs e)

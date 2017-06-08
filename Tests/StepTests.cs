@@ -15,7 +15,7 @@ namespace Nutadore.Tests
 		[TestMethod]
 		public void EliminateHeadsOverlapping()
 		{
-			Application app = Common.Initialize();
+			MainWindow mw = Common.Initialize();
 
 			// Akord z laseczką skierowaną do góry.
 			Chord chordStemUp = new Chord()
@@ -24,8 +24,8 @@ namespace Nutadore.Tests
 				.AddNote(new Note(Note.Letter.E, Accidental.Type.None, Note.Octave.OneLined))
 				.AddNote(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.OneLined))
 				.AddNote(new Note(Note.Letter.G, Accidental.Type.Sharp, Note.Octave.OneLined))
-				.AddNote(new Note(Note.Letter.H, Accidental.Type.None, Note.Octave.OneLined))
-				.AddNote(new Note(Note.Letter.H, Accidental.Type.Flat, Note.Octave.OneLined));
+				.AddNote(new Note(Note.Letter.B, Accidental.Type.None, Note.Octave.OneLined))
+				.AddNote(new Note(Note.Letter.B, Accidental.Type.Flat, Note.Octave.OneLined));
 			chordStemUp.notes.ForEach(note => note.stemDirection = Note.StemDirection.Up);
 
 			// Akord z laseczką sierowaną w dół.
@@ -35,11 +35,11 @@ namespace Nutadore.Tests
 				.AddNote(new Note(Note.Letter.E, Accidental.Type.None, Note.Octave.Great))
 				.AddNote(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.Great))
 				.AddNote(new Note(Note.Letter.G, Accidental.Type.Sharp, Note.Octave.Great))
-				.AddNote(new Note(Note.Letter.H, Accidental.Type.None, Note.Octave.Great))
-				.AddNote(new Note(Note.Letter.H, Accidental.Type.Flat, Note.Octave.Great));
+				.AddNote(new Note(Note.Letter.B, Accidental.Type.None, Note.Octave.Great))
+				.AddNote(new Note(Note.Letter.B, Accidental.Type.Flat, Note.Octave.Great));
 			chordStemDown.notes.ForEach(note => note.stemDirection = Note.StemDirection.Down);
 
-			app.score.Invoke("Add",
+			mw.score.Add(
 				new Nutadore.Step()
 					.AddVoice(chordStemUp)
 					.AddVoice(chordStemDown));
@@ -56,12 +56,12 @@ namespace Nutadore.Tests
 				.AddNote(new Note(Note.Letter.F, Accidental.Type.None, Note.Octave.Small));
 			chord.notes.ForEach(note => note.stemDirection = Note.StemDirection.Down);
 
-			app.score.Invoke("Add",
+			mw.score.Add(
 				new Nutadore.Step()
 					.AddVoice(chord)
 					.AddVoice(chordSemitone));
 
-			app.mw.ShowDialog();
+			mw.ShowDialog();
 
 			Assert.IsTrue(true);
 		}
@@ -69,7 +69,7 @@ namespace Nutadore.Tests
 		[TestMethod]
 		public void EliminateAccidentalOverlapping()
 		{
-			Application app = Common.Initialize();
+			MainWindow mw = Common.Initialize();
 
 			Chord chordSteamUp = new Chord()
 				.AddNote(new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.OneLined))
@@ -78,7 +78,7 @@ namespace Nutadore.Tests
 				.AddNote(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.OneLined))
 				.AddNote(new Note(Note.Letter.G, Accidental.Type.Sharp, Note.Octave.OneLined))
 				.AddNote(new Note(Note.Letter.A, Accidental.Type.Sharp, Note.Octave.OneLined))
-				.AddNote(new Note(Note.Letter.H, Accidental.Type.Flat, Note.Octave.OneLined));
+				.AddNote(new Note(Note.Letter.B, Accidental.Type.Flat, Note.Octave.OneLined));
 			chordSteamUp.notes.ForEach(note => note.stemDirection = Note.StemDirection.Up);
 
 			Chord chordSteamDown = new Chord()
@@ -88,14 +88,70 @@ namespace Nutadore.Tests
 				.AddNote(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.Small))
 				.AddNote(new Note(Note.Letter.G, Accidental.Type.Sharp, Note.Octave.Small))
 				.AddNote(new Note(Note.Letter.A, Accidental.Type.Sharp, Note.Octave.Small))
-				.AddNote(new Note(Note.Letter.H, Accidental.Type.Flat, Note.Octave.Small));
+				.AddNote(new Note(Note.Letter.B, Accidental.Type.Flat, Note.Octave.Small));
 			chordSteamDown.notes.ForEach(note => note.stemDirection = Note.StemDirection.Down);
 
-			app.score.Invoke("Add", new Nutadore.Step()
+			mw.score.Add(new Nutadore.Step()
 				.AddVoice(chordSteamUp)
 				.AddVoice(chordSteamDown));
 
-			app.mw.ShowDialog();
+			mw.ShowDialog();
+
+			Assert.IsTrue(true);
+		}
+
+		[TestMethod]
+		public void NoteNamesAndFinges()
+		{
+			MainWindow mw = Common.Initialize();
+
+			Chord chordSteamUp = new Chord()
+				.AddNote(new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.OneLined))
+				.AddNote(new Note(Note.Letter.D, Accidental.Type.Sharp, Note.Octave.OneLined))
+				.AddNote(new Note(Note.Letter.E, Accidental.Type.Flat, Note.Octave.OneLined))
+				.AddNote(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.OneLined))
+				.AddNote(new Note(Note.Letter.G, Accidental.Type.Sharp, Note.Octave.OneLined))
+				.AddNote(new Note(Note.Letter.A, Accidental.Type.Sharp, Note.Octave.OneLined))
+				.AddNote(new Note(Note.Letter.B, Accidental.Type.Flat, Note.Octave.OneLined));
+			chordSteamUp.notes.ForEach(note => note.stemDirection = Note.StemDirection.Up);
+			int finger = 0;
+			foreach (var note in chordSteamUp.notes)
+				note.finger = (finger++ % 5) + 1;
+
+			Chord chordSteamDown = new Chord()
+				.AddNote(new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.Small))
+				.AddNote(new Note(Note.Letter.D, Accidental.Type.Sharp, Note.Octave.Small))
+				.AddNote(new Note(Note.Letter.E, Accidental.Type.Flat, Note.Octave.Small))
+				.AddNote(new Note(Note.Letter.F, Accidental.Type.Sharp, Note.Octave.Small))
+				.AddNote(new Note(Note.Letter.G, Accidental.Type.Sharp, Note.Octave.Small))
+				.AddNote(new Note(Note.Letter.A, Accidental.Type.Sharp, Note.Octave.Small))
+				.AddNote(new Note(Note.Letter.B, Accidental.Type.Flat, Note.Octave.Small));
+			chordSteamDown.notes.ForEach(note => note.stemDirection = Note.StemDirection.Down);
+
+			Note note1 = new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.Great);
+			Note note2 = new Note(Note.Letter.F, Accidental.Type.None, Note.Octave.Great);
+			note2.finger = 1;
+
+			mw.score.Add(new Step()
+				.AddVoice(chordSteamUp)
+				.AddVoice(chordSteamDown)
+				.AddVoice(note1)
+				.AddVoice(note2));
+
+			foreach (var octave in Enum.GetValues(typeof(Note.Octave)).Cast<Note.Octave>())
+			{
+				Chord chord = new Chord();
+				foreach (var letter in Enum.GetValues(typeof(Note.Letter)).Cast<Note.Letter>())
+				{
+					if (octave == Note.Octave.SubContra && letter < Note.Letter.A ||
+						octave == Note.Octave.FiveLined && letter > Note.Letter.C)
+						continue;
+					chord.AddNote(new Note(letter, Accidental.Type.None, octave));
+				}
+				mw.score.Add(new Step().AddVoice(chord));
+			}
+
+			mw.ShowDialog();
 
 			Assert.IsTrue(true);
 		}

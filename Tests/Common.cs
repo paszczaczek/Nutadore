@@ -8,24 +8,15 @@ using System.Threading.Tasks;
 
 namespace Tests
 {
-	public class Application
-	{
-		public MainWindow mw;
-		public PrivateObject score;
-	}
-
 	static class Common
 	{
-		static public Application Initialize() {
+		static public MainWindow Initialize() {
 
 			MainWindow mw = new Nutadore.MainWindow();
 			mw.Topmost = true;
 			mw.MainWindowTest();
-			return new Application
-			{
-				mw = mw,
-				score = new PrivateObject(mw, "score")
-			};
+
+			return mw;			
 		}
 	}
 }

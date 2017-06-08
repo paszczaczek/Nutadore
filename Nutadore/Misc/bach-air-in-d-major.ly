@@ -1,14 +1,7 @@
 \version "2.18.2"
 
 \parallelMusic #'(voiceA voiceB voiceC) {
-  
-  % !!!
-  % Nutadore nie uwzglednia dlugosci nuty z poprzednej nuty, np. dla c8 d e wychodzi c*8 d*4 e*4
-  % zaimplementowac !
-  % !!!
-  
-  % bar 1
-  
+  % bar 1  
     <fis''-2>1~-\markup{fis2} 
   | <d''-1>1~-\markup{d2} 
   | <d-5>4-\markup{d} d'^\markup{d1} cis'^\markup{cis1} cis-\markup{cis} 
@@ -53,14 +46,6 @@
   | <a'>4-\markup{a1} r4 r2
   | <cis,-5>4-\markup{Cis} <cis>4-\markup{cis} <a,>4-\markup{A} <fis>4-\markup{fis}  
   
-  % test
-  | <c' cis'>4 r4 r4 r4
-  | r1
-  | <c d e g a>4 r4 r4 r4
- 
-  | <cis''-1 dis'' ees''-3 fis'' gis'' ais'' bes'' >4 r4 r2
-  | r1
-  | <cis-1 dis ees-3 fis gis ais bes >4 r4 r2
 
 }
 
@@ -79,14 +64,14 @@
     \new Staff <<            
       \tempo "Adagio"
       \clef treble
-      %\key d \major
+      \key d \major
       \voiceA 
       \\ 
        \voiceB
     >>
     \new Staff <<
       \clef bass
-      %\key d \major
+      \key d \major
        \voiceC
     >>    
     %{

@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace Nutadore
 {
-	internal class LyParser
+	public class LilyPond
 	{
 		static private bool debug = false;
 
@@ -29,12 +29,37 @@ namespace Nutadore
 				(?<curlyBrackets>
 					[^{]*
 					(
-						((?<Open>{)[^{}]*)+
-						((?<Close-Open>})[^{}]*)+
+						(
+							(?<Open>{)
+							[^{}]*
+						)+
+						(
+							(?<Close-Open>})
+							[^{}]*
+						)+
 					)*
 					(?(Open)(?!))
 				)
 			\}");
+
+		// << ... >>
+		static Regex reAngleBrackets = new Regex(@"(?sx)
+			<<
+				(?'angleBrackets'
+					.*?(?=<<|>>)
+					(
+						(
+							(?'Open'<<)
+							.*?(?=<<|>>)
+						)+
+						(
+							(?'Close-Open'>>)
+							.*?(?=<<|>>)
+						)+
+					)*
+					(?(Open)(?!))
+				)
+			");
 
 		// \parallelMusic #'(voiceA voiceB voiceC) {...}
 		static Regex reParallelMusic = new Regex($@"(?x)
@@ -147,14 +172,47 @@ namespace Nutadore
 				{reRest} |
 				{reBar}
 			)");
+
+		// \score {...}
+		static Regex reScore = new Regex($@"(?x)
+			\\score
+			\s*
+			{reCurlyBrackets}");
+
+		// \PianoStaff <<...>>
+		static Regex rePianoStaff = new Regex($@"(?x)
+			\\new
+			\s*
+			PianoStaff
+			\s*
+			{reAngleBrackets}");
+
+		// \Staff <<...>>
+		static Regex reStaff = new Regex($@"(?x)
+			\\new
+			\s*
+			Staff
+			\s*
+			{reAngleBrackets}");
+
+		//  \key d \minor
+		static Regex reKey = new Regex($@"(?x)
+			\\key
+			\s*
+			(?<letter>[cdefgab])
+			\s*
+			\\(?<type>major|minor)
+			");
 		#endregion
 
 		private static Duration[] lastDuration;
 
-		internal static void Load(Score score, string fileName)
+		public static void Parse(string fileName, Score score)
 		{
+			string lyText = File.ReadAllText(fileName);
+
 			// Wczytaj glosy zapisane jako \parallelMusic
-			List<Sign>[] parallelMusic = ParallelMusic(fileName);
+			List<Sign>[] parallelMusic = ParallelMusic(lyText);
 
 			// Znajdź najkrótszą nutę lub pauzę w utworzne.
 			Duration.Name shortestDurationName = parallelMusic.Min(voice =>
@@ -164,7 +222,7 @@ namespace Nutadore
 					.DefaultIfEmpty()
 					.Min(signd => signd?.duration.name ?? Duration.Name.Whole));
 
-			// Znajdź najktótszą nutę lub pauzę z kropką.
+			// Znajdź najkrótszą nutę lub pauzę z kropką.
 			Duration.Name shortestDottedDurationName = parallelMusic.Min(voice =>
 				voice
 					.Select(sign => sign as IDuration)
@@ -230,13 +288,14 @@ namespace Nutadore
 				if (musicCount % measureCount == 0)
 					score.Add(new Step().AddVoice(new Bar()));
 			}
+
+			// Wczytaj \score
+			Score(lyText, score);
 		}
 
-		static public List<Sign>[] ParallelMusic(string lyFileName)
+		private static List<Sign>[] ParallelMusic(string lyText)
 		{
 			List<Sign>[] voices = null;
-
-			string lyText = File.ReadAllText(lyFileName);
 
 			// Usuwanie komentarzy.
 			lyText = reBlockComment.Replace(lyText, "");
@@ -338,46 +397,10 @@ namespace Nutadore
 
 		private static Note GetNote(Match mNote, int voiceNo)
 		{
-			Note.Letter letter;
-			switch (mNote.Groups["letter"].Value)
-			{
-				case "c": letter = Note.Letter.C; break;
-				case "d": letter = Note.Letter.D; break;
-				case "e": letter = Note.Letter.E; break;
-				case "f": letter = Note.Letter.F; break;
-				case "g": letter = Note.Letter.G; break;
-				case "a": letter = Note.Letter.A; break;
-				case "b":
-				case "h": letter = Note.Letter.H; break;
-				default:
-					throw new ArgumentOutOfRangeException("letter");
-			}
+			Note.Letter letter = GetLetter(mNote.Groups["letter"].Value);
+			Accidental.Type accidentalType = GetAccidentalType(mNote.Groups["accidental"].Value);
 
-			Accidental.Type accidentalType;
-			switch (mNote.Groups["accidental"].Value)
-			{
-				case "is": accidentalType = Accidental.Type.Sharp; break;
-				case "es": accidentalType = Accidental.Type.Flat; break;
-				case "": accidentalType = Accidental.Type.None; break;
-				default:
-					throw new ArgumentOutOfRangeException("accidental");
-			}
-
-			Note.Octave octave;
-			switch (mNote.Groups["octave"].Value)
-			{
-				case ",,,": octave = Note.Octave.SubContra; break;
-				case ",,": octave = Note.Octave.Contra; break;
-				case ",": octave = Note.Octave.Great; break;
-				case "": octave = Note.Octave.Small; break;
-				case "'": octave = Note.Octave.OneLined; break;
-				case "''": octave = Note.Octave.TwoLined; break;
-				case "'''": octave = Note.Octave.ThreeLined; break;
-				case "''''": octave = Note.Octave.FourLined; break;
-				case "'''''": octave = Note.Octave.FiveLined; break;
-				default:
-					throw new ArgumentOutOfRangeException("octave");
-			}
+			Note.Octave octave = GetOctave(mNote.Groups["octave"].Value);
 
 			Duration duration = GetDuration(mNote, voiceNo);
 
@@ -422,5 +445,85 @@ namespace Nutadore
 			return rest;
 		}
 
+		private static Note.Letter GetLetter(string s)
+		{
+			switch (s)
+			{
+				case "c": return Note.Letter.C;
+				case "d": return Note.Letter.D;
+				case "e": return Note.Letter.E;
+				case "f": return Note.Letter.F;
+				case "g": return Note.Letter.G;
+				case "a": return Note.Letter.A;
+				case "b": return Note.Letter.B;
+				default:
+					throw new ArgumentOutOfRangeException("s", s);
+			}
+		}
+
+		private static Accidental.Type GetAccidentalType(string s)
+		{
+			switch (s)
+			{
+				case "is": return Accidental.Type.Sharp;
+				case "es": return Accidental.Type.Flat;
+				case "": return Accidental.Type.None;
+				default:
+					throw new ArgumentOutOfRangeException("accidental", s);
+			}
+		}
+
+		private static Note.Octave GetOctave(string s)
+		{
+			switch (s)
+			{
+				case ",,,": return Note.Octave.SubContra;
+				case ",,": return Note.Octave.Contra;
+				case ",": return Note.Octave.Great;
+				case "": return Note.Octave.Small;
+				case "'": return Note.Octave.OneLined;
+				case "''": return Note.Octave.TwoLined;
+				case "'''": return Note.Octave.ThreeLined;
+				case "''''": return Note.Octave.FourLined;
+				case "'''''": return Note.Octave.FiveLined;
+				default:
+					throw new ArgumentOutOfRangeException("octave", s);
+			}
+		}
+
+		private static Scale.Type GetScaleType(string s)
+		{
+			switch (s)
+			{
+				case "major": return Scale.Type.Major;
+				case "minor": return Scale.Type.Minor;
+				default:
+					throw new ArgumentOutOfRangeException("s", s);
+			}
+		}
+
+		private static void Score(string lyText, Score score)
+		{
+			// Wczytanie \score {...}
+			Match mScore = reScore.Match(lyText);
+			string scoreCB = mScore.Groups["curlyBrackets"].Value;
+
+			// Wczytanie \new PianoStaff
+			Match pianoStaff = rePianoStaff.Match(scoreCB);
+			string pianoStaffAB = pianoStaff.Groups["angleBrackets"].Value;
+
+			// Wczytanie \Staff
+			foreach (Match staff in reStaff.Matches(pianoStaffAB))
+			{
+				string staffAB = staff.Groups["angleBrackets"].Value;
+				Match key = reKey.Match(staffAB);
+				string sLetter = key.Groups["letter"].Value;
+				string sScale = key.Groups["type"].Value;
+
+				Note.Letter letter = GetLetter(sLetter);
+				Scale.Type type = GetScaleType(sScale);
+				score.scale = new Scale(letter, type);
+			}
+		}
 	}
 }

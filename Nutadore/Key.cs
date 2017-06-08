@@ -144,7 +144,7 @@ namespace Nutadore
 					letter = Note.Letter.A;
 					break;
 				case 11:
-					letter = Note.Letter.H;
+					letter = Note.Letter.B;
 					break;
 				default:
 					throw new ArgumentOutOfRangeException("keyNoInOctave");

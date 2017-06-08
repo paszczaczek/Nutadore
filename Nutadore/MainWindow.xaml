@@ -8,7 +8,7 @@
 			<RowDefinition/>
 			<RowDefinition Height="Auto"/>
 		</Grid.RowDefinitions>
-		<local:Score x:Name="score" Grid.Row="0"  Margin="10" />
-		<local:Keyboard x:Name="keyboard" Grid.Row="1" Margin="10" VerticalAlignment="Bottom"/>
+		<local:Score x:Name="score" Grid.Row="0"  Margin="10" x:FieldModifier="public"/>
+		<local:Keyboard x:Name="keyboard" Grid.Row="1" Margin="10" VerticalAlignment="Bottom" x:FieldModifier="public"/>
 	</Grid>
 </Window>

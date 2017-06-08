@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -70,7 +71,7 @@ namespace Nutadore
 					case Note.Letter.A:
 						staffPosition = StaffPosition.ByLine(2, true);
 						break;
-					case Note.Letter.H:
+					case Note.Letter.B:
 						staffPosition = StaffPosition.ByLine(3);
 						break;
 				}
@@ -116,7 +117,7 @@ namespace Nutadore
 							throw new System.NotImplementedException();
 						case Note.Letter.A:
 							throw new System.NotImplementedException();
-						case Note.Letter.H:
+						case Note.Letter.B:
 							throw new System.NotImplementedException();
 					}
 					break;
