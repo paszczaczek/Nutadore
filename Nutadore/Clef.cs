@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Nutadore
 {
@@ -20,18 +21,23 @@ namespace Nutadore
 			foreach (Staff staff in new[] { trebleStaff, bassStaff })
 			{
 				string glyphCode = null;
-				double glyphTop = staff.StaffPositionToY(StaffPosition.ByLine(2));
+				double glyphTop = 0; //= staff.StaffPositionToY(StaffPosition.ByLine(2));
 				switch (staff.type)
 				{
 					case Staff.Type.Treble:
 						glyphCode = "\x00c9";
-						glyphTop -= 57 * score.Magnification;
+						glyphTop
+							= staff.StaffPositionToY(StaffPosition.ByLine(2))
+							- base.GlyphFormatedText(score, glyphCode).Baseline;
 						break;
 					case Staff.Type.Bass:
 						glyphCode = "\x00c7";
-						glyphTop -= 77.5 * score.Magnification;
+						glyphTop
+							= staff.StaffPositionToY(StaffPosition.ByLine(4))
+							- base.GlyphFormatedText(score, glyphCode).Baseline;
 						break;
 				}
+
 				double rightClef = base.AddGlyphToScore(score, left, glyphTop, glyphCode);
 				//Rect boundaryClef = base.AddFetaGlyph(score, left, glyphTop, glyphCode);
 				//double rightClef = boundaryClef.Left + boundaryClef.Width;

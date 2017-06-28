@@ -15,6 +15,7 @@ namespace Nutadore
 		private static Brush currentBrush = Brushes.DarkGray; // LightSeaGreen;
 		private static Brush highlightBrush = Brushes.DarkGray;
 		private static Brush textOverWhiteHeadBrush = Brushes.Black;
+		private static double stemHightByLines = 3.5;
 
 		public Letter letter;
 		public Octave octave;
@@ -60,6 +61,7 @@ namespace Nutadore
 		public StemDirection stemDirection = StemDirection.Up;
 		public int finger = 0;
 		public int fingerColumn;
+		private double stemLeft;
 
 		public enum Letter
 		{
@@ -128,11 +130,20 @@ namespace Nutadore
 
 			// Dodajemy znaki chromatyczne.
 			AddAccidentalToScore(score, trebleStaff, bassStaff, step, left);
+
 			// Dodajemy opis nuty przed główką.
 			if (showDescr)
 				AddDescrToScore(score, staff, left, DescrAfterHead);
+
 			// Dodajemy głowkę nuty.
 			AddHeadToScore(score, trebleStaff, bassStaff, staff, left);
+
+			// Dodajemy laseczkę.
+			AddStemToScore(score, trebleStaff, bassStaff, staff, left);
+
+			// Dodajemy chorągiewkę.
+			AddFlagToScore(score, trebleStaff, bassStaff, staff, left);
+
 			// Dodajemy opis nuty za główką.
 			if (showDescr && DescrAfterHead)
 				AddDescrToScore(score, staff, left);
@@ -281,13 +292,13 @@ namespace Nutadore
 		{
 			// Rysujemy główkę nuty.
 			string glyphCode = IsHeadBlack ? "\x0056" : "\x0055";
+			FormattedText ft = base.GlyphFormatedText(score, glyphCode);
 			double glyphTop
-					= staff.top * score.Magnification
-					 + (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification;
-			glyphTop -= 57.5 * score.Magnification;
+					= staff.StaffPositionToY(staffPosition)
+					- ft.Baseline;
 			headOffset = right - left;
 			double glyphLeft = right;
-			double headWidth = base.GlyphFormatedText(score, glyphCode).Width;
+			double headWidth = ft.Width;
 			// Wyznaczamy położenie i offset głowki nuty.
 			/*
 			 *       |
@@ -333,6 +344,78 @@ namespace Nutadore
 			// Rysujemy linie dodane górne i dolne - jeśli nuta nie jest częścią akordu.
 			if (showLegerLines)
 				AddLegerLinesToScore(score, trebleStaff, bassStaff, staff, glyphLeft);
+		}
+
+		private void AddStemToScore(Score score, Staff trebleStaff, Staff bassStaff, Staff staff, double left)
+		{
+			// Rysujemy laseczkę.
+			if (duration.name > Duration.Name.Quarter)
+				return;
+
+			double y1 = staff.StaffPositionToY(staffPosition);
+			double y2;
+			double x;
+			double thicknes = 1.0 * score.Magnification;
+			if (stemDirection == StemDirection.Up)
+			{
+				y2 = staff.StaffPositionToY(StaffPosition.ByNumber(staffPosition.Number + stemHightByLines));
+				x = right - thicknes/2;
+			} else
+			{
+				y2 = staff.StaffPositionToY(StaffPosition.ByNumber(staffPosition.Number - stemHightByLines));
+				x = head.Margin.Left + thicknes/2;
+			}
+			Line legerLine = new Line
+			{
+				X1 = x,
+				X2 = x,
+				Y1 = y1,
+				Y2 = y2,
+				Stroke = Brushes.Black,
+				StrokeThickness = thicknes
+			};
+			base.AddElementToScore(score, legerLine);
+			stemLeft = x;
+		}
+
+		private void AddFlagToScore(Score score, Staff trebleStaff, Staff bassStaff, Staff staff, double left)
+		{
+			// Rysujemy chorągiewkę nuty.
+			string glyphCode = "";
+			switch (duration.name)
+			{
+				case Duration.Name.ThirtySecond:
+					glyphCode = "\x00bb";
+					break;
+				case Duration.Name.Sixteenth:
+					glyphCode = "\x00ba";
+					break;
+				case Duration.Name.Eighth:
+					glyphCode = "\x00b9";
+					break;
+				default:
+					return;
+			}
+			FormattedText glyphFT = base.GlyphFormatedText(score, glyphCode);
+			double glyphLeft = stemLeft;
+			double glyphTop
+				= staff.StaffPositionToY(staffPosition)
+				- glyphFT.Baseline;
+			if (stemDirection == StemDirection.Up)
+			{
+				glyphTop -= stemHightByLines * Staff.spaceBetweenLines * score.Magnification;
+				right = base.AddGlyphToScore(score, glyphLeft, glyphTop, glyphCode, 1);
+			}
+			else
+			{
+				// tego -1 w zasadzie nie powinno być, ale tak wychodzi i nie wiem dlaczego
+				glyphTop += (stemHightByLines - 1) * Staff.spaceBetweenLines * score.Magnification;
+				base.AddGlyphToScore(score, glyphLeft, glyphTop, glyphCode, 1);
+				TextBlock flag = base.elements.FindLast(e => true) as TextBlock;
+				// skalowanie jest wzgledem osi BaseLine
+				Transform transform = Transform.Parse("1, 0, 0, -1, 0, 0");
+				flag.LayoutTransform = transform;
+			}
 		}
 
 		public override void RemoveFromScore(Score score)

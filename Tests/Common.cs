@@ -12,9 +12,9 @@ namespace Tests
 	{
 		static public MainWindow Initialize() {
 
-			MainWindow mw = new Nutadore.MainWindow();
+			MainWindow mw = new MainWindow();
 			mw.Topmost = true;
-			mw.MainWindowTest();
+			//mw.MainWindowTest();
 
 			return mw;			
 		}

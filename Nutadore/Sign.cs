@@ -12,7 +12,7 @@ namespace Nutadore
 	abstract public class Sign
 	{
 		private static readonly string familyName = "feta26";
-		private static readonly double fontSize = 42;
+		private static readonly double fontSize = 39 * Staff.spaceBetweenLines / 10.0; //42;
 
 		protected List<UIElement> elements = new List<UIElement>();
 		public Rect bounds { get; protected set; } = Rect.Empty;
@@ -45,7 +45,7 @@ namespace Nutadore
 				FontSize = fontSize,
 				Text = glyphCode,
 				Padding = new Thickness(0, 0, 0, 0),
-				Margin = new Thickness(glyphLeft, glyphTop, 0, 0),
+				Margin = new Thickness(glyphLeft, glyphTop, 0, 0)
 			};
 			AddElementToScore(score, uiElement, zindex);
 

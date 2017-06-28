@@ -1,18 +1,4 @@
-﻿using mshtml;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using System.Windows;
 
 namespace Nutadore
 {
@@ -28,21 +14,23 @@ namespace Nutadore
 			score.ConnectKeyboard(keyboard);
 			keyboard.ConnectScore(score);
 
-			//LyParserTest2();
+			Note noteStemUp = new Note(
+				Note.Letter.E,
+				Accidental.Type.None,
+				Note.Octave.OneLined,
+				new Duration(Duration.Name.Eighth, true));
+			noteStemUp.stemDirection = Note.StemDirection.Up;
 
-		}
+			Note noteStemDown = new Note(
+				Note.Letter.A,
+				Accidental.Type.None,
+				Note.Octave.Small,
+				new Duration(Duration.Name.Eighth, true));
+			noteStemDown.stemDirection = Note.StemDirection.Down;
 
-		public void MainWindowTest()
-		{
-			InitializeComponent();
-
-			score.ConnectKeyboard(keyboard);
-			keyboard.ConnectScore(score);
-		}
-
-		private void LyParserTest2()
-		{
-			LilyPond.Parse(@"Misc\bach-air-in-d-major.ly", score);
+			score.Add(new Step()
+				.AddVoice(noteStemUp)
+				.AddVoice(noteStemDown));
 		}
 	}
 }

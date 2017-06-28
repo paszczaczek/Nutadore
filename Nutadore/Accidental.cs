@@ -64,11 +64,13 @@ namespace Nutadore
 			else
 				staffs = new[] { bassStaff };
 
+			FormattedText glyphFT = base.GlyphFormatedText(score, glyphCode);
+
 			foreach (Staff staff in staffs)
 			{
 				double glyphTop = staff.StaffPositionToY(staffPosition);
 
-				glyphTop -= 57 * score.Magnification;
+				glyphTop -= glyphFT.Baseline;
 				right = base.AddGlyphToScore(score, left, glyphTop, glyphCode);
 
 				if (isKeySignatureHint)
