@@ -61,7 +61,6 @@ namespace Nutadore
 		public StemDirection stemDirection = StemDirection.Up;
 		public int finger = 0;
 		public int fingerColumn;
-		private double stemLeft;
 
 		public enum Letter
 		{
@@ -139,10 +138,10 @@ namespace Nutadore
 			AddHeadToScore(score, trebleStaff, bassStaff, staff, left);
 
 			// Dodajemy laseczkę.
-			AddStemToScore(score, trebleStaff, bassStaff, staff, left);
+			double stemLeft = AddStemToScore(score, staff);
 
 			// Dodajemy chorągiewkę.
-			AddFlagToScore(score, trebleStaff, bassStaff, staff, left);
+			AddFlagToScore(score, staff, stemLeft);
 
 			// Dodajemy opis nuty za główką.
 			if (showDescr && DescrAfterHead)
@@ -179,7 +178,7 @@ namespace Nutadore
 				return right + Staff.spaceBetweenSigns * score.Magnification;
 			}
 		}
-		
+
 		private void AddLegerLinesToScore(Score score, Staff trebleStaff, Staff bassStaff, Staff staff, double left)
 		{
 			// Czy trzeba dorysować linie dodane?
@@ -346,39 +345,41 @@ namespace Nutadore
 				AddLegerLinesToScore(score, trebleStaff, bassStaff, staff, glyphLeft);
 		}
 
-		private void AddStemToScore(Score score, Staff trebleStaff, Staff bassStaff, Staff staff, double left)
+		private double AddStemToScore(Score score, Staff staff)
 		{
 			// Rysujemy laseczkę.
 			if (duration.name > Duration.Name.Quarter)
-				return;
+				return right;
 
-			double y1 = staff.StaffPositionToY(staffPosition);
-			double y2;
-			double x;
+			double stemY1 = staff.StaffPositionToY(staffPosition);
+			double stemY2;
+			double stemX;
 			double thicknes = 1.0 * score.Magnification;
 			if (stemDirection == StemDirection.Up)
 			{
-				y2 = staff.StaffPositionToY(StaffPosition.ByNumber(staffPosition.Number + stemHightByLines));
-				x = right - thicknes/2;
-			} else
-			{
-				y2 = staff.StaffPositionToY(StaffPosition.ByNumber(staffPosition.Number - stemHightByLines));
-				x = head.Margin.Left + thicknes/2;
+				stemY2 = staff.StaffPositionToY(StaffPosition.ByNumber(staffPosition.Number + stemHightByLines));
+				stemX = right - thicknes / 2;
 			}
-			Line legerLine = new Line
+			else
 			{
-				X1 = x,
-				X2 = x,
-				Y1 = y1,
-				Y2 = y2,
+				stemY2 = staff.StaffPositionToY(StaffPosition.ByNumber(staffPosition.Number - stemHightByLines));
+				stemX = head.Margin.Left + thicknes / 2;
+			}
+			Line stem = new Line
+			{
+				X1 = stemX,
+				X2 = stemX,
+				Y1 = stemY1,
+				Y2 = stemY2,
 				Stroke = Brushes.Black,
 				StrokeThickness = thicknes
 			};
-			base.AddElementToScore(score, legerLine);
-			stemLeft = x;
+			base.AddElementToScore(score, stem);
+
+			return stemX;
 		}
 
-		private void AddFlagToScore(Score score, Staff trebleStaff, Staff bassStaff, Staff staff, double left)
+		private void AddFlagToScore(Score score, Staff staff, double stemLeft)
 		{
 			// Rysujemy chorągiewkę nuty.
 			string glyphCode = "";
@@ -833,5 +834,5 @@ namespace Nutadore
 					return "";
 			}
 		}
-	}	
+	}
 }
