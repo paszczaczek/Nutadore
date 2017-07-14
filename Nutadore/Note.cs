@@ -362,9 +362,10 @@ namespace Nutadore
 					- glyphFT.Baseline;
 			if (!staffPosition.LineAbove)
 					glyphTop -= Staff.spaceBetweenLines * score.Magnification * 0.5;
-			double glyphLeft 
-				= right 
-				+ Staff.spaceBetweenLines * score.Magnification * 0.3;
+			double glyphLeft = right;
+			// Przy innych niż z chorągiewką z laseczką skierowaną przesuwamy kropkę trochę w lewo.
+			if (!(stemDirection == StemDirection.Up && duration.name <= Duration.Name.Eighth))
+				glyphLeft += Staff.spaceBetweenLines * score.Magnification * 0.3;
 			right = base.AddGlyphToScore(score, glyphLeft, glyphTop, glyphCode, 1);
 		}
 

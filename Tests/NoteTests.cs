@@ -31,10 +31,7 @@ namespace Tests
 			chordSteamUp.notes.ForEach(note => note.stemDirection = Note.StemDirection.Up);
 
 			Chord chordSteamDown = new Chord()
-				.AddNote(new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.Small)
-				{
-					duration = new Duration(Duration.Name.Half)
-				})
+				.AddNote(new Note(Note.Letter.C, Accidental.Type.Sharp, Note.Octave.Small))
 				.AddNote(new Note(Note.Letter.D, Accidental.Type.Flat, Note.Octave.Small));
 			chordSteamDown.notes.ForEach(note => note.stemDirection = Note.StemDirection.Down);
 
