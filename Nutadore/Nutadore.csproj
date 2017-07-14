@@ -122,7 +122,6 @@
     <Resource Include="Misc\Fonts\feta-braces-h.ttf" />
     <Resource Include="Misc\Fonts\feta-braces-i.ttf" />
     <Resource Include="Misc\Fonts\feta.ttf" />
-    <None Include="ClassDiagram.cd" />
     <None Include="Misc\LilyPond\essay.pdf" />
     <None Include="Misc\LilyPond\music-glossary.pdf" />
     <None Include="Misc\LilyPond\snippets.pdf" />

@@ -143,6 +143,9 @@ namespace Nutadore
 			// Dodajemy chorągiewkę.
 			AddFlagToScore(score, staff, stemLeft);
 
+			// Dodajemy kropkę do główki nuty.
+			AddDotToScore(score, staff, left);
+
 			// Dodajemy opis nuty za główką.
 			if (showDescr && DescrAfterHead)
 				AddDescrToScore(score, staff, left);
@@ -234,41 +237,42 @@ namespace Nutadore
 				|| !isHeadReversed && stemDirection == StemDirection.Down;
 
 			// Rysujemy numer palca.
-			double DescrTop
-					= staff.top * score.Magnification
-					+ (4 - staffPosition.Number) * Staff.spaceBetweenLines * score.Magnification
-					- 6 * score.Magnification;
-			double fingerLeft = right;
-			double fingerScale = 0.9;
+			double descrTop
+					= score.Magnification * (
+					staff.top 
+					+ (4 - staffPosition.Number) * Staff.spaceBetweenLines 
+					/*- 7*/);
+			double descrLeft = right;
 			string descr = "";
 			if (score.showFingers)
 				descr += finger > 0 ? finger.ToString() : "";
 			if (score.showNotesName)
 				descr += ToString("{letter}{accidental}{octave}");
-			TextBlock fingerTextBlock = new TextBlock
+			TextBlock descrTextBlock = new TextBlock
 			{
 				FontFamily = new FontFamily("Consolas"),
-				FontSize = 12 * score.Magnification * fingerScale,
+				FontSize = 12 * score.Magnification,
 				Text = descr,
 				Foreground = onlyPlaceholder ? Brushes.Transparent : Brushes.Black,
-				Padding = new Thickness(0, 0, 0, 0),
-				Margin = new Thickness(fingerLeft, DescrTop, 0, 0)
+				Padding = new Thickness(0, 0, 0, 0)
+				//Background = Brushes.OrangeRed
 			};
-			base.AddElementToScore(score, fingerTextBlock, 2);
-			FormattedText fingerFormattedText = new FormattedText(
-				fingerTextBlock.Text,
+			base.AddElementToScore(score, descrTextBlock, 2);
+			FormattedText descrFormattedText = new FormattedText(
+				descrTextBlock.Text,
 				CultureInfo.GetCultureInfo("en-us"),
 				FlowDirection.LeftToRight,
 				new Typeface("Consolas"),
-				fingerTextBlock.FontSize,
+				descrTextBlock.FontSize,
 				Brushes.Black);
-			Rect fingerBounds = new Rect(
-				fingerLeft,
-				DescrTop + fingerFormattedText.Height + fingerFormattedText.OverhangAfter - fingerFormattedText.Extent,
-				fingerFormattedText.Width,
-				fingerFormattedText.Extent);
-			base.ExtendBounds(fingerBounds);
-			right = fingerLeft + fingerFormattedText.Width;
+			Rect descrBounds = new Rect(
+				descrLeft,
+				descrTop + descrFormattedText.Height + descrFormattedText.OverhangAfter - descrFormattedText.Extent,
+				descrFormattedText.Width,
+				descrFormattedText.Extent);
+			base.ExtendBounds(descrBounds);
+			descrTextBlock.Margin = new Thickness(descrLeft, descrTop - descrFormattedText.Height / 2, 0, 0);
+			right = descrLeft + descrFormattedText.Width;
 		}
 
 		private void AddAccidentalToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left)
@@ -313,11 +317,13 @@ namespace Nutadore
 				if (!isHeadReversed)
 				{
 					// (1) Nuta z laseczka ku górze nieodwrócona - rysujemy przed laseczą.
+					//   |
 					// #o|
 				}
 				else
 				{
 					// (2) Nuta z laseczką ku górze odwrocona - rysujemy ja za laseczka.
+					//   |
 					// # |o
 					glyphLeft += headWidth;
 				}
@@ -327,7 +333,8 @@ namespace Nutadore
 				if (!isHeadReversed)
 				{
 					// (3) Nuta z laseczką ku kołowi nieodwrócona - rysujemy za laseczką.
-					// # o|
+					// # |o
+					//   |
 					headOffset += headWidth;
 					glyphLeft += headWidth;
 				}
@@ -335,6 +342,7 @@ namespace Nutadore
 				{
 					// (4) Nuta z laseczką ku dołowi odwrócona - rysujemy ją przed laseczką.
 					// #o|
+					//   |
 					headOffset += headWidth;
 				}
 			}
@@ -343,6 +351,21 @@ namespace Nutadore
 			// Rysujemy linie dodane górne i dolne - jeśli nuta nie jest częścią akordu.
 			if (showLegerLines)
 				AddLegerLinesToScore(score, trebleStaff, bassStaff, staff, glyphLeft);
+		}
+
+		private void AddDotToScore(Score score, Staff staff, double left)
+		{
+			string glyphCode = "\x0050";
+			FormattedText glyphFT = base.GlyphFormatedText(score, glyphCode);
+			double glyphTop
+					= staff.StaffPositionToY(staffPosition)
+					- glyphFT.Baseline;
+			if (!staffPosition.LineAbove)
+					glyphTop -= Staff.spaceBetweenLines * score.Magnification * 0.5;
+			double glyphLeft 
+				= right 
+				+ Staff.spaceBetweenLines * score.Magnification * 0.3;
+			right = base.AddGlyphToScore(score, glyphLeft, glyphTop, glyphCode, 1);
 		}
 
 		private double AddStemToScore(Score score, Staff staff)
@@ -354,14 +377,19 @@ namespace Nutadore
 			double stemY1 = staff.StaffPositionToY(staffPosition);
 			double stemY2;
 			double stemX;
+			// Glowka nuty ma os symetrii niedokladnie w poziomie, dlatego laseczka musi zaczynac sie troche
+			// wyzej/nizej bo inaczej widac róg laseczki.
+			double stemY1Corr = Staff.spaceBetweenLines * score.Magnification * 0.2;
 			double thicknes = 1.0 * score.Magnification;
 			if (stemDirection == StemDirection.Up)
 			{
+				stemY1 -= stemY1Corr;
 				stemY2 = staff.StaffPositionToY(StaffPosition.ByNumber(staffPosition.Number + stemHightByLines));
 				stemX = right - thicknes / 2;
 			}
 			else
 			{
+				stemY1 += stemY1Corr;
 				stemY2 = staff.StaffPositionToY(StaffPosition.ByNumber(staffPosition.Number - stemHightByLines));
 				stemX = head.Margin.Left + thicknes / 2;
 			}
