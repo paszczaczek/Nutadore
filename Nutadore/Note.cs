@@ -102,6 +102,14 @@ namespace Nutadore
 					$"Wysokość nuty poza zakresem: {lowest.ToString()} .. {highest.ToString()}");
 		}
 
+		public Note Copy()
+		{
+			Note note = new Note(letter, accidental.type, octave, duration);
+			note.staffPosition = StaffPosition.ByNumber(staffPosition.Number);
+
+			return note;
+		}
+
 		public override double AddToScore(Score score, Staff trebleStaff, Staff bassStaff, Step step, double left)
 		{
 			// Left i right będą potrzebne do rysowania znaków ottavy
@@ -355,24 +363,39 @@ namespace Nutadore
 
 		private void AddDotToScore(Score score, Staff staff, double left)
 		{
+			if (!duration.dotted)
+				return;
+
 			string glyphCode = "\x0050";
 			FormattedText glyphFT = base.GlyphFormatedText(score, glyphCode);
 			double glyphTop
 					= staff.StaffPositionToY(staffPosition)
 					- glyphFT.Baseline;
+			// Przesunięcie kropki w pionie.
 			if (!staffPosition.LineAbove)
 					glyphTop -= Staff.spaceBetweenLines * score.Magnification * 0.5;
 			double glyphLeft = right;
-			// Przy innych niż z chorągiewką z laseczką skierowaną przesuwamy kropkę trochę w lewo.
-			if (!(stemDirection == StemDirection.Up && duration.name <= Duration.Name.Eighth))
-				glyphLeft += Staff.spaceBetweenLines * score.Magnification * 0.3;
+			// Przesunięcie kropki w poziomie.
+			double dotOffsetRatio = 0.3;
+			if (stemDirection == StemDirection.Up)
+				switch (duration.name)
+				{
+					case Duration.Name.Sixteenth:
+						dotOffsetRatio = 0.0;
+						break;
+					case Duration.Name.Eighth:
+						dotOffsetRatio = -0.3;
+						break;
+				}
+			glyphLeft += Staff.spaceBetweenLines * score.Magnification * dotOffsetRatio;
+
 			right = base.AddGlyphToScore(score, glyphLeft, glyphTop, glyphCode, 1);
 		}
 
 		private double AddStemToScore(Score score, Staff staff)
 		{
 			// Rysujemy laseczkę.
-			if (duration.name > Duration.Name.Quarter)
+			if (duration.name > Duration.Name.Half)
 				return right;
 
 			double stemY1 = staff.StaffPositionToY(staffPosition);
