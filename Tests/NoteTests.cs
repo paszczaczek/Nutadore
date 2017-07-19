@@ -37,9 +37,16 @@ namespace Tests
 				mw.score.Add(new Step()
 					.AddVoice(note)
 					.AddVoice(noteDotted)
-					.AddVoice(noteDotted2)
-					);
+					.AddVoice(noteDotted2));
 			}
+
+			Chord chord = new Chord()
+				.AddNote(new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.OneLined))
+				.AddNote(new Note(Note.Letter.B, Accidental.Type.None, Note.Octave.TwoLined));
+			chord.duration = new Duration(Duration.Name.Eighth, true);
+			mw.score.Add(new Step()
+				.AddVoice(chord));
+
 
 			//// ćwierćnuty
 			//Note quoterUp = new Note(

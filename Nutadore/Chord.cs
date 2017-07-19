@@ -17,6 +17,7 @@ namespace Nutadore
 			get { return _duration; }
 			set { notes.ForEach(note => note.duration = value); _duration = value; }
 		}
+		public Note.StemDirection stemDirection = Note.StemDirection.Up;
 
 		public double headOffset { get; private set; }
 
@@ -61,6 +62,7 @@ namespace Nutadore
 					note == trebleLowestNote ||
 					note == bassHighestNote ||
 					note == bassLowestNote;
+				note.isPartOfChord = true;
 				Staff staff
 					= note.staffType == Staff.Type.Treble
 					? trebleStaff

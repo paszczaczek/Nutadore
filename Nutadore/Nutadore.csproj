@@ -139,7 +139,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Misc\bach-air-in-d-major.ly">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Misc\bach-air-in-d-major.mid" />
   </ItemGroup>

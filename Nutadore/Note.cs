@@ -24,6 +24,7 @@ namespace Nutadore
 		public Perform.HowTo performHowTo;
 		public StaffPosition staffPosition = StaffPosition.ByLine(1);
 		public Staff.Type staffType;
+		public bool isPartOfChord = false;
 
 		private Step step;
 
@@ -145,11 +146,14 @@ namespace Nutadore
 			// Dodajemy głowkę nuty.
 			AddHeadToScore(score, trebleStaff, bassStaff, staff, left);
 
-			// Dodajemy laseczkę.
-			double stemLeft = AddStemToScore(score, staff);
+			if (!isPartOfChord)
+			{
+				// Dodajemy laseczkę.
+				double stemLeft = AddStemToScore(score, staff);
 
-			// Dodajemy chorągiewkę.
-			AddFlagToScore(score, staff, stemLeft);
+				// Dodajemy chorągiewkę.
+				AddFlagToScore(score, staff, stemLeft);
+			}
 
 			// Dodajemy kropkę do główki nuty.
 			AddDotToScore(score, staff, left);

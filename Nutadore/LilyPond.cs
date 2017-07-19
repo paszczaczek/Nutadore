@@ -8,7 +8,7 @@ namespace Nutadore
 {
 	public class LilyPond
 	{
-		static private bool debug = false;
+		static private bool debug = true;
 
 		#region regex
 		// # ...
@@ -120,6 +120,12 @@ namespace Nutadore
 				(?<dotted>\.?)
 			)");
 
+		// \stemUp, \StemDown, \StemNeutral
+		static Regex reStemDirection = new Regex(@"(?x)
+			(
+				\\stem(?<stemDirection>Up|Down|Neutral)
+			)");
+
 		// ~
 		static Regex reTie = new Regex(@"(?x)
 			(?<tie>~)
@@ -133,6 +139,7 @@ namespace Nutadore
 				{reDuration}?
 				{reFinger}?
 				{reMarkup}?
+				{reStemDirection}?
 			)");
 
 		// <fis''-2 ces,-3>~-\markup{fis2}
@@ -144,6 +151,7 @@ namespace Nutadore
 				{reDuration}?
 				{reTie}?
 				{reMarkup}?
+				{reStemDirection}?
 			)");
 
 		// r4
@@ -356,6 +364,11 @@ namespace Nutadore
 								chord.AddNote(GetNote(noteInChord, voiceNo));
 							}
 							chord.duration = GetDuration(mChord, voiceNo);
+
+							Note.StemDirection? stemDirection = GetStemDirection(mChord.Groups["stemDirection"].Value);
+							if (stemDirection != null)
+								chord.stemDirection = (Note.StemDirection)stemDirection;
+
 							voices[voiceNo].Add(chord);
 							continue;
 						}
@@ -399,6 +412,7 @@ namespace Nutadore
 		{
 			Note.Letter letter = GetLetter(mNote.Groups["letter"].Value);
 			Accidental.Type accidentalType = GetAccidentalType(mNote.Groups["accidental"].Value);
+			Note.StemDirection? stemDirection = GetStemDirection(mNote.Groups["stemDirection"].Value);
 
 			Note.Octave octave = GetOctave(mNote.Groups["octave"].Value);
 
@@ -408,6 +422,8 @@ namespace Nutadore
 			int finger;
 			if (int.TryParse(mNote.Groups["finger"].Value, out finger))
 				note.finger = finger;
+			if (stemDirection != null)
+				note.stemDirection = (Note.StemDirection)stemDirection;
 
 			return note;
 		}
@@ -434,6 +450,20 @@ namespace Nutadore
 			lastDuration[voiceNo] = duration;
 
 			return duration;
+		}
+
+		private static Note.StemDirection? GetStemDirection(string stemDirection)
+		{
+			switch (stemDirection)
+			{
+				case "Up": return Note.StemDirection.Up;
+				case "Down": return Note.StemDirection.Down;
+				case "Neutral":
+				case "":
+					return null;
+				default:
+					throw new ArgumentOutOfRangeException("stemDirection", stemDirection);
+			}
 		}
 
 		private static Rest GetRest(Match mRest, int voiceNo)
