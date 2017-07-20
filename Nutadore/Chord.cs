@@ -52,6 +52,12 @@ namespace Nutadore
 			Note bassHighestNote = bassNotes.LastOrDefault(note => note.staffPosition >= StaffPosition.ByLegerAbove(1));
 			Note bassLowestNote = bassNotes.FirstOrDefault(note => note.staffPosition <= StaffPosition.ByLegerBelow(1));
 
+			// Wyszukaj najniższą i najwyższą nutę na obu pięcioliniach.
+			var allNotes = notes.FindAll(note => true);
+			allNotes.Sort();
+			Note highestNote = allNotes.LastOrDefault();
+			Note lowestNote = allNotes.FirstOrDefault();
+
 			// Narysuj wszystkie nuty akordu.
 			headOffset = 0;
 			foreach (var note in notes)
@@ -62,7 +68,18 @@ namespace Nutadore
 					note == trebleLowestNote ||
 					note == bassHighestNote ||
 					note == bassLowestNote;
-				note.isPartOfChord = true;
+				// Laseczkę i chorągiewkę rysuj tylko dla najwyższej lub najniżeszj nuty.
+				if (stemDirection == Note.StemDirection.Up)
+				{
+					note.showStem = note.Equals(highestNote);
+					note.endNoteStem = lowestNote;
+				}
+				else
+				{
+					note.showStem = note.Equals(lowestNote);
+					note.endNoteStem = highestNote;
+				}
+				note.stemDirection = stemDirection;
 				Staff staff
 					= note.staffType == Staff.Type.Treble
 					? trebleStaff

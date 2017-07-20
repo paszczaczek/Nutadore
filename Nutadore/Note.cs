@@ -24,7 +24,6 @@ namespace Nutadore
 		public Perform.HowTo performHowTo;
 		public StaffPosition staffPosition = StaffPosition.ByLine(1);
 		public Staff.Type staffType;
-		public bool isPartOfChord = false;
 
 		private Step step;
 
@@ -47,6 +46,8 @@ namespace Nutadore
 		}
 
 		public bool showLegerLines = true;
+		public bool showStem = true;
+		public Note endNoteStem;
 		public double right { get; private set; }
 
 		public static readonly Note lowest = new Note(Letter.A, Accidental.Type.None, Octave.SubContra);
@@ -146,14 +147,11 @@ namespace Nutadore
 			// Dodajemy głowkę nuty.
 			AddHeadToScore(score, trebleStaff, bassStaff, staff, left);
 
-			if (!isPartOfChord)
-			{
-				// Dodajemy laseczkę.
-				double stemLeft = AddStemToScore(score, staff);
+			// Dodajemy laseczkę.
+			double stemLeft = AddStemToScore(score, trebleStaff, bassStaff, staff);
 
-				// Dodajemy chorągiewkę.
-				AddFlagToScore(score, staff, stemLeft);
-			}
+			// Dodajemy chorągiewkę.
+			AddFlagToScore(score, staff, stemLeft);
 
 			// Dodajemy kropkę do główki nuty.
 			AddDotToScore(score, staff, left);
@@ -375,7 +373,7 @@ namespace Nutadore
 			double glyphTop
 					= staff.StaffPositionToY(staffPosition)
 					- glyphFT.Baseline;
-			// Przesunięcie kropki w pionie.
+			// Jeśli nuta jest na linii, to kropka musi być powyżej linni, bo to źle wygląda.
 			if (!staffPosition.LineAbove)
 					glyphTop -= Staff.spaceBetweenLines * score.Magnification * 0.5;
 			double glyphLeft = right;
@@ -388,7 +386,10 @@ namespace Nutadore
 						dotOffsetRatio = 0.0;
 						break;
 					case Duration.Name.Eighth:
-						dotOffsetRatio = -0.3;
+						if (!staffPosition.LineAbove)
+							dotOffsetRatio = -0.1;
+						else
+							dotOffsetRatio = -0.3;
 						break;
 				}
 			glyphLeft += Staff.spaceBetweenLines * score.Magnification * dotOffsetRatio;
@@ -396,13 +397,26 @@ namespace Nutadore
 			right = base.AddGlyphToScore(score, glyphLeft, glyphTop, glyphCode, 1);
 		}
 
-		private double AddStemToScore(Score score, Staff staff)
+		private double AddStemToScore(Score score, Staff trebleStaff, Staff bassStaff, Staff staff)
 		{
 			// Rysujemy laseczkę.
 			if (duration.name > Duration.Name.Half)
 				return right;
 
-			double stemY1 = staff.StaffPositionToY(staffPosition);
+			double stemY1;
+			if (endNoteStem == null)
+			{
+				// Nuta nie jest częścia akordu.
+				stemY1 = staff.StaffPositionToY(staffPosition);
+			}
+			else
+			{
+				// Nute jest częścią akordu, początek laseczki wynika z najwyższej/najniższej nuty.
+				if (endNoteStem.staffType == Staff.Type.Treble)
+					stemY1 = trebleStaff.StaffPositionToY(endNoteStem.staffPosition);
+				else
+					stemY1 = bassStaff.StaffPositionToY(endNoteStem.staffPosition);
+			}
 			double stemY2;
 			double stemX;
 			// Glowka nuty ma os symetrii niedokladnie w poziomie, dlatego laseczka musi zaczynac sie troche
@@ -430,6 +444,7 @@ namespace Nutadore
 				Stroke = Brushes.Black,
 				StrokeThickness = thicknes
 			};
+			stem.Visibility = showStem ? Visibility.Visible : Visibility.Hidden;
 			base.AddElementToScore(score, stem);
 
 			return stemX;
@@ -473,6 +488,8 @@ namespace Nutadore
 				Transform transform = Transform.Parse("1, 0, 0, -1, 0, 0");
 				flag.LayoutTransform = transform;
 			}
+
+			base.elements.FindLast(e => true).Visibility = showStem ? Visibility.Visible : Visibility.Hidden;
 		}
 
 		public override void RemoveFromScore(Score score)

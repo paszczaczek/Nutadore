@@ -123,7 +123,7 @@ namespace Nutadore
 		// \stemUp, \StemDown, \StemNeutral
 		static Regex reStemDirection = new Regex(@"(?x)
 			(
-				\\stem(?<stemDirection>Up|Down|Neutral)
+				\\stem(?<direction>Up|Down|Neutral)
 			)");
 
 		// ~
@@ -139,7 +139,6 @@ namespace Nutadore
 				{reDuration}?
 				{reFinger}?
 				{reMarkup}?
-				{reStemDirection}?
 			)");
 
 		// <fis''-2 ces,-3>~-\markup{fis2}
@@ -151,7 +150,6 @@ namespace Nutadore
 				{reDuration}?
 				{reTie}?
 				{reMarkup}?
-				{reStemDirection}?
 			)");
 
 		// r4
@@ -173,8 +171,19 @@ namespace Nutadore
 				{reFinger}?
 			)");
 
+		// \change Staff="down"
+		static Regex reChangeStaff = new Regex($@"(?x)
+			\\change
+			\s+
+			Staff
+			\s*=\s*
+			""(?<name>down|up)""
+			");
+
 		static Regex reSign = new Regex($@"(?x)
 			(
+				{reStemDirection} |
+				{reChangeStaff} |
 				{reChord} |
 				{reNote} |
 				{reRest} |
@@ -214,6 +223,8 @@ namespace Nutadore
 		#endregion
 
 		private static Duration[] lastDuration;
+		private static Staff.Type?[] lastChangeStaff;
+		private static Note.StemDirection?[] lastStemDirection;
 
 		public static void Parse(string fileName, Score score)
 		{
@@ -317,12 +328,15 @@ namespace Nutadore
 				CaptureCollection voicesNames = parallelMusic.Groups["voicesNames"].Captures;
 				voices = new List<Sign>[voicesNames.Count];
 				lastDuration = new Duration[voices.Count()];
+				lastChangeStaff = new Staff.Type?[voices.Count()];
+				lastStemDirection = new Note.StemDirection?[voices.Count()];
 				for (int v = 0; v < voices.Count(); v++)
 				{
 					voices[v] = new List<Sign>();
 					lastDuration[v] = new Duration();
+					lastChangeStaff[v] = null;
+					lastStemDirection[v] = null;
 				}
-
 
 				// Zawartość nawisaów klamrowych w parellelMusic.
 				string curlyBrackets = parallelMusic.Groups["curlyBrackets"].Value;
@@ -349,6 +363,26 @@ namespace Nutadore
 					{
 						int voiceNo = measureNo % 3;
 
+						// Czy to polecenie zmiany kierunku laseczek dla nut?
+						Match stemDirection = reStemDirection.Match(sign.Value);
+						if (stemDirection.Success)
+						{
+							string direction = GetStemDirection(stemDirection, voiceNo);
+							if (debug)
+								Console.WriteLine($"\t\\change Staff=\"{direction}\"");
+							continue;
+						}
+
+						// Czy to polecenie zmiany pięciolinii?
+						Match changeStaff = reChangeStaff.Match(sign.Value);
+						if (changeStaff.Success)
+						{
+							string staffName = GetChangeStaff(changeStaff, voiceNo);
+							if (debug)
+								Console.WriteLine($"\t\\change Staff=\"{staffName}\"");
+							continue;
+						}
+
 						// Czy to jest akord?
 						Match mChord = reChord.Match(sign.Value);
 						if (mChord.Success)
@@ -360,14 +394,12 @@ namespace Nutadore
 							{
 								if (debug)
 									Console.WriteLine($"\t\tnote: {noteInChord}");
-
 								chord.AddNote(GetNote(noteInChord, voiceNo));
 							}
 							chord.duration = GetDuration(mChord, voiceNo);
 
-							Note.StemDirection? stemDirection = GetStemDirection(mChord.Groups["stemDirection"].Value);
-							if (stemDirection != null)
-								chord.stemDirection = (Note.StemDirection)stemDirection;
+							if (lastStemDirection[voiceNo] != null)
+								chord.stemDirection = (Note.StemDirection)lastStemDirection[voiceNo];
 
 							voices[voiceNo].Add(chord);
 							continue;
@@ -411,19 +443,17 @@ namespace Nutadore
 		private static Note GetNote(Match mNote, int voiceNo)
 		{
 			Note.Letter letter = GetLetter(mNote.Groups["letter"].Value);
-			Accidental.Type accidentalType = GetAccidentalType(mNote.Groups["accidental"].Value);
-			Note.StemDirection? stemDirection = GetStemDirection(mNote.Groups["stemDirection"].Value);
-
+			Accidental.Type accidentalType = GetAccidentalType(mNote.Groups["accidental"].Value);			
 			Note.Octave octave = GetOctave(mNote.Groups["octave"].Value);
-
 			Duration duration = GetDuration(mNote, voiceNo);
+			Staff.Type? prefferedStaffType = lastChangeStaff[voiceNo];
 
-			Note note = new Note(letter, accidentalType, octave, duration);
+			Note note = new Note(letter, accidentalType, octave, duration, prefferedStaffType);
 			int finger;
 			if (int.TryParse(mNote.Groups["finger"].Value, out finger))
 				note.finger = finger;
-			if (stemDirection != null)
-				note.stemDirection = (Note.StemDirection)stemDirection;
+			if (lastStemDirection[voiceNo] != null)
+				note.stemDirection = (Note.StemDirection)lastStemDirection[voiceNo];
 
 			return note;
 		}
@@ -452,18 +482,24 @@ namespace Nutadore
 			return duration;
 		}
 
-		private static Note.StemDirection? GetStemDirection(string stemDirection)
+		private static string GetStemDirection(Match mStemDirection, int voiceNo)
 		{
-			switch (stemDirection)
+			string direction = mStemDirection.Groups["direction"].Value;
+			switch (direction)
 			{
-				case "Up": return Note.StemDirection.Up;
-				case "Down": return Note.StemDirection.Down;
+				case "Up":
+					lastStemDirection[voiceNo] = Note.StemDirection.Up;
+					break;
+				case "Down":
+					lastStemDirection[voiceNo] = Note.StemDirection.Down;
+					break;
 				case "Neutral":
-				case "":
-					return null;
+					lastStemDirection[voiceNo] = null;
+					break;
 				default:
-					throw new ArgumentOutOfRangeException("stemDirection", stemDirection);
+					throw new ArgumentOutOfRangeException("stemDirection", direction);
 			}
+			return direction;
 		}
 
 		private static Rest GetRest(Match mRest, int voiceNo)
@@ -532,7 +568,26 @@ namespace Nutadore
 			}
 		}
 
-		private static void Score(string lyText, Score score)
+		private static string GetChangeStaff(Match mChangeStaff, int voiceNo)
+		{
+			string name = mChangeStaff.Groups["name"].Value;
+			switch (name)
+			{
+				case "up":
+				case "RH":
+				case "treble":
+					lastChangeStaff[voiceNo] = Staff.Type.Treble;
+					break;
+				case "down":
+				case "LH":
+				case "bass":
+					lastChangeStaff[voiceNo] = Staff.Type.Bass;
+					break;
+			}
+			return name;
+		}
+
+	private static void Score(string lyText, Score score)
 		{
 			// Wczytanie \score {...}
 			Match mScore = reScore.Match(lyText);

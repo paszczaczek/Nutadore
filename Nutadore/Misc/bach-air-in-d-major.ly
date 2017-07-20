@@ -4,7 +4,7 @@
   % bar 1  
     <fis''-2>1~-\markup{fis2} 
   | <d''-1>1~-\markup{d2} 
-  | <d-5>4-\markup{d}\stemDown d'^\markup{d1}\stemDown cis'^\markup{cis1}\stemDown cis-\markup{cis}\stemDown
+  | \stemNeutral \change Staff="down" <d-5>4-\markup{d} d'^\markup{d1} cis'^\markup{cis1} cis-\markup{cis}
 
   % bar 2  
   | <fis''-2>1~-\markup{fis2}
@@ -45,9 +45,9 @@
   | <a'>4-\markup{a1} r4 r2
   | <cis,-5>4-\markup{Cis} <cis>4-\markup{cis} <a,>4-\markup{A} <fis>4-\markup{fis}  
 
-  | e'1
   | c'1
-  | g2 g2
+  | c'1
+  | c,1
 
 }
 
@@ -63,7 +63,7 @@
 
 \score {
   \new PianoStaff <<  
-    \new Staff <<            
+    \new Staff = "up" <<            
       \tempo "Adagio"
       \clef treble
       \key d \major
@@ -71,7 +71,7 @@
       \\ 
        \voiceB
     >>
-    \new Staff <<
+    \new Staff = "down" <<
       \clef bass
       \key d \major
        \voiceC

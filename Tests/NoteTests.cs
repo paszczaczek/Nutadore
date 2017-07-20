@@ -40,13 +40,35 @@ namespace Tests
 					.AddVoice(noteDotted2));
 			}
 
-			Chord chord = new Chord()
+			Chord chordUp = new Chord()
 				.AddNote(new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.OneLined))
-				.AddNote(new Note(Note.Letter.B, Accidental.Type.None, Note.Octave.TwoLined));
-			chord.duration = new Duration(Duration.Name.Eighth, true);
-			mw.score.Add(new Step()
-				.AddVoice(chord));
+				.AddNote(new Note(Note.Letter.E, Accidental.Type.None, Note.Octave.OneLined))
+				.AddNote(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.OneLined));
+			chordUp.duration = new Duration(Duration.Name.Eighth, true);
+			mw.score.Add(new Step().AddVoice(chordUp));
 
+			Chord chordDown = new Chord()
+				.AddNote(new Note(Note.Letter.C, Accidental.Type.None, Note.Octave.OneLined))
+				.AddNote(new Note(Note.Letter.E, Accidental.Type.None, Note.Octave.OneLined))
+				.AddNote(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.OneLined));
+			chordDown.stemDirection = Note.StemDirection.Down;
+			chordDown.duration = new Duration(Duration.Name.Eighth, true);
+			mw.score.Add(new Step().AddVoice(chordDown));
+
+			Chord chord2 = new Chord()
+				.AddNote(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.TwoLined))
+				.AddNote(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.Small, null, Staff.Type.Treble))
+				.AddNote(new Note(Note.Letter.B, Accidental.Type.None, Note.Octave.Great));
+			chord2.duration = new Duration(Duration.Name.Eighth, true);
+			mw.score.Add(new Step().AddVoice(chord2));
+
+			Chord chord2Down = new Chord()
+				.AddNote(new Note(Note.Letter.D, Accidental.Type.None, Note.Octave.TwoLined))
+				.AddNote(new Note(Note.Letter.G, Accidental.Type.None, Note.Octave.Small, null, Staff.Type.Treble))
+				.AddNote(new Note(Note.Letter.B, Accidental.Type.None, Note.Octave.Great));
+			chord2Down.duration = new Duration(Duration.Name.Eighth, true);
+			chord2Down.stemDirection = Note.StemDirection.Down;
+			mw.score.Add(new Step().AddVoice(chord2Down));
 
 			//// ćwierćnuty
 			//Note quoterUp = new Note(
